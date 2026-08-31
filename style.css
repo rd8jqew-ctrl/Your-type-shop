@@ -817,3 +817,31 @@ html{scroll-padding-top:110px}
   .siteHeader .headerVideo{display:flex !important;}
 }
 
+
+/* Section product assignment controls — admin only, does not affect storefront styling. */
+.sectionProductsBox{margin-top:14px;padding-top:12px;border-top:1px solid #2d2d2d}
+.sectionProductsHead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.sectionProductsHead b{margin-right:auto}
+.sectionProductChoices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:260px;overflow:auto;padding-right:2px}
+.sectionProductChoice{display:flex;align-items:center;gap:7px;padding:8px 9px;border:1px solid #292929;background:#0b0b0b;font-size:12px;cursor:pointer}
+.sectionProductChoice input{accent-color:#fff}
+@media(max-width:600px){.sectionProductChoices{grid-template-columns:1fr}.sectionProductsHead .btn{min-height:36px;padding:7px 10px}}
+
+/* Section product assignment controls — admin only, storefront styling unchanged. */
+.sectionProductsBox{margin-top:14px;padding-top:12px;border-top:1px solid #2d2d2d}
+.sectionProductsHead{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.sectionProductsHead b{margin-right:auto}
+.sectionProductChoices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-height:260px;overflow:auto;padding-right:2px}
+.sectionProductChoice{display:flex;align-items:center;gap:7px;padding:8px 9px;border:1px solid #292929;background:#0b0b0b;font-size:12px;cursor:pointer}
+.sectionProductChoice input{accent-color:#fff}
+@media(max-width:600px){.sectionProductChoices{grid-template-columns:1fr}.sectionProductsHead .btn{min-height:36px;padding:7px 10px}}
+
+.sectionNumber{font-size:11px;letter-spacing:.18em;color:#777;margin-bottom:5px}
+.adminMap{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.adminMapCard{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;background:rgba(255,255,255,.035)}
+.adminMapCard h3{margin:0 0 6px}.adminMapCard p{margin:0 0 12px;color:#999;font-size:13px}
+.switchRow{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}
+.sectionProductsBox{border-top:1px solid rgba(255,255,255,.08);padding-top:12px}
+.sectionProductsHead{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.sectionProductsHead b{margin-right:auto}
+.sectionProductChoices{display:grid;gap:7px;max-height:220px;overflow:auto;margin-top:10px}
+.sectionProductChoice{display:flex;gap:8px;align-items:center;font-size:13px}

@@ -21,7 +21,12 @@
       "images": [
         "akari-flight-tee.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Ghamand Chroma Instinct",
@@ -41,7 +46,12 @@
       "images": [
         "chroma-instinct-tee.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Ghamand Buddha's Blessing",
@@ -61,7 +71,12 @@
       "images": [
         "buddhas-blessing-tee.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Burning Oath T-Shirt",
@@ -81,7 +96,12 @@
       "images": [
         "burning-oath-tshirt.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Who Are You T-Shirt",
@@ -101,7 +121,12 @@
       "images": [
         "who-are-you-tshirt.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "What You Fear T-Shirt",
@@ -121,7 +146,12 @@
       "images": [
         "what-you-fear-tshirt.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Specter of Stillness T-Shirt",
@@ -141,7 +171,12 @@
       "images": [
         "specter-stillness-tshirt.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Crowned Destiny Tee",
@@ -161,7 +196,12 @@
       "images": [
         "crowned-destiny-tee.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Chaos Oversize Tee",
@@ -181,7 +221,12 @@
       "images": [
         "chaos.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Burning Oath Tee",
@@ -201,7 +246,12 @@
       "images": [
         "bushido.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Chaos Destiny Tee",
@@ -221,7 +271,12 @@
       "images": [
         "graffiti.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Instinct Oversize Tee",
@@ -241,7 +296,12 @@
       "images": [
         "armor.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Bushido Graphic Tee",
@@ -261,7 +321,12 @@
       "images": [
         "bushido.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Inferno Street Tee",
@@ -281,7 +346,12 @@
       "images": [
         "chaos.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Midnight Graffiti Tee",
@@ -301,7 +371,12 @@
       "images": [
         "graffiti.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Ritual Oversize Tee",
@@ -321,7 +396,12 @@
       "images": [
         "ornament.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     },
     {
       "name": "Dark Armor Tee",
@@ -341,7 +421,12 @@
       "images": [
         "armor.jpg"
       ],
-      "active": true
+      "active": true,
+      "colors": [
+        "Black",
+        "White",
+        "Charcoal"
+      ]
     }
   ],
   "sessions": {
@@ -354,6 +439,11 @@
       "role": "admin",
       "userId": null,
       "expires": 1788044406643
+    },
+    "2147af11b9f833db2da07a51cbf0c042d9ac01a2887996415078c51e4c0a72cb": {
+      "role": "admin",
+      "userId": null,
+      "expires": 1788215816177
     }
   },
   "reviews": [],

@@ -16,7 +16,7 @@ button:focus:not(:focus-visible){outline:none}
 
 .card,.heart,.add,.bag,.wishlistHead{user-select:none;-webkit-user-select:none}
 ::selection{background:transparent}
-</style>
+ .adminHiddenSection{display:none!important}\n</style>
 </head>
 <body>
 <div class="shipping" aria-label="Free shipping announcement"><div class="shipping-track"><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span></div></div>
@@ -48,11 +48,11 @@ button:focus:not(:focus-visible){outline:none}
 <div id="searchbar" class="searchbar"><input id="searchInput" type="search" autocomplete="off" placeholder="Search products..." oninput="renderProducts()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'});}"></div>
 
 <main id="home">
-<section class="heroEditorial">
+<section class="heroEditorial" id="home">
   <div class="heroMeta"><span>YOUR TYPE / SYSTEM</span><i></i><b>01 / 04</b></div>
   <div class="heroCopy">
     <p class="eyebrow">NEW COLLECTION / 2026</p>
-    <h1>Engineered<br><em>for the Street</em></h1>
+    <h1 id="siteHeroTitle">Engineered<br><em>for the Street</em></h1>
     <p class="sub">Premium fabrics. Heavy graphics. Built for those who move different.</p>
     <div class="buttons"><a class="btn primary" href="#shop">SHOP NOW →</a><a class="btn" href="#collections">EXPLORE →</a></div>
   </div>
@@ -141,12 +141,12 @@ button:focus:not(:focus-visible){outline:none}
   <div class="highlightCards"><article><span>✦</span><h3>Premium Feel</h3><p>Heavyweight-inspired streetwear presentation with a clean editorial finish.</p></article><article><span>↻</span><h3>Easy Returns</h3><p>Simple customer-care flow designed to keep shopping confidence high.</p></article><article><span>▣</span><h3>Secure Checkout</h3><p>Clear cart, checkout and payment choices without visual clutter.</p></article><article><span>∞</span><h3>Limited Drops</h3><p>New collections and highlight edits keep the storefront feeling fresh.</p></article></div>
 </section>
 
-<section class="editorialBanner">
+<section class="editorialBanner" id="editorial">
   <div><p class="eyebrow">YOUR TYPE / 02</p><h2>Dark graphics.<br><span>Heavy attitude.</span></h2><p>Built for oversized fits, late nights and the street.</p><a class="btn primary" href="#shop">SHOP THE DROP →</a></div>
   <div class="editorialArt"><img src="photos/graffiti.jpg" alt="YOUR TYPE graphic"></div>
 </section>
 
-<section class="newsletter"><div class="newsletterVideo" aria-hidden="true"><video autoplay muted loop playsinline preload="metadata"><source src="photos/stay-in-loop.mp4" type="video/mp4"></video></div><p class="eyebrow">STAY IN THE LOOP</p><h2>Be first to the next drop.</h2><div class="email"><input id="newsletterEmail" type="email" autocomplete="email" placeholder="Enter your email" aria-label="Email address"><button type="button" onclick="joinNewsletter()">JOIN →</button></div><p id="newsletterHint" class="newsletterHint" aria-live="polite"></p></section>
+<section class="newsletter" id="newsletter"><div class="newsletterVideo" aria-hidden="true"><video autoplay muted loop playsinline preload="metadata"><source src="photos/stay-in-loop.mp4" type="video/mp4"></video></div><p class="eyebrow">STAY IN THE LOOP</p><h2>Be first to the next drop.</h2><div class="email"><input id="newsletterEmail" type="email" autocomplete="email" placeholder="Enter your email" aria-label="Email address"><button type="button" onclick="joinNewsletter()">JOIN →</button></div><p id="newsletterHint" class="newsletterHint" aria-live="polite"></p></section>
 </main>
 
 <footer class="premiumFooter">
@@ -275,13 +275,24 @@ function score(value){
  return 20 + (matched/terms.length)*40 + total;
 }
 function productCardHTML(p,index){const liked=wishlist.includes(p[0]);const z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};return `<article class="card" onclick="openProduct(${index})"><div class="pic"><span class="badge">${p[3]||''}</span><button class="heart ${liked?'liked':''}" aria-label="${liked?'Remove from wishlist':'Add to wishlist'}" aria-pressed="${liked}" onclick="event.preventDefault();event.stopPropagation();toggleWishlist(event,this,${index})">${liked?'♥':'♡'}</button><img src="photos/${p[2]}" alt="${p[0]}" loading="lazy" draggable="false"><div class="quick">QUICK VIEW</div></div><div class="info"><h3>${p[0]}</h3><div class="price">${p[1]} ${p[4]?'<del>'+p[4]+'</del>':''}</div><div class="sizes">${['S','M','L','XL'].map(sz=>`<button type="button" ${Number(z[sz]||0)<=0?'disabled':''} onclick="event.stopPropagation();selectCardSize(this,'${sz}')">${sz}</button>`).join('')}</div><button type="button" class="add" data-add-to-bag="${index}" ${Number(p[5]??20)<=0?'disabled':''}>${Number(p[5]??20)<=0?'SOLD OUT':'ADD TO BAG +'}</button></div></article>`}
+let ytSectionProducts={};
+function sectionList(key,fallback){
+ const ids=Array.isArray(ytSectionProducts[key])?ytSectionProducts[key]:null;
+ if(!ids)return fallback;
+ const byId=new Map(products.map(p=>[String(p[8]||''),p]));
+ return ids.map(id=>byId.get(String(id))).filter(Boolean);
+}
 function renderCurated(){
  const visible=products.filter(p=>p);
- const best=visible.slice(0,4);
- const fresh=visible.filter(p=>String(p[3]||'').toUpperCase()==='NEW').slice(0,4);
- const women=visible.filter((p,i)=>/tee|top|shirt/i.test(p[0])).slice(3,7);
+ const best=sectionList('bestSellers',visible.slice(0,4));
+ const fresh=sectionList('newCollection',visible.filter(p=>String(p[3]||'').toUpperCase()==='NEW').slice(0,4));
+ const trend=sectionList('trending',visible.slice(0,4));
+ const women=sectionList('womenTops',visible.filter(p=>/tee|top|shirt/i.test(p[0])).slice(0,4));
+ const featured=sectionList('featured',visible);
  const fill=(id,list)=>{const el=document.getElementById(id);if(el)el.innerHTML=list.map(p=>productCardHTML(p,products.indexOf(p))).join('')};
- fill('bestSellerGrid',best); fill('newCollectionGrid',fresh.length?fresh:visible.slice(4,8)); fill('womenTopsGrid',women.length?women:visible.slice(0,4));
+ const main=document.getElementById('products');
+ if(main && Array.isArray(ytSectionProducts.featured)){main.innerHTML=featured.map(p=>productCardHTML(p,products.indexOf(p))).join('')}
+ fill('bestSellerGrid',best); fill('newCollectionGrid',fresh); fill('trendingGrid',trend); fill('womenTopsGrid',women);
 }
 function renderProducts(){const q=(document.getElementById('searchInput')?.value||'').trim().toLowerCase();const list=products.map((p,index)=>({p,index,score:score(p[0])})).filter(x=>!q||x.score>0).sort((a,b)=>b.score-a.score||a.index-b.index);document.getElementById('resultCount').textContent=list.length+' PIECES';document.getElementById('products').innerHTML=list.map(({p,index},rank)=>{const liked=wishlist.includes(p[0]),z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};return `<article class="card" data-search-rank="${rank}" onclick="openProduct(${index})"><div class="pic"><span class="badge">${p[3]||''}</span><button class="heart ${liked?'liked':''}" aria-label="${liked?'Remove from wishlist':'Add to wishlist'}" aria-pressed="${liked}" onclick="event.preventDefault();event.stopPropagation();toggleWishlist(event,this,${index})">${liked?'♥':'♡'}</button><img src="photos/${p[2]}" alt="${p[0]}" loading="lazy" draggable="false" onerror="this.closest('.pic')?.classList.add('imageMissing');this.style.visibility='hidden'"><div class="quick">QUICK VIEW</div></div><div class="info"><div class="productNo">${String(index+1).padStart(2,'0')}</div><h3>${p[0]}</h3><div class="price">${p[1]} ${p[4]?'<del>'+p[4]+'</del>':''}</div><div class="sizes">${['S','M','L','XL'].map(sz=>`<button type="button" ${Number(z[sz]||0)<=0?'disabled':''} onclick="event.stopPropagation();selectCardSize(this,'${sz}')">${sz}</button>`).join('')}</div><button type="button" class="add" data-add-to-bag="${index}" ${Number(p[5]??20)<=0?'disabled':''}>${Number(p[5]??20)<=0?'SOLD OUT':'ADD TO BAG +'}</button></div></article>`}).join('')||'<div class="empty">NO PRODUCTS FOUND</div>'}
 function selectCardSize(btn,size){
@@ -497,6 +508,7 @@ function showShipping(){showModal('Shipping & Returns',`<p><b>Free shipping:</b>
 function trackOrder(){showModal('Track Order',`<input id="trackNo" class="modalInput" placeholder="Enter order number"><button class="checkout" onclick="lookupOrder()">TRACK ORDER →</button><div id="trackResult" class="muted" style="margin-top:15px"></div>`)}
 function lookupOrder(){const id=(document.getElementById('trackNo')?.value||'').trim();if(!id)return;fetch('/api/orders/'+encodeURIComponent(id)).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Order not found');document.getElementById('trackResult').innerHTML='<b>'+d.orderId+'</b><br>Status: '+d.status+'<br>Total: '+money(d.total)+'<br>Placed: '+new Date(d.date).toLocaleString('en-IN')}).catch(e=>document.getElementById('trackResult').textContent=e.message)}
 function showAbout(){showModal('About YOUR TYPE','<p class="muted">YOUR TYPE is a dark streetwear label built around bold graphics, oversized silhouettes and premium everyday pieces.</p>')} function showContact(){showModal('Contact Us','<p class="muted">Email: support@yourtype.store</p><p class="muted">We reply within 1–2 business days.</p>')} function showPolicy(title,text){showModal(title,'<p class="muted">'+text+'</p>')}
+async function loadSiteConfig(){try{const r=await fetch('/api/site-config',{cache:'no-store'});const d=await r.json(),site=d.site||{},sec=site.sections||{};ytSectionProducts=site.sectionProducts||{};const map={home:'home',collections:'collections',motion:'motion',featured:'shop',bestSellers:'bestSellers',newCollection:'newCollection',trending:'trending',womenTops:'womenTops',highlights:'highlights',editorial:'editorial',newsletter:'newsletter'};Object.entries(map).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('adminHiddenSection',sec[key]===false)});const hero=document.getElementById('siteHeroTitle');if(hero&&site.hero)hero.textContent=String(site.hero);const ann=document.querySelector('.shipping');if(ann&&site.announcement)ann.setAttribute('aria-label',site.announcement);renderCurated(); }catch(_){}} loadSiteConfig(); setInterval(loadSiteConfig,15000); 
 fetch('/api/products').then(r=>r.json()).then(d=>{if(Array.isArray(d.products)&&d.products.length){products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);}renderProducts();renderCurated();updateCart();updateWishlist();}).catch(()=>{renderProducts();renderCurated();updateCart();updateWishlist();});
 // Keep an already-open storefront fresh when Admin changes product data.
 let _ytLastProductSignature='';
