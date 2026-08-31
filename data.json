@@ -444,11 +444,34 @@
       "role": "admin",
       "userId": null,
       "expires": 1788215816177
+    },
+    "ae5b157b2bf27215322090f14381ab9d59ddd3b536d817604c45709b6688ee4c": {
+      "role": "admin",
+      "userId": null,
+      "expires": 1788220945455
     }
   },
   "reviews": [],
   "notifications": [],
   "coupons": [],
   "returns": [],
-  "audit": []
+  "audit": [],
+  "site": {
+    "hero": "YOUR TYPE",
+    "announcement": "New drops every week",
+    "sections": {
+      "home": true,
+      "collections": true,
+      "motion": true,
+      "featured": true,
+      "bestSellers": true,
+      "newCollection": true,
+      "trending": true,
+      "womenTops": true,
+      "highlights": true,
+      "editorial": true,
+      "newsletter": true
+    },
+    "sectionProducts": {}
+  }
 }
