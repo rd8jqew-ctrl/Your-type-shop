@@ -1,4 +1,4 @@
-<!doctype html>
+doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -139,15 +139,15 @@ function go(id,btn){let e=document.getElementById(id);if(!e){toast('Section not 
 function adminLogin(){
   openModal(`<h2>Admin Login</h2><form id="adminLoginForm" autocomplete="off" novalidate onsubmit="event.preventDefault();doAdminLogin()">
     <label for="loginUser" class="muted">Username</label>
-    <input id="loginUser" name="username" type="text" value="" autocomplete="section-admin username" autocapitalize="none" spellcheck="false" inputmode="text" placeholder="Admin username">
+    <input id="loginUser" name="admin_username_field" type="text" value="" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="text" placeholder="Admin username">
     <label for="loginPass" class="muted">Password</label>
-    <input id="loginPass" name="password" type="password" autocomplete="section-admin current-password" placeholder="Admin password">
+    <input id="loginPass" name="admin_password_field" type="password" autocomplete="current-password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Admin password">
     <p class="muted">Sign in with the admin credentials configured on your server.</p>
     <button class="btn primary" type="submit">Sign In</button>
   </form>`);
   requestAnimationFrame(()=>document.getElementById('loginUser')?.focus());
 }
-async function doAdminLogin(){const username=document.getElementById("loginUser").value.trim(),password=document.getElementById("loginPass").value;if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}sessionStorage.setItem("adminToken",x.token);closeModal();await loadServerState();go("dashboard")}catch(e){toast("Unable to connect to server")}}
+async function doAdminLogin(){const username=String(document.getElementById("loginUser")?.value||"").trim(),password=String(document.getElementById("loginPass")?.value||"");if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}sessionStorage.setItem("adminToken",x.token);closeModal();await loadServerState();go("dashboard")}catch(e){toast("Unable to connect to server")}}
 
 function adminHeaders(){const t=sessionStorage.getItem('adminToken');return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'}}
 async function loadServerState(){const t=sessionStorage.getItem('adminToken');if(!t)return;try{const r=await fetch('/api/admin/data',{headers:{Authorization:'Bearer '+t},cache:'no-store'});if(!r.ok)return;const d=await r.json();if(Array.isArray(d.products)){state.products=d.products.map(p=>({id:p.id,name:p.name,price:Number(String(p.price||'').replace(/[^0-9.]/g,''))||0,cost:Number(p.cost||0),sku:p.sku||'',category:p.category||'T-Shirts',description:p.description||'',sizes:Object.keys(p.sizes||{}).filter(k=>['S','M','L','XL','XXL'].includes(k)),colors:Array.isArray(p.colors)&&p.colors.length?p.colors:['Black','White','Charcoal'],images:p.images&&p.images.length?p.images:[p.image],hidden:p.active===false,featured:Boolean(p.featured),sections:Array.isArray(p.sections)?p.sections:[]}));state.inventory=[];state.products.forEach(p=>Object.entries(d.products.find(x=>x.id===p.id)?.sizes||{}).forEach(([sz,n])=>state.inventory.push([p.id,sz,Number(n||0),5])));state.categories=Array.from(new Set(state.products.map(p=>p.category).filter(Boolean)));save();renderProducts();renderInventory();filterStore('all');}const sr=await fetch('/api/site-config',{cache:'no-store'});if(sr.ok){const sd=await sr.json();state.website={...(state.website||{}),...(sd.site||{})};state.sectionSettings=(sd.site&&sd.site.sections)||state.sectionSettings;save();}}catch(e){console.warn('Server sync failed',e)}}
