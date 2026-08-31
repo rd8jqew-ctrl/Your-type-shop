@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YOUR TYPE — Streetwear</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+html,body{max-width:100%;overflow-x:hidden}
+button,a,.card,.heart,.add,.bag,.wishlistHead{ -webkit-tap-highlight-color:transparent; }
+button,a,.heart,.add,.bag,.wishlistHead,.motionCard,.collectionMotionCard{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button,a,.heart,.add,.bag,.wishlistHead{cursor:pointer}
+button:focus:not(:focus-visible){outline:none}
+@media (pointer:coarse){button,a,.heart,.add,.bag,.wishlistHead{min-height:44px}.heart,.modalBookmark{min-width:44px;min-height:44px}.card{cursor:pointer}.motionShopBtn{min-height:46px}.modalBox{overscroll-behavior:contain}}
+
+.card,.heart,.add,.bag,.wishlistHead{user-select:none;-webkit-user-select:none}
+::selection{background:transparent}
+</style>
+</head>
+<body>
+<div class="shipping" aria-label="Free shipping announcement"><div class="shipping-track"><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span></div></div>
+
+<header class="siteHeader">
+  <a class="logo" href="#home" aria-label="YOUR TYPE">YOUR TYPE</a>
+  <nav><a href="#home">HOME</a><a href="#shop">SHOP</a><a href="#shop">BESTSELLERS</a><a href="#collections">COLLECTIONS</a></nav>
+  <div class="actions">
+    <a class="logoVideo headerVideo" href="#home" aria-label="YOUR TYPE video"><video autoplay muted loop playsinline preload="metadata"><source src="photos/header-logo.mp4" type="video/mp4"></video></a>
+    <button class="iconBtn searchBtn" aria-label="Search" title="Search" onclick="toggleSearch()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
+    </button>
+    <button class="iconBtn themeBtn" aria-label="Theme" title="Theme" onclick="document.body.classList.toggle('light')">
+      <svg class="sunIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"></circle><path d="M12 2.5v2.2M12 19.3v2.2M4.52 4.52l1.55 1.55M17.93 17.93l1.55 1.55M2.5 12h2.2M19.3 12h2.2M4.52 19.48l1.55-1.55M17.93 6.07l1.55-1.55"></path></svg>
+    </button>
+    <button class="iconBtn accountBtn" aria-label="Account" title="Account" onclick="account()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.1"></circle><path d="M5.4 20c.7-4 2.9-6.1 6.6-6.1s5.9 2.1 6.6 6.1"></path></svg>
+    </button>
+    <button class="iconBtn wishlistHead" aria-label="Wishlist" title="Wishlist" onclick="openWishlist()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.7c0 5-8.8 10.2-8.8 10.2S3.2 13.7 3.2 8.7A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"></path></svg>
+      <span id="wishlistCount">0</span>
+    </button>
+    <button class="iconBtn bag" aria-label="Shopping bag" title="Shopping bag" onclick="openCart()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l-1 12H6l-1-12Z"></path><path d="M8.5 8.5V7a3.5 3.5 0 0 1 7 0v1.5"></path></svg>
+      <span id="cartCount" class="cartCount">0</span>
+    </button>
+  </div>
+</header><div id="bagToast" class="bagToast" role="status" aria-live="polite">ADDED TO BAG <span>✓</span></div>
+<div id="searchbar" class="searchbar"><input id="searchInput" type="search" autocomplete="off" placeholder="Search products..." oninput="renderProducts()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('shop')?.scrollIntoView({behavior:'smooth',block:'start'});}"></div>
+
+<main id="home">
+<section class="heroEditorial">
+  <div class="heroMeta"><span>YOUR TYPE / SYSTEM</span><i></i><b>01 / 04</b></div>
+  <div class="heroCopy">
+    <p class="eyebrow">NEW COLLECTION / 2026</p>
+    <h1>Engineered<br><em>for the Street</em></h1>
+    <p class="sub">Premium fabrics. Heavy graphics. Built for those who move different.</p>
+    <div class="buttons"><a class="btn primary" href="#shop">SHOP NOW →</a><a class="btn" href="#collections">EXPLORE →</a></div>
+  </div>
+  <div class="heroVisual">
+    <div class="heroFrame">
+      <img src="photos/armor.jpg" alt="YOUR TYPE streetwear graphic">
+      <div class="orbit orbitOne"><span>YOUR TYPE · YOUR TYPE · YOUR TYPE · </span></div>
+      <div class="orbit orbitTwo"><span>STREETWEAR / GRAPHICS / ATTITUDE / </span></div>
+      <div class="heroStamp">YOUR<br>TYPE</div>
+      <div class="heroCaption">DROP 01 — HEAVY GRAPHICS<br>OVERSIZED FIT / INDIA</div>
+    </div>
+  </div>
+  <div class="scrollHint">SCROLL TO EXPLORE <span>↓</span></div>
+</section>
+
+<div class="marquee"><div>YOUR TYPE&nbsp;&nbsp; / &nbsp;&nbsp;ENGINEERED FOR THE STREET&nbsp;&nbsp; / &nbsp;&nbsp;YOUR TYPE&nbsp;&nbsp; / &nbsp;&nbsp;ENGINEERED FOR THE STREET&nbsp;&nbsp; / &nbsp;&nbsp;</div></div>
+
+<section class="trust">
+  <div><b>✦ PREMIUM QUALITY</b><small>HANDPICKED FABRICS</small></div>
+  <div><b>♙ SECURE PAYMENTS</b><small>100% SAFE & SECURE</small></div>
+  <div><b>▣ FREE SHIPPING</b><small>ON PREPAID ORDERS</small></div>
+  <div><b>↻ EASY RETURNS</b><small>7 DAYS RETURN POLICY</small></div>
+</section>
+
+<section id="collections" class="collections">
+  <div class="sectionIntro"><p class="eyebrow">THE UNIFORM / 01</p><h2>Wear the<br>statement.</h2><p>Graphic-led pieces designed to work as a complete street uniform.</p></div>
+  <div class="collectionTiles">
+    <a href="#shop" class="collectionTile tall"><img src="photos/chaos.jpg" alt="Tops"><span>TOPS <b>→</b></span></a>
+    <div class="collectionTile bottomsSwipe" id="bottomsSwipe" aria-label="Swipe to change bottoms">
+      <div class="collectionMotionCarousel" id="bottomsCarousel" aria-label="Swipe bottoms">
+        <div class="collectionMotionTrack" id="bottomsTrack"></div>
+        <div class="collectionMotionHint">← SWIPE →</div>
+      </div>
+      <a class="bottomsLink" href="#shop" aria-label="Shop bottoms">BOTTOMS <b>→</b></a>
+    </div>
+    <a href="#shop" class="collectionTile"><img src="photos/ornament.jpg" alt="GRAPHICS"><span>GRAPHICS <b>→</b></span></a>
+  </div>
+</section>
+
+<section class="motionSection" id="motion">
+  <div class="motionHead">
+    <div>
+      <p class="eyebrow">YOUR TYPE / MOTION</p>
+      <h2>WATCH <em>IN MOTION</em></h2>
+      <p class="motionSubline">SEE THE FIT MOVE BEFORE YOU SHOP IT.</p>
+    </div>
+    <p class="motionLead">SWIPE TO MOVE THROUGH THE DROP.</p>
+  </div>
+  <div class="motionCarousel" id="motionCarousel" aria-label="Swipe products">
+    <div class="motionTrack" id="motionTrack"></div>
+    <div class="motionHint">← SWIPE →</div>
+  </div>
+</section>
+
+<div class="highlightTicker" aria-label="YOUR TYPE highlight"><div class="highlightTickerTrack"><span>THE PIECES PEOPLE LOOK TWICE AT</span><b>•</b><span>MADE FOR THE FEW</span><b>•</b><span>NOT FOR EVERYONE</span><b>•</b><span>LOOK ONCE • LOOK AGAIN • FIND YOUR TYPE</span><b>•</b><span>THE PIECES PEOPLE LOOK TWICE AT</span><b>•</b><span>MADE FOR THE FEW</span><b>•</b><span>NOT FOR EVERYONE</span><b>•</b><span>LOOK ONCE • LOOK AGAIN • FIND YOUR TYPE</span><b>•</b></div></div>
+
+
+
+<section id="shop" class="productsSection">
+  <div class="sectionHead"><div><p class="eyebrow">THE DROP / 01</p><h2>Featured Products</h2></div><span id="resultCount"></span></div>
+  <div id="products" class="grid"></div>
+</section>
+
+<section class="curatedSection" id="bestSellers">
+  <div class="sectionHead curatedHead"><div><p class="eyebrow">THE MOST WANTED / 02</p><h2>Best Sellers</h2><p class="sectionNote">The pieces getting the most attention right now.</p></div><a class="textLink" href="#shop">VIEW ALL →</a></div>
+  <div id="bestSellerGrid" class="curatedGrid"></div>
+</section>
+
+<section class="curatedSection" id="newCollection">
+  <div class="sectionHead curatedHead"><div><p class="eyebrow">DROP 02 / NEW</p><h2>New Collection</h2><p class="sectionNote">Fresh graphics. Clean silhouettes. Same YOUR TYPE attitude.</p></div><a class="textLink" href="#shop">EXPLORE →</a></div>
+  <div id="newCollectionGrid" class="curatedGrid"></div>
+</section>
+
+<section class="trendSection" id="trending">
+  <div class="trendCopy"><p class="eyebrow">NOW IN THE FEED / 03</p><h2>Trending<br><em>Now.</em></h2><p>Statement graphics, oversized fits and pieces made to be noticed.</p><a class="btn primary" href="#shop">SHOP TRENDING →</a></div>
+  <div class="trendCards"><div class="trendCard"><span>01</span><b>OVERSIZED</b><small>Relaxed fits / heavy silhouettes</small></div><div class="trendCard"><span>02</span><b>GRAPHICS</b><small>Bold artwork / limited drops</small></div><div class="trendCard"><span>03</span><b>STREET UNIFORM</b><small>Tops / layers / everyday rotation</small></div></div>
+</section>
+
+<section class="curatedSection womenSection" id="womenTops">
+  <div class="sectionHead curatedHead"><div><p class="eyebrow">WOMEN / EDIT 04</p><h2>Women’s Tops</h2><p class="sectionNote">A dedicated top edit for a cleaner, sharper fit.</p></div><a class="textLink" href="#shop">SHOP TOPS →</a></div>
+  <div id="womenTopsGrid" class="curatedGrid"></div>
+</section>
+
+<section class="highlightsSection" id="highlights">
+  <div class="sectionHead"><div><p class="eyebrow">YOUR TYPE / HIGHLIGHTS</p><h2>Made to stand out.</h2></div></div>
+  <div class="highlightCards"><article><span>✦</span><h3>Premium Feel</h3><p>Heavyweight-inspired streetwear presentation with a clean editorial finish.</p></article><article><span>↻</span><h3>Easy Returns</h3><p>Simple customer-care flow designed to keep shopping confidence high.</p></article><article><span>▣</span><h3>Secure Checkout</h3><p>Clear cart, checkout and payment choices without visual clutter.</p></article><article><span>∞</span><h3>Limited Drops</h3><p>New collections and highlight edits keep the storefront feeling fresh.</p></article></div>
+</section>
+
+<section class="editorialBanner">
+  <div><p class="eyebrow">YOUR TYPE / 02</p><h2>Dark graphics.<br><span>Heavy attitude.</span></h2><p>Built for oversized fits, late nights and the street.</p><a class="btn primary" href="#shop">SHOP THE DROP →</a></div>
+  <div class="editorialArt"><img src="photos/graffiti.jpg" alt="YOUR TYPE graphic"></div>
+</section>
+
+<section class="newsletter"><div class="newsletterVideo" aria-hidden="true"><video autoplay muted loop playsinline preload="metadata"><source src="photos/stay-in-loop.mp4" type="video/mp4"></video></div><p class="eyebrow">STAY IN THE LOOP</p><h2>Be first to the next drop.</h2><div class="email"><input id="newsletterEmail" type="email" autocomplete="email" placeholder="Enter your email" aria-label="Email address"><button type="button" onclick="joinNewsletter()">JOIN →</button></div><p id="newsletterHint" class="newsletterHint" aria-live="polite"></p></section>
+</main>
+
+<footer class="premiumFooter">
+  <div class="footBrand">
+    <div class="footBrandName">YOUR TYPE</div>
+    <p>Streetwear built for the bold.<br>Designed to stand out.</p>
+    <div class="social" aria-label="YOUR TYPE social media">
+      <a href="#" aria-label="Instagram" title="Instagram" onclick="return false;"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle class="fill" cx="17.4" cy="6.6" r="1.1"></circle></svg></a>
+      <a href="#" aria-label="Facebook" title="Facebook" onclick="return false;"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8h3V4h-3c-3.3 0-5 2-5 5v3H6v4h3v4h4v-4h3.2l.8-4H13V9.4c0-.9.3-1.4 1-1.4Z" class="fill"></path></svg></a>
+      <a href="#" aria-label="X" title="X" onclick="return false;"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"></path></svg></a>
+      <a href="#" aria-label="YouTube" title="YouTube" onclick="return false;"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="4"></rect><path d="m10 9 5 3-5 3Z" class="fill"></path></svg></a>
+    </div>
+  </div>
+
+  <div class="footerAccordion collapsed" id="customerCare">
+    <button class="footerAccordionHead" type="button" aria-expanded="false" aria-controls="customerCareBody" onclick="toggleFooterSection('customerCare')">
+      <span>CUSTOMER CARE</span><span class="footerChevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="footerAccordionBody" id="customerCareBody">
+      <a href="about.html"><span class="careIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 10v6M12 7.2v.1"></path></svg></span><span>About Us</span></a>
+      <a href="returns.html"><span class="careIcon"><svg viewBox="0 0 24 24"><path d="M8 8H4l4-4M4 8a8 8 0 1 1 2.2 7.5"></path></svg></span><span>Returns</span></a>
+      <a href="contact.html"><span class="careIcon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg></span><span>Contact</span></a>
+      <a href="terms.html"><span class="careIcon"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6zM14 3v4h4M9 11h6M9 15h6"></path></svg></span><span>Terms of Service</span></a>
+      <a href="contact.html#contact"><span class="careIcon"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11A7 7 0 0 0 5 10c0 4.9 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.3"></circle></svg></span><span>Contact Information</span></a>
+      <a href="privacy.html"><span class="careIcon"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></span><span>Privacy Policy</span></a>
+      <a href="shipping.html"><span class="careIcon"><svg viewBox="0 0 24 24"><path d="M3 6h11v11H3zM14 10h4l3 3v4h-7z"></path><circle cx="7" cy="19" r="2"></circle><circle cx="18" cy="19" r="2"></circle></svg></span><span>Shipping Policy</span></a>
+    </div>
+  </div>
+
+  <div class="footerAccordion collapsed" id="supportSection">
+    <button class="footerAccordionHead" type="button" aria-expanded="false" aria-controls="supportBody" onclick="toggleFooterSection('supportSection')">
+      <span>SUPPORT</span><span class="footerChevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="footerAccordionBody" id="supportBody">
+      <a href="contact.html"><span class="careIcon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9.5a2.7 2.7 0 1 1 4.1 2.3c-1.2.7-1.6 1.2-1.6 2.2M12 17.2v.1"></path></svg></span><span>FAQ's</span></a>
+      <a href="returns.html"><span class="careIcon"><svg viewBox="0 0 24 24"><path d="M7 7h-4l4-4M3 7a8 8 0 1 1 2.4 6"></path><path d="M17 17h4l-4 4M21 17a8 8 0 1 1-2.4-6"></path></svg></span><span>Return / Exchange</span></a>
+      <a href="track-order.html"><span class="careIcon"><svg viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7z"></path><circle cx="7" cy="18" r="2"></circle><circle cx="18" cy="18" r="2"></circle></svg></span><span>Track Your Order</span></a>
+      <a href="returns.html"><span class="careIcon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"></rect><path d="M3 10h18"></path></svg></span><span>Refund / Exchange Policy</span></a>
+    </div>
+  </div>
+
+  <div class="footerAccordion collapsed" id="shipToSection">
+    <button class="footerAccordionHead" type="button" aria-expanded="false" aria-controls="shipToBody" onclick="toggleFooterSection('shipToSection')">
+      <span>SHIP TO <em class="countryPill">India (₹)</em></span><span class="footerChevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="footerAccordionBody shipToBody" id="shipToBody">
+      <button class="countryOption selected" type="button" onclick="selectCountry(this)"><span class="countryIcon">◎</span><span><b>India</b><small>₹ &nbsp; INR</small></span><strong>✓</strong></button>
+      <button class="countryOption" type="button" onclick="selectCountry(this)"><span class="countryIcon">◎</span><span><b>United States</b><small>$ &nbsp; USD</small></span><strong></strong></button>
+      <button class="countryOption" type="button" onclick="selectCountry(this)"><span class="countryIcon">◎</span><span><b>United Kingdom</b><small>£ &nbsp; GBP</small></span><strong></strong></button>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleCustomerCare(){
+  const wrap=document.getElementById('customerCare');
+  const body=document.getElementById('customerCareBody');
+  const btn=wrap?.querySelector('.customerCareHead');
+  if(!wrap||!body||!btn)return;
+  const open=!wrap.classList.contains('collapsed');
+  wrap.classList.toggle('collapsed',open);
+  btn.setAttribute('aria-expanded',String(!open));
+}
+</script>
+
+<div id="cart" class="drawer"><div class="drawerTop"><div><p class="eyebrow">YOUR TYPE / CHECKOUT</p><h2>Your Bag</h2></div><button onclick="closeCart()">×</button></div><div id="cartItems"></div><div class="total"><span>Total</span><b id="cartTotal">₹0</b></div><button class="checkout" onclick="checkout()">PROCEED TO CHECKOUT →</button></div>
+<div id="wishlist" class="drawer"><div class="drawerTop"><h2>Wishlist</h2><button onclick="closeWishlist()">×</button></div><div id="wishlistItems"></div></div>
+<div id="overlay" class="overlay" onclick="closeCart();closeWishlist()"></div>
+<div id="wishlistToast" class="likeToast" aria-live="polite"></div>
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalBox"><div class="modalTop"><h2 id="modalTitle">YOUR TYPE</h2><button onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
+<script>
+let products = [["Akari Flight Tee", "₹1,549", "akari-flight-tee.jpg", "SALE", "₹2,200"], ["Ghamand Chroma Instinct", "₹1,399", "chroma-instinct-tee.jpg", "SALE", "₹2,100"], ["Ghamand Buddha's Blessing", "₹1,499", "buddhas-blessing-tee.jpg", "SALE", "₹2,200"], ["Burning Oath T-Shirt", "₹1,399", "burning-oath-tshirt.jpg", "NEW"], ["Who Are You T-Shirt", "₹1,499", "who-are-you-tshirt.jpg", "NEW"], ["What You Fear T-Shirt", "₹1,399", "what-you-fear-tshirt.jpg", "NEW"], ["Specter of Stillness T-Shirt", "₹1,499", "specter-stillness-tshirt.jpg", "NEW"], ["Crowned Destiny Tee", "₹1,399", "crowned-destiny-tee.jpg", "NEW"], ["Chaos Oversize Tee", "₹1,399", "chaos.jpg", "NEW"], ["Burning Oath Tee", "₹1,499", "bushido.jpg", "NEW"], ["Chaos Destiny Tee", "₹1,399", "graffiti.jpg", "NEW"], ["Instinct Oversize Tee", "₹1,399", "armor.jpg", "NEW"], ["Bushido Graphic Tee", "₹1,499", "bushido.jpg", "NEW"], ["Inferno Street Tee", "₹1,449", "chaos.jpg", "NEW"], ["Midnight Graffiti Tee", "₹1,349", "graffiti.jpg", "NEW"], ["Ritual Oversize Tee", "₹1,499", "ornament.jpg", "NEW"], ["Dark Armor Tee", "₹1,399", "armor.jpg", "NEW"]];
+function storageGet(key,fallback='[]'){
+ try{const v=localStorage.getItem(key); if(v!==null)return v;}catch(e){}
+ try{const m=document.cookie.match(new RegExp('(?:^|; )'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'=([^;]*)')); if(m)return decodeURIComponent(m[1]);}catch(e){}
+ return fallback;
+}
+function storageSet(key,value){
+ const text=typeof value==='string'?value:JSON.stringify(value);
+ let ok=false; try{localStorage.setItem(key,text);ok=true}catch(e){}
+ try{document.cookie=key+'='+encodeURIComponent(text)+'; path=/; max-age=31536000; SameSite=Lax';}catch(e){}
+ return ok;
+}
+function storageRemove(key){try{localStorage.removeItem(key)}catch(e){} try{document.cookie=key+'=; path=/; max-age=0; SameSite=Lax'}catch(e){}}
+let cart=[]; try{cart=JSON.parse(storageGet('yourTypeCart','[]'))}catch(e){cart=[]} let wishlist=[]; loadWishlistSafe(); let selectedSize='M';
+let selectedColor='Black';
+function selectModalColor(btn,color){
+ selectedColor=color;
+ const wrap=btn?.parentElement;
+ wrap?.querySelectorAll('button').forEach(x=>x.classList.remove('chosen'));
+ btn?.classList.add('chosen');
+}
+document.addEventListener('click',function(e){
+ const link=e.target.closest('a[href="#shop"]');
+ if(link){goToShop(e);}
+});
+window.addEventListener('storage',e=>{if(e.key==='yourTypeWishlist'){try{wishlist=JSON.parse(e.newValue||'[]')}catch(_){wishlist=[]}updateWishlist();renderProducts();}});
+function money(n){return '₹'+Number(n).toLocaleString('en-IN')}
+function goToShop(e){
+ if(e){e.preventDefault();e.stopPropagation();}
+ try{closeWishlist();closeCart();closeModal();}catch(_){}
+ const shop=document.getElementById('shop');
+ if(!shop)return;
+ requestAnimationFrame(()=>shop.scrollIntoView({behavior:'smooth',block:'start'}));
+}
+
+storageSet('yourTypeProductsCache',products)
+function normalizeSearch(value){
+ return String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+}
+function productCardHTML(p,index){const liked=wishlist.includes(p[0]);const z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};return `<article class="card" onclick="openProduct(${index})"><div class="pic"><span class="badge">${p[3]||''}</span><button class="heart ${liked?'liked':''}" aria-label="${liked?'Remove from wishlist':'Add to wishlist'}" aria-pressed="${liked}" onclick="event.preventDefault();event.stopPropagation();toggleWishlist(event,this,${index})">${liked?'♥':'♡'}</button><img src="photos/${p[2]}" alt="${p[0]}" loading="lazy" draggable="false"><div class="quick">QUICK VIEW</div></div><div class="info"><h3>${p[0]}</h3><div class="price">${p[1]} ${p[4]?'<del>'+p[4]+'</del>':''}</div><div class="sizes">${['S','M','L','XL'].map(sz=>`<button type="button" ${Number(z[sz]||0)<=0?'disabled':''} onclick="event.stopPropagation();selectCardSize(this,'${sz}')">${sz}</button>`).join('')}</div><button type="button" class="add" data-add-to-bag="${index}" ${Number(p[5]??20)<=0?'disabled':''}>${Number(p[5]??20)<=0?'SOLD OUT':'ADD TO BAG +'}</button></div></article>`}
+function renderCurated(){
+ const visible=products.filter(p=>p);
+ const best=visible.slice(0,4);
+ const fresh=visible.filter(p=>String(p[3]||'').toUpperCase()==='NEW').slice(0,4);
+ const women=visible.filter((p,i)=>/tee|top|shirt/i.test(p[0])).slice(3,7);
+ const fill=(id,list)=>{const el=document.getElementById(id);if(el)el.innerHTML=list.map(p=>productCardHTML(p,products.indexOf(p))).join('')};
+ fill('bestSellerGrid',best); fill('newCollectionGrid',fresh.length?fresh:visible.slice(4,8)); fill('womenTopsGrid',women.length?women:visible.slice(0,4));
+}
+function renderProducts(){const q=(document.getElementById('searchInput')?.value||'').trim().toLowerCase();const list=products.map((p,index)=>({p,index,score:score(p[0])})).filter(x=>!q||x.score>0).sort((a,b)=>b.score-a.score||a.index-b.index);document.getElementById('resultCount').textContent=list.length+' PIECES';document.getElementById('products').innerHTML=list.map(({p,index},rank)=>{const liked=wishlist.includes(p[0]),z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};return `<article class="card" data-search-rank="${rank}" onclick="openProduct(${index})"><div class="pic"><span class="badge">${p[3]||''}</span><button class="heart ${liked?'liked':''}" aria-label="${liked?'Remove from wishlist':'Add to wishlist'}" aria-pressed="${liked}" onclick="event.preventDefault();event.stopPropagation();toggleWishlist(event,this,${index})">${liked?'♥':'♡'}</button><img src="photos/${p[2]}" alt="${p[0]}" loading="lazy" draggable="false" onerror="this.closest('.pic')?.classList.add('imageMissing');this.style.visibility='hidden'"><div class="quick">QUICK VIEW</div></div><div class="info"><div class="productNo">${String(index+1).padStart(2,'0')}</div><h3>${p[0]}</h3><div class="price">${p[1]} ${p[4]?'<del>'+p[4]+'</del>':''}</div><div class="sizes">${['S','M','L','XL'].map(sz=>`<button type="button" ${Number(z[sz]||0)<=0?'disabled':''} onclick="event.stopPropagation();selectCardSize(this,'${sz}')">${sz}</button>`).join('')}</div><button type="button" class="add" data-add-to-bag="${index}" ${Number(p[5]??20)<=0?'disabled':''}>${Number(p[5]??20)<=0?'SOLD OUT':'ADD TO BAG +'}</button></div></article>`}).join('')||'<div class="empty">NO PRODUCTS FOUND</div>'}
+function selectCardSize(btn,size){
+ const card=btn.closest('.card'); if(card) card.dataset.selectedSize=size;
+ btn.parentElement.querySelectorAll('button').forEach(x=>x.classList.remove('chosen'));btn.classList.add('chosen');selectedSize=size;
+}
+function addToCart(i,btn){
+ if(Number(products[i][5]??20)<=0){showModal('SOLD OUT','<p class="muted">This product is currently out of stock.</p>');return;}
+ const card=btn?.closest('.card');
+ const size=card?.dataset.selectedSize||'M';
+ cart.push({...products[i],size,color:'Black',qty:1});
+ saveCart();
+ document.querySelector('.bag')?.classList.remove('bagAdded');
+ void document.querySelector('.bag')?.offsetWidth;
+ document.querySelector('.bag')?.classList.add('bagAdded');
+ if(btn){
+   btn.classList.add('added');
+   const old=btn.textContent; btn.textContent='ADDED TO BAG ✓';
+   setTimeout(()=>{btn.classList.remove('added');btn.textContent=old},650);
+ }
+ const toast=document.getElementById('bagToast');
+ if(toast){toast.classList.add('show');clearTimeout(window.__bagToast);window.__bagToast=setTimeout(()=>toast.classList.remove('show'),900);}
+ setTimeout(openCart,260);
+}
+function wishlistKey(p){
+ return String(p?.[0]||'').trim();
+}
+function loadWishlistSafe(){
+ try{
+   const raw=JSON.parse(storageGet('yourTypeWishlist','[]'));
+   wishlist=Array.isArray(raw)?raw.map(String).filter(Boolean):[];
+ }catch(e){wishlist=[]}
+}
+function persistWishlist(){
+ storageSet('yourTypeWishlist',wishlist);
+}
+function toggleWishlist(event,btn,i){
+ if(event){event.preventDefault();event.stopPropagation();}
+ const p=products[i]; if(!p)return;
+ const name=wishlistKey(p); if(!name)return;
+ const pos=wishlist.indexOf(name); const adding=pos===-1;
+ if(adding)wishlist.push(name);else wishlist.splice(pos,1);
+ persistWishlist();
+ if(btn){
+   btn.classList.toggle('liked',adding);
+   btn.textContent=adding?'♥':'♡';
+   btn.setAttribute('aria-label',adding?'Remove from wishlist':'Add to wishlist');
+   btn.setAttribute('aria-pressed',String(adding));
+   btn.classList.remove('heartPop','likePulse');void btn.offsetWidth;
+   btn.classList.add('heartPop','likePulse');
+ }
+ updateWishlist();
+ showWishlistToast(adding?'SAVED TO WISHLIST':'REMOVED FROM WISHLIST');
+ try{
+   const token=localStorage.getItem('yourTypeCustomerToken');
+   if(token){
+     fetch('/api/auth/wishlist',{method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({wishlist})}).catch(()=>{});
+   }
+ }catch(e){}
+}
+function getVisitorId(){let v=localStorage.getItem('yourTypeVisitorId');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2));localStorage.setItem('yourTypeVisitorId',v)}return v}
+function showWishlistToast(text){const el=document.getElementById('wishlistToast');if(!el)return;el.textContent='♥  '+text;el.classList.add('show');clearTimeout(window.__likeToast);window.__likeToast=setTimeout(()=>el.classList.remove('show'),1000)}
+function updateWishlist(){
+ const count=document.getElementById('wishlistCount');
+ const box=document.getElementById('wishlistItems');
+ if(count)count.textContent=wishlist.length;
+ if(!box)return;
+ const valid=wishlist.map(name=>({name,i:products.findIndex(p=>wishlistKey(p)===name)})).filter(x=>x.i>=0);
+ if(valid.length!==wishlist.length){wishlist=valid.map(x=>x.name);persistWishlist();}
+ box.innerHTML=valid.length?valid.map(({name,i})=>{
+   const p=products[i];
+   return `<article class="wishlistItem" role="button" tabindex="0" onclick="openProduct(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProduct(${i})}">
+     <div class="wishlistThumb"><img src="photos/${p[2]}" alt="${esc(p[0])}" loading="lazy" draggable="false" onerror="this.style.visibility='hidden'"></div>
+     <div class="wishlistInfo"><span class="wishlistEyebrow">SAVED PIECE</span><b>${esc(p[0])}</b><span class="wishlistPrice">${esc(p[1])}</span><span class="wishlistHint">TAP TO VIEW</span></div>
+     <button class="wishlistRemove" type="button" aria-label="Remove ${esc(p[0])} from wishlist" onclick="event.stopPropagation();removeWishlistByIndex(${i})">×</button>
+   </article>`
+ }).join(''):'<div class="wishlistEmpty"><strong>YOUR WISHLIST IS EMPTY</strong><span>Save pieces you want to come back to.</span></div>';
+}
+function removeWishlistByIndex(i){const p=products[i];if(!p)return;removeWishlist(wishlistKey(p));showWishlistToast('REMOVED FROM WISHLIST')}
+function removeWishlist(name){wishlist=wishlist.filter(x=>x!==name);persistWishlist();updateWishlist();renderProducts()}
+function openWishlist(){updateWishlist();document.getElementById('wishlist').classList.add('open');document.getElementById('overlay').classList.add('show')}
+function closeWishlist(){document.getElementById('wishlist').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function saveCart(){storageSet('yourTypeCart',cart);updateCart()}
+function restorePersistentShopState(){
+ try{
+   const savedCart=JSON.parse(storageGet('yourTypeCart','[]'));
+   if(Array.isArray(savedCart)) cart=savedCart;
+ }catch(e){}
+ try{
+   const savedWishlist=JSON.parse(storageGet('yourTypeWishlist','[]'));
+   if(Array.isArray(savedWishlist)) wishlist=savedWishlist.map(String).filter(Boolean);
+ }catch(e){}
+ updateCart();
+ updateWishlist();
+}
+window.addEventListener('pageshow',restorePersistentShopState);
+window.addEventListener('DOMContentLoaded',restorePersistentShopState);
+window.addEventListener('pagehide',()=>{storageSet('yourTypeCart',cart);storageSet('yourTypeWishlist',wishlist)});
+window.addEventListener('storage',e=>{if(e.key==='yourTypeCart'){try{cart=JSON.parse(e.newValue||'[]');updateCart()}catch(_){}}});
+function changeCartQty(i,delta){const item=cart[i];if(!item)return;item.qty=Math.max(1,Math.min(10,Number(item.qty||1)+delta));saveCart()}
+function setCartSize(i,size){const item=cart[i];if(!item)return;item.size=size;saveCart()}
+function setCartColor(i,color){const item=cart[i];if(!item)return;item.color=color;saveCart()}
+function cartItemTotal(p){return Number(String(p[1]||'0').replace(/[^0-9.]/g,''))*Number(p.qty||1)}
+function updateCart(){
+ const cartCount=document.getElementById('cartCount');
+ if(cartCount) cartCount.textContent=cart.reduce((n,p)=>n+Number(p.qty||1),0);
+ const box=document.getElementById('cartItems');
+ if(!box)return;
+ box.innerHTML=cart.length?`<div class="cartCustomizeIntro"><span class="eyebrow">YOUR TYPE / BAG</span><strong>Make it yours.</strong><small>Choose size, color and quantity before you buy.</small></div>`+cart.map((p,i)=>{
+   const size=p.size||'M', color=p.color||'Black', qty=Number(p.qty||1);
+   return `<article class="cartItem cartCustomizeItem">
+    <div class="cartItemVisual"><img src="photos/${p[2]}" alt="${esc(p[0])}" loading="lazy" draggable="false"><span class="cartItemNo">${String(i+1).padStart(2,'0')}</span></div>
+    <div class="cartItemBody"><div class="cartItemTitle"><div><b>${esc(p[0])}</b><span>${esc(p[1])} each</span></div><button class="cartRemove" aria-label="Remove ${esc(p[0])}" onclick="removeItem(${i})">×</button></div>
+    <div class="cartChoice"><label>SIZE<div class="cartChoiceBtns">${['S','M','L','XL','XXL'].map(sz=>`<button type="button" class="${size===sz?'chosen':''}" onclick="setCartSize(${i},'${sz}')">${sz}</button>`).join('')}</div></label>
+    <label>COLOR<div class="cartChoiceBtns colorBtns">${(Array.isArray(p[9])&&p[9].length?p[9]:['Black','White','Charcoal']).map(c=>`<button type="button" class="${color===c?'chosen':''}" onclick="setCartColor(${i},'${c}')"><i class="colorDot ${String(c).toLowerCase()}"></i>${c}</button>`).join('')}</div></label></div>
+    <div class="cartBottomRow"><div class="qtyControl"><button type="button" onclick="changeCartQty(${i},-1)">−</button><b>${qty}</b><button type="button" onclick="changeCartQty(${i},1)">+</button></div><strong>${money(cartItemTotal(p))}</strong></div>
+    </div></article>`;
+ }).join(''):'<div class="empty">Your bag is empty.<small class="cartEmptyHint">Add a piece to start your order.</small></div>';
+ let total=cart.reduce((s,p)=>s+cartItemTotal(p),0);document.getElementById('cartTotal').textContent=money(total);
+}
+function removeItem(i){cart.splice(i,1);saveCart()}
+function openCart(){closeWishlist();location.href='bag.html'}
+function closeCart(){document.getElementById('cart').classList.remove('open');document.getElementById('overlay').classList.remove('show')}
+function toggleSearch(){const bar=document.getElementById('searchbar');bar.classList.toggle('show');if(bar.classList.contains('show'))document.getElementById('searchInput').focus()}
+function checkout(){if(!cart.length){showModal('Your Bag','Your bag is empty. Add a product before checkout.');return}location.href='checkout.html'}
+function selectModalSize(btn,size){
+ const wrap=btn?.parentElement; if(!wrap)return;
+ wrap.querySelectorAll('button').forEach(x=>x.classList.remove('chosen')); btn.classList.add('chosen'); selectedSize=size;
+}
+function modalAdd(i){
+ const p=products[i]; if(!p)return;
+ const z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};
+ const size=selectedSize||'M';
+ if(Number(z[size]||0)<=0){showModal('SIZE UNAVAILABLE',`<p class="muted">${esc(p[0])} in size ${size} is currently sold out.</p>`);return;}
+ cart.push({...p,size,color:'Black',qty:1}); saveCart(); closeModal(); openCart();
+}
+function modalBuyNow(i){
+ const p=products[i]; if(!p)return;
+ const z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};
+ const size=selectedSize||'M';
+ if(Number(z[size]||0)<=0){showModal('SIZE UNAVAILABLE',`<p class="muted">${esc(p[0])} in size ${size} is currently sold out.</p>`);return;}
+ cart.push({...p,size,color:'Black',qty:1}); saveCart(); closeModal(); location.href='checkout.html';
+}
+function toggleModalWishlist(i,btn){
+ const p=products[i]; if(!p)return;
+ const name=wishlistKey(p); const pos=wishlist.indexOf(name); const adding=pos===-1;
+ if(adding)wishlist.push(name);else wishlist.splice(pos,1);
+ persistWishlist(); updateWishlist(); renderProducts();
+ if(btn){btn.classList.toggle('liked',adding);btn.textContent=adding?'♥':'♡';btn.setAttribute('aria-label',adding?'Remove from wishlist':'Add to wishlist');}
+ showWishlistToast(adding?'SAVED TO WISHLIST':'REMOVED FROM WISHLIST');
+}
+function openProduct(i){
+ const p=products[i],z=p[6]||{S:p[5]??20,M:p[5]??20,L:p[5]??20,XL:p[5]??20,XXL:p[5]??20};
+ const liked=wishlist.includes(wishlistKey(p));
+ showModal(p[0],`<div class="productModal"><img src="photos/${p[2]}" alt="${p[0]}" loading="lazy" draggable="false" onerror="this.closest('.pic')?.classList.add('imageMissing');this.style.visibility='hidden'"><div><div class="productModalHead"><div class="price">${p[1]} ${p[4]?'<del>'+p[4]+'</del>':''}</div><button type="button" class="modalBookmark ${liked?'liked':''}" aria-label="${liked?'Remove from wishlist':'Add to wishlist'}" onclick="event.preventDefault();event.stopPropagation();toggleModalWishlist(${i},this)">${liked?'♥':'♡'}</button></div><p class="muted">Premium streetwear fit · Handpicked fabric · 7-day returns.</p><h4>SELECT SIZE</h4><div class="modalSizes">${['S','M','L','XL','XXL'].map(sz=>`<button ${Number(z[sz]||0)<=0?'disabled':''} onclick="selectModalSize(this,'${sz}')">${sz}${Number(z[sz]||0)<=0?' · SOLD OUT':''}</button>`).join('')}</div><h4>SELECT COLOR</h4><div class="modalSizes modalColors">${(Array.isArray(p[9])&&p[9].length?p[9]:['Black','White','Charcoal']).map(c=>`<button type="button" class="${(window.selectedColor||'Black')===c?'chosen':''}" onclick="selectModalColor(this,${JSON.stringify(c)})"><i class="colorDot ${String(c).toLowerCase()}"></i>${c}</button>`).join('')}</div><button class="checkout" onclick="modalAdd(${i})">ADD TO BAG — ${p[1]}</button><button class="buyNowBtn" onclick="modalBuyNow(${i})">BUY NOW</button><button class="reviewBtn" onclick="showReviews(${JSON.stringify(p[0])})">★ REVIEWS</button></div></div>`)
+}
+async function showReviews(name){try{const r=await fetch('/api/reviews/'+encodeURIComponent(name)),d=await r.json(),reviews=d.reviews||[],avg=reviews.length?(reviews.reduce((a,r)=>a+r.rating,0)/reviews.length).toFixed(1):'5.0';showModal(name+' — Reviews',`<div class="reviews"><div class="reviewSummary"><b>★ ${avg}/5</b><span>${reviews.length} review${reviews.length===1?'':'s'}</span></div>${reviews.length?reviews.map(r=>`<div class="review"><b>${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</b><strong>${esc(r.title)}</strong><p>${esc(r.text)}</p><small>${esc(r.name)}${r.verified?' · Verified buyer':''}</small></div>`).join(''):'<p class="muted">No reviews yet. Be the first.</p>'}<button class="checkout" onclick="writeReview(${JSON.stringify(name)})">WRITE A REVIEW →</button></div>`)}catch(e){showModal('Reviews','<p class="muted">Could not load reviews right now.</p>')}}
+function writeReview(name){if(!localStorage.getItem('yourTypeCustomerToken')){showModal('SIGN IN REQUIRED','<p class="muted">Please sign in to leave a review.</p><button class="checkout" onclick="account()">SIGN IN →</button>');return}showModal('WRITE A REVIEW',`<form class="authForm" onsubmit="event.preventDefault();submitReview(${JSON.stringify(name)})"><select class="modalInput" id="reviewRating"><option value="5">★★★★★ — 5</option><option value="4">★★★★☆ — 4</option><option value="3">★★★☆☆ — 3</option><option value="2">★★☆☆☆ — 2</option><option value="1">★☆☆☆☆ — 1</option></select><input class="modalInput" id="reviewTitle" placeholder="Review title"><textarea class="modalInput" id="reviewText" maxlength="800" rows="5" placeholder="Tell us about the fit and quality"></textarea><button class="checkout" type="submit">SUBMIT REVIEW →</button></form>`)}
+async function submitReview(name){const title=document.getElementById('reviewTitle')?.value.trim(),text=document.getElementById('reviewText')?.value.trim(),rating=Number(document.getElementById('reviewRating')?.value||5),token=localStorage.getItem('yourTypeCustomerToken');if(!title||!text){alert('Please complete the review.');return}const r=await fetch('/api/reviews',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({product:name,title,text,rating})}),d=await r.json();if(!r.ok){showModal('REVIEW',`<p class="muted">${esc(d.error||'Could not submit review')}</p>`);return}showReviews(name)}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function showModal(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')} function closeModal(){document.getElementById('modal').classList.remove('show')}
+function joinNewsletter(){
+ const input=document.getElementById('newsletterEmail'),hint=document.getElementById('newsletterHint');
+ const email=(input?.value||'').trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+   if(hint){hint.textContent='ENTER A VALID EMAIL';hint.classList.add('error');}
+   input?.focus(); return;
+ }
+ fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})}).then(r=>{if(!r.ok)throw new Error('subscribe');return r.json()}).then(()=>{if(hint){hint.textContent='';hint.classList.remove('error');}}).catch(()=>{if(hint){hint.textContent='COULD NOT SUBSCRIBE — TRY AGAIN';hint.classList.add('error');}return;});
+ if(hint){hint.textContent='';hint.classList.remove('error');}
+ showModal('YOU’RE IN',`<div class="subscribeSuccess"><div class="successGlow"></div><div class="successMark"><span>✓</span></div><div class="successEyebrow">YOUR TYPE / ACCESS GRANTED</div><h3>Welcome to the loop.</h3><p>You’re officially on the list. New drops, early access and selected releases are now coming your way.</p><div class="successEmail">${email}</div><div class="successLine"><i></i><span>EARLY ACCESS UNLOCKED</span><i></i></div><button class="checkout successContinue" onclick="closeModal()">ENTER YOUR TYPE →</button></div>`);
+ input.value='';
+}
+
+function account(){
+ if(localStorage.getItem('yourTypeCustomerToken')){showMyAccount();return;}
+ showModal('YOUR TYPE / ACCOUNT',`<div class="accountPremium">
+   <div class="accountGlow"></div>
+   <div class="accountBadge">YOUR TYPE</div>
+   <h3>Welcome back.</h3>
+   <p class="muted accountLead">Sign in or create your account to keep your orders, wishlist and details in one place.</p>
+   <div class="authTabs"><button class="authTab active" onclick="switchAuth('signin',this)">SIGN IN</button><button class="authTab" onclick="switchAuth('signup',this)">SIGN UP</button></div>
+   <div id="authPanel"></div>
+ </div>`);
+ renderAuth('signin');
+}
+function renderAuth(mode){
+ const panel=document.getElementById('authPanel'); if(!panel)return;
+ if(mode==='signup'){
+   panel.innerHTML=`<form class="authForm" onsubmit="event.preventDefault();completeSignup()"><input class="modalInput" id="signupName" autocomplete="name" placeholder="Full name"><input class="modalInput" id="signupEmail" type="email" autocomplete="email" placeholder="Email address"><input class="modalInput" id="signupPassword" type="password" autocomplete="new-password" placeholder="Create password"><button class="checkout authSubmit" type="submit">CREATE ACCOUNT →</button><small class="authNote">By continuing, you agree to the YOUR TYPE terms.</small></form>`;
+ }else{
+   panel.innerHTML=`<form class="authForm" onsubmit="event.preventDefault();completeSignin()"><input class="modalInput" id="signinEmail" type="email" autocomplete="email" placeholder="Email address"><input class="modalInput" id="signinPassword" type="password" autocomplete="current-password" placeholder="Password"><button class="checkout authSubmit" type="submit">SIGN IN →</button><button type="button" class="authLink" onclick="switchAuth('signup',document.querySelectorAll('.authTab')[1])">NEW HERE? CREATE AN ACCOUNT</button></form>`;
+ }
+}
+function switchAuth(mode,btn){document.querySelectorAll('.authTab').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');renderAuth(mode)}
+function completeSignup(){const name=(document.getElementById('signupName')?.value||'').trim(),email=(document.getElementById('signupEmail')?.value||'').trim(),password=document.getElementById('signupPassword')?.value||'';if(!name||!email||password.length<8){showModal('ACCOUNT','<p class="muted">Please enter your name, a valid email and an 8+ character password.</p>');return}fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not create account');localStorage.setItem('yourTypeCustomerToken',d.token);if(Array.isArray(d.wishlist)){wishlist=d.wishlist;localStorage.setItem('yourTypeWishlist',JSON.stringify(wishlist));updateWishlist();renderProducts();}showModal('ACCOUNT CREATED',`<div class="accountSuccess"><div class="successGlow"></div><div class="successMark"><span>✓</span></div><div class="successEyebrow">YOUR TYPE / ACCESS GRANTED</div><h3>Welcome, ${name.replace(/[<>]/g,'')}.</h3><p>Your account is ready.</p><div class="successEmail">${email.replace(/[<>]/g,'')}</div><button class="checkout successContinue" onclick="closeModal()">ENTER YOUR TYPE →</button></div>`)}).catch(e=>showModal('ACCOUNT',`<p class="muted">${String(e.message).replace(/[<>]/g,'')}</p>`))}
+function completeSignin(){const email=(document.getElementById('signinEmail')?.value||'').trim(),password=document.getElementById('signinPassword')?.value||'';if(!email||!password)return;fetch('/api/auth/signin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Sign in failed');localStorage.setItem('yourTypeCustomerToken',d.token);if(Array.isArray(d.wishlist)){wishlist=d.wishlist;localStorage.setItem('yourTypeWishlist',JSON.stringify(wishlist));updateWishlist();renderProducts();}showModal('SIGNED IN',`<div class="accountSuccess"><div class="successGlow"></div><div class="successMark"><span>✓</span></div><div class="successEyebrow">YOUR TYPE / ACCOUNT</div><h3>Good to see you, ${String(d.name||'').replace(/[<>]/g,'')}.</h3><p>Your account is verified.</p><div class="successEmail">${String(d.email||'').replace(/[<>]/g,'')}</div><button class="checkout successContinue" onclick="showMyAccount()">MY ACCOUNT →</button></div>`)}).catch(e=>showModal('SIGN IN',`<p class="muted">${String(e.message).replace(/[<>]/g,'')}</p>`))}
+
+async function showMyAccount(){
+ const token=localStorage.getItem('yourTypeCustomerToken');
+ if(!token){account();return}
+ try{
+  const r=await fetch('/api/auth/me',{headers:{Authorization:'Bearer '+token}}); const me=await r.json(); if(!r.ok)throw Error(me.error||'Please sign in again');
+  const ro=await fetch('/api/auth/orders',{headers:{Authorization:'Bearer '+token}}); const od=await ro.json(); if(!ro.ok)throw Error(od.error||'Could not load orders');
+  const orders=od.orders||[];
+  showModal('MY ACCOUNT',`<div class="accountPremium"><div class="accountBadge">YOUR TYPE</div><h3>${String(me.name).replace(/[<>]/g,'')}</h3><p class="muted">${String(me.email).replace(/[<>]/g,'')}</p><h4>YOUR ORDERS</h4>${orders.length?orders.map(o=>`<div style="border-top:1px solid #222;padding:12px 0"><b>${esc(o.orderId)}</b><span style="float:right">${esc(o.status)}</span><br><span class="muted">${money(o.total)} · ${new Date(o.date).toLocaleDateString('en-IN')}</span><br><button class="authLink" onclick="closeModal();setTimeout(()=>trackSpecificOrder('${esc(o.orderId)}'),120)">TRACK ORDER →</button></div>`).join(''):'<p class="muted">No orders yet.</p>'}<button class="authLink" onclick="localStorage.removeItem('yourTypeCustomerToken');closeModal()">SIGN OUT</button></div>`);
+ }catch(e){localStorage.removeItem('yourTypeCustomerToken');showModal('ACCOUNT',`<p class="muted">${String(e.message).replace(/[<>]/g,'')}</p>`)}
+}
+function trackSpecificOrder(id){showModal('TRACK ORDER',`<div class="trackCard"><b>${esc(id)}</b><p class="muted">Loading current order status…</p></div>`);fetch('/api/orders/'+encodeURIComponent(id)).then(async r=>{const d=await r.json();if(!r.ok)throw Error(d.error||'Order not found');document.getElementById('modalBody').innerHTML=`<div class="trackCard"><b>${esc(d.orderId)}</b><div class="trackStatus">${esc(d.status)}</div><p class="muted">${money(d.total)} · ${new Date(d.date).toLocaleString('en-IN')}</p></div>`}).catch(e=>document.getElementById('modalBody').innerHTML=`<p class="muted">${esc(e.message)}</p>`)}
+function showSizeGuide(){showModal('Size Guide',`<div class="guide"><div><b>SIZE</b><b>CHEST</b><b>LENGTH</b></div><div><span>S</span><span>40"</span><span>27"</span></div><div><span>M</span><span>42"</span><span>28"</span></div><div><span>L</span><span>44"</span><span>29"</span></div><div><span>XL</span><span>46"</span><span>30"</span></div><div><span>XXL</span><span>48"</span><span>31"</span></div></div>`)}
+function showShipping(){showModal('Shipping & Returns',`<p><b>Free shipping:</b> prepaid orders above ₹999.</p><p><b>Dispatch:</b> usually within 1–3 business days.</p><p><b>Returns:</b> 7-day return policy on eligible unused items.</p>`)}
+function trackOrder(){showModal('Track Order',`<input id="trackNo" class="modalInput" placeholder="Enter order number"><button class="checkout" onclick="lookupOrder()">TRACK ORDER →</button><div id="trackResult" class="muted" style="margin-top:15px"></div>`)}
+function lookupOrder(){const id=(document.getElementById('trackNo')?.value||'').trim();if(!id)return;fetch('/api/orders/'+encodeURIComponent(id)).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Order not found');document.getElementById('trackResult').innerHTML='<b>'+d.orderId+'</b><br>Status: '+d.status+'<br>Total: '+money(d.total)+'<br>Placed: '+new Date(d.date).toLocaleString('en-IN')}).catch(e=>document.getElementById('trackResult').textContent=e.message)}
+function showAbout(){showModal('About YOUR TYPE','<p class="muted">YOUR TYPE is a dark streetwear label built around bold graphics, oversized silhouettes and premium everyday pieces.</p>')} function showContact(){showModal('Contact Us','<p class="muted">Email: support@yourtype.store</p><p class="muted">We reply within 1–2 business days.</p>')} function showPolicy(title,text){showModal(title,'<p class="muted">'+text+'</p>')}
+fetch('/api/products').then(r=>r.json()).then(d=>{if(Array.isArray(d.products)&&d.products.length){products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);}renderProducts();renderCurated();updateCart();updateWishlist();}).catch(()=>{renderProducts();renderCurated();updateCart();updateWishlist();});
+// Keep an already-open storefront fresh when Admin changes product data.
+let _ytLastProductSignature='';
+async function refreshStorefrontProducts(){try{const r=await fetch('/api/products',{cache:'no-store'});const d=await r.json();if(!Array.isArray(d.products))return;const sig=JSON.stringify(d.products.map(p=>[p.id,p.name,p.price,p.image,p.active,p.sizes,p.colors,p.featured,p.badge,p.oldPrice]));if(sig===_ytLastProductSignature)return;_ytLastProductSignature=sig;products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);renderProducts();renderCurated();}
+catch(_){}}
+setInterval(refreshStorefrontProducts,15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshStorefrontProducts();});
+const bottomsSlides=[
+  {image:'graffiti.jpg',name:'Chaos Destiny Tee',price:'₹1,399'},
+  {image:'ornament.jpg',name:'Dragon Wide Leg Pants',price:'₹1,699'},
+  {image:'bushido.jpg',name:'Shadow Combat Pants',price:'₹1,599'},
+  {image:'chaos.jpg',name:'Graphic Wide Leg Pants',price:'₹1,699'}
+];
+let bottomsIndex=0;
+let bottomsDragging=false;
+let bottomsDragX=0;
+let bottomsSuppressClickUntil=0;
+
+function bottomsDistance(i){
+  let d=i-bottomsIndex, n=bottomsSlides.length;
+  if(d>n/2)d-=n;
+  if(d<-n/2)d+=n;
+  return d;
+}
+function bottomsRender(){
+  const track=document.getElementById('bottomsTrack'); if(!track)return;
+  if(!track.children.length){
+    track.innerHTML=bottomsSlides.map((p,i)=>`<article class="collectionMotionCard" data-index="${i}" role="button" tabindex="0" aria-label="View ${p.name}"><div class="collectionMotionImage"><img src="photos/${p.image}" alt="${p.name}"></div><div class="collectionMotionInfo"><span>${p.name}</span><b>${p.price}</b></div></article>`).join('');
+  }
+  [...track.children].forEach((card,i)=>{
+    const d=bottomsDistance(i);
+    card.style.setProperty('--distance',d);
+    card.style.setProperty('--drag',bottomsDragging ? bottomsDragX+'px' : '0px');
+    card.classList.toggle('isCenter',d===0);
+    card.classList.toggle('isLeft',d===-1);
+    card.classList.toggle('isRight',d===1);
+    card.classList.toggle('isFar',Math.abs(d)>1);
+  });
+}
+function bottomsGo(dir){
+  bottomsIndex=(bottomsIndex+dir+bottomsSlides.length)%bottomsSlides.length;
+  bottomsDragX=0;
+  bottomsRender();
+}
+(function(){
+  const el=document.getElementById('bottomsSwipe'); if(!el)return;
+  let active=false,startX=0,startY=0,axis=null,moved=false,pointerId=null;
+  const THRESHOLD=42, AXIS_LOCK=1.15;
+  function begin(e){
+    if(e.pointerType==='mouse' && e.button!==0)return;
+    active=true; pointerId=e.pointerId; startX=e.clientX; startY=e.clientY; axis=null; moved=false;
+    bottomsDragging=true; bottomsDragX=0; el.classList.add('isDragging');
+    try{el.setPointerCapture(e.pointerId)}catch(_){}
+  }
+  function move(e){
+    if(!active || e.pointerId!==pointerId)return;
+    const dx=e.clientX-startX,dy=e.clientY-startY;
+    if(!axis){
+      if(Math.abs(dx)<7 && Math.abs(dy)<7)return;
+      axis=(Math.abs(dx)>Math.abs(dy)*AXIS_LOCK)?'x':'y';
+      if(axis==='y'){cancel();return;}
+    }
+    if(axis!=='x')return;
+    e.preventDefault(); moved=Math.abs(dx)>9;
+    const limit=Math.max(120,Math.min(220,el.clientWidth*.7));
+    let x=dx;
+    if(Math.abs(x)>limit)x=Math.sign(x)*(limit+(Math.abs(x)-limit)*.18);
+    bottomsDragX=x; bottomsRender();
+  }
+  function cancel(){
+    active=false; pointerId=null; bottomsDragging=false; bottomsDragX=0; el.classList.remove('isDragging'); bottomsRender();
+  }
+  function finish(){
+    if(!active)return;
+    const dx=bottomsDragX,didMove=moved; active=false; pointerId=null;
+    bottomsSuppressClickUntil=Date.now()+(didMove?650:0);
+    el.classList.remove('isDragging');
+    if(!didMove || Math.abs(dx)<THRESHOLD){
+      bottomsDragging=false; bottomsRender(); bottomsDragX=0; requestAnimationFrame(bottomsRender); return;
+    }
+    const dir=dx<0?1:-1; bottomsDragging=false; bottomsRender();
+    requestAnimationFrame(()=>{bottomsIndex=(bottomsIndex+dir+bottomsSlides.length)%bottomsSlides.length; bottomsDragX=0; bottomsRender();});
+  }
+  el.addEventListener('pointerdown',begin);
+  el.addEventListener('pointermove',move,{passive:false});
+  el.addEventListener('pointerup',finish);
+  el.addEventListener('pointercancel',cancel);
+  el.addEventListener('lostpointercapture',()=>{if(active)cancel()});
+  el.addEventListener('click',e=>{
+    if(Date.now()<bottomsSuppressClickUntil)return;
+    if(e.target.closest('.bottomsLink'))return;
+    const card=e.target.closest('.collectionMotionCard');
+    if(!card)return;
+    const p=bottomsSlides[Number(card.dataset.index)];
+    const i=products.findIndex(x=>x[0]===p.name);
+    if(i>-1)openProduct(i);
+  });
+  el.addEventListener('keydown',e=>{
+    const card=e.target.closest('.collectionMotionCard'); if(!card)return;
+    if(e.key==='ArrowLeft'){e.preventDefault();bottomsGo(-1)}
+    if(e.key==='ArrowRight'){e.preventDefault();bottomsGo(1)}
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();const i=products.findIndex(x=>x[0]===bottomsSlides[Number(card.dataset.index)].name);if(i>-1)openProduct(i)}
+  });
+  bottomsRender();
+})();
+
+const motionSlides=[
+  {image:'chaos.jpg',name:'Chaos Oversize Tee',price:'₹1,399'},
+  {image:'bushido.jpg',name:'Burning Oath Tee',price:'₹1,499'},
+  {image:'graffiti.jpg',name:'Chaos Destiny Tee',price:'₹1,399'},
+  {image:'armor.jpg',name:'Instinct Oversize Tee',price:'₹1,399'},
+  {image:'bushido.jpg',name:'Bushido Graphic Tee',price:'₹1,499'}
+];
+let motionIndex=0;
+let motionDragging=false;
+let motionDragX=0;
+let motionPointer=null;
+let motionMoved=false;
+let motionSuppressClickUntil=0;
+
+function motionDistance(i){
+  let d=i-motionIndex, n=motionSlides.length;
+  if(d>n/2)d-=n;
+  if(d<-n/2)d+=n;
+  return d;
+}
+function motionOpenProduct(i){
+  const p=motionSlides[i];
+  const productIndex=products.findIndex(x=>x[0]===p.name);
+  if(productIndex>-1)openProduct(productIndex);
+}
+function motionRender(){
+  const track=document.getElementById('motionTrack'); if(!track)return;
+  if(!track.children.length){
+    track.innerHTML=motionSlides.map((p,i)=>`<article class="motionCard" data-index="${i}" role="button" tabindex="0" aria-label="Shop ${p.name}"><div class="motionCardImage"><img src="photos/${p.image}" alt="${p.name}"></div><div class="motionCardInfo"><span>${p.name}</span><b>${p.price}</b></div><button type="button" class="motionShopBtn" onclick="event.stopPropagation();motionOpenProduct(${i})">SHOP →</button></article>`).join('');
+  }
+  [...track.children].forEach((card,i)=>{
+    const d=motionDistance(i);
+    card.style.setProperty('--distance',d);
+    card.style.setProperty('--drag',motionDragging ? motionDragX+'px' : '0px');
+    card.classList.toggle('isCenter',d===0);
+    card.classList.toggle('isLeft',d===-1);
+    card.classList.toggle('isRight',d===1);
+    card.classList.toggle('isFar',Math.abs(d)>1);
+  });
+}
+function motionGo(dir){
+  motionIndex=(motionIndex+dir+motionSlides.length)%motionSlides.length;
+  motionDragX=0;
+  motionRender();
+}
+
+(function(){
+  const el=document.getElementById('motionCarousel'); if(!el)return;
+  let active=false,startX=0,startY=0,axis=null,moved=false,pointerId=null;
+  const THRESHOLD=48;
+  const AXIS_LOCK=1.15;
+
+  function begin(e){
+    if(e.pointerType==='mouse' && e.button!==0)return;
+    active=true; pointerId=e.pointerId; startX=e.clientX; startY=e.clientY;
+    axis=null; moved=false; motionDragging=true; motionDragX=0;
+    el.classList.add('isDragging');
+    try{el.setPointerCapture(e.pointerId)}catch(_){ }
+  }
+
+  function move(e){
+    if(!active || e.pointerId!==pointerId)return;
+    const dx=e.clientX-startX, dy=e.clientY-startY;
+    if(!axis){
+      if(Math.abs(dx)<7 && Math.abs(dy)<7)return;
+      axis=(Math.abs(dx)>Math.abs(dy)*AXIS_LOCK)?'x':'y';
+      if(axis==='y'){
+        // Give vertical scrolling completely back to the page.
+        active=false; motionDragging=false; motionDragX=0; pointerId=null;
+        el.classList.remove('isDragging'); motionRender();
+        return;
+      }
+    }
+    if(axis!=='x')return;
+    e.preventDefault();
+    moved=Math.abs(dx)>10;
+    // 1:1 physical tracking. Only a very soft resistance after the useful range.
+    const limit=Math.max(180,Math.min(280,el.clientWidth*.72));
+    let x=dx;
+    if(Math.abs(x)>limit){
+      const extra=Math.abs(x)-limit;
+      x=Math.sign(x)*(limit+extra*.18);
+    }
+    motionDragX=x;
+    motionRender();
+  }
+
+  function finish(cancelled=false){
+    if(!active)return;
+    const dx=motionDragX, didMove=moved;
+    active=false; pointerId=null;
+    motionSuppressClickUntil=Date.now()+(didMove?700:0);
+
+    if(cancelled || !didMove || Math.abs(dx)<THRESHOLD){
+      // Animate the exact dragged position back to center.
+      motionDragging=false;
+      el.classList.remove('isDragging');
+      motionRender();
+      motionDragX=0;
+      requestAnimationFrame(()=>motionRender());
+      return;
+    }
+
+    const dir=dx<0?1:-1;
+    // Critical smoothness fix: first render the current slide with the finger position,
+    // then on the next frame change the index and animate to the new resting position.
+    motionDragging=false;
+    el.classList.remove('isDragging');
+    motionRender();
+    void el.offsetWidth;
+    motionIndex=(motionIndex+dir+motionSlides.length)%motionSlides.length;
+    motionDragX=0;
+    requestAnimationFrame(()=>motionRender());
+    setTimeout(()=>{motionMoved=false},650);
+  }
+
+  el.addEventListener('pointerdown',begin);
+  el.addEventListener('pointermove',move,{passive:false});
+  el.addEventListener('pointerup',e=>{if(e.pointerId===pointerId)finish(false)});
+  el.addEventListener('pointercancel',e=>{if(e.pointerId===pointerId)finish(true)});
+  el.addEventListener('lostpointercapture',()=>{if(active)finish(true)});
+
+  el.addEventListener('click',e=>{
+    if(Date.now()<motionSuppressClickUntil)return;
+    const card=e.target.closest('.motionCard');
+    if(card)motionOpenProduct(Number(card.dataset.index));
+  });
+  el.addEventListener('keydown',e=>{
+    const card=e.target.closest('.motionCard'); if(!card)return;
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();motionOpenProduct(Number(card.dataset.index));}
+    if(e.key==='ArrowLeft'){e.preventDefault();motionGo(-1);}
+    if(e.key==='ArrowRight'){e.preventDefault();motionGo(1);}
+  });
+  motionRender();
+})();
+
+
+
+function toggleFooterSection(id){
+  const wrap=document.getElementById(id);
+  if(!wrap)return;
+  const body=wrap.querySelector('.footerAccordionBody');
+  const btn=wrap.querySelector('.footerAccordionHead');
+  if(!body||!btn)return;
+  const collapsed=wrap.classList.toggle('collapsed');
+  btn.setAttribute('aria-expanded',String(!collapsed));
+}
+function selectCountry(btn){
+  const body=btn.closest('.shipToBody');
+  if(!body)return;
+  body.querySelectorAll('.countryOption').forEach(x=>{
+    x.classList.remove('selected');
+    const mark=x.querySelector('strong');
+    if(mark)mark.textContent='';
+  });
+  btn.classList.add('selected');
+  const mark=btn.querySelector('strong');
+  if(mark)mark.textContent='✓';
+}
+
+/* 16 — universal product-card Add to Bag reliability.
+   Use one delegated handler so every dynamically-rendered card behaves the same
+   on touch screens, mouse, and keyboard. A short guard prevents touch+click double adds. */
+(function(){
+  let lastAddAt=0, lastAddIndex=-1;
+  function handleAdd(e){
+    const btn=e.target.closest?.('[data-add-to-bag]');
+    if(!btn || btn.disabled) return;
+    const index=Number(btn.getAttribute('data-add-to-bag'));
+    if(!Number.isInteger(index) || !products[index]) return;
+    if(e.type==='pointerup' && e.pointerType==='mouse') return;
+    const now=Date.now();
+    if(now-lastAddAt<500 && lastAddIndex===index) return;
+    lastAddAt=now; lastAddIndex=index;
+    e.preventDefault(); e.stopPropagation();
+    addToCart(index,btn);
+  }
+  document.addEventListener('pointerup',handleAdd,true);
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?.('[data-add-to-bag]');
+    if(!btn || btn.disabled) return;
+    const now=Date.now(), index=Number(btn.getAttribute('data-add-to-bag'));
+    if(now-lastAddAt<500 && lastAddIndex===index){e.preventDefault();e.stopPropagation();return;}
+    handleAdd(e);
+  },true);
+})();
+
+/* FINAL TOUCH SAFETY: no blue selection/tap highlight, no text/image selection on touch, inputs remain editable. */
+document.addEventListener('contextmenu',function(e){
+  if(e.target.closest('input,textarea,select')) return;
+  e.preventDefault();
+});
+document.addEventListener('dragstart',function(e){
+  if(e.target.closest('img')) e.preventDefault();
+});
+// Keep touch/click behavior native on controls; only suppress accidental text selection.
+document.addEventListener('selectstart',function(e){
+  if(!e.target.closest('input,textarea,select,[contenteditable="true"],button,a')) e.preventDefault();
+});
+// Safety fallback: on touch devices, ensure taps on real controls are not swallowed by card/slider handlers.
+document.addEventListener('click',function(e){
+  const control=e.target.closest('button,a,input,select,textarea');
+  if(control && control.disabled) e.preventDefault();
+},true);
+</script>
+</body>
+</html>

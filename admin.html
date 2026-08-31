@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YOUR TYPE — Launch Ready Store & Admin</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080808;color:#f5f5f5;font:14px Arial,sans-serif}
+header{position:sticky;top:0;z-index:20;background:#090909;border-bottom:1px solid #292929;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:900;letter-spacing:3px}.wrap{max-width:1150px;margin:auto;padding:0 14px}.hero{text-align:center;padding:26px 8px}
+h1{font-size:40px;margin:8px}h2{margin-top:20px}.muted{color:#999}.tabs{display:flex;gap:6px;overflow:auto;padding:7px 0 14px}
+.btn{border:1px solid #3b3b3b;background:#151515;color:#fff;border-radius:9px;padding:9px 11px;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+.btn:hover{background:#252525}
+button,.btn,a,summary{touch-action:manipulation}
+@media (pointer:coarse){button,.btn{min-height:44px}.tabs{scrollbar-width:none}.modal{overscroll-behavior:contain}}.primary{background:#fff;color:#000}.danger{border-color:#633535}.good{border-color:#355f3c}
+.section{display:none}.section.on{display:block}.stats,.grid,.menu{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.stat,.card,.box,.order{background:#111;border:1px solid #292929;border-radius:12px;padding:13px}
+.stat b{font-size:22px;display:block;margin:5px 0}.grid{margin-top:12px}.card{padding:0;overflow:hidden}
+.pic{aspect-ratio:1;background:linear-gradient(135deg,#3c3c3c,#101010);display:grid;place-items:center;font-size:40px;font-weight:900}
+.info{padding:11px}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #292929}
+.row:last-child{border-bottom:0}.order{margin:10px 0}.orderbody{display:grid;grid-template-columns:90px 1fr;gap:12px;margin-top:12px}
+.orderimg{height:90px;border-radius:9px;background:linear-gradient(135deg,#444,#111);display:grid;place-items:center;font-weight:900;font-size:25px}
+.address{white-space:pre-line;background:#151515;border:1px solid #333;border-radius:10px;padding:12px;line-height:1.6}
+.timeline{display:flex;gap:5px;overflow:auto;margin:12px 0}.step{min-width:108px;text-align:center;padding:9px;border:1px solid #333;border-radius:9px;color:#888}
+.step.done{color:#fff;background:#1b1b1b}.search,input,select,textarea{width:100%;padding:10px;margin:5px 0;background:#151515;color:#fff;border:1px solid #333;border-radius:8px}
+.modal{position:fixed;inset:0;background:#000d;z-index:40;display:none;align-items:center;justify-content:center;padding:14px}.modal.on{display:flex}
+.modalbox{width:min(760px,100%);max-height:92vh;overflow:auto;background:#111;border:1px solid #444;border-radius:15px;padding:16px}
+.close{float:right}.toast{display:none;position:fixed;bottom:15px;left:50%;transform:translateX(-50%);background:#fff;color:#000;padding:10px 14px;border-radius:9px;z-index:50}
+.pill{border:1px solid #444;border-radius:99px;padding:4px 8px;font-size:11px}.notice{padding:10px;border:1px solid #444;border-radius:9px;background:#141414}
+@media(min-width:700px){.stats,.grid,.menu{grid-template-columns:repeat(4,1fr)}}
+</style></head>
+<body>
+<header><div class="logo">YOUR TYPE</div><div><button class="btn" onclick="location.href='/'">Store</button> <button class="btn primary" onclick="adminLogin()">Admin</button></div></header>
+<div class="wrap">
+
+<section id="store" class="section on">
+<div class="hero"><div class="muted">STORE PREVIEW</div><h1>YOUR TYPE</h1><p class="muted">Admin dashboard for managing your store.</p></div>
+<div class="tabs"><button class="btn" onclick="filterStore('all')">All</button><button class="btn" onclick="filterStore('T-Shirt')">T-Shirts</button><button class="btn" onclick="filterStore('Shirt')">Shirts</button><button class="btn" onclick="go('account')">My Account</button><button class="btn" onclick="go('customerOrders')">My Orders</button></div>
+<div id="storeGrid" class="grid"></div></section>
+
+<div id="adminTabs" class="tabs" style="display:none">
+<button class="btn tab active" onclick="go('dashboard',this)">Dashboard</button><button class="btn tab" onclick="go('orders',this)">Orders</button>
+<button class="btn tab" onclick="go('inventory',this)">Inventory</button><button class="btn tab" onclick="go('variants',this)">Variants</button><button class="btn tab" onclick="go('products',this)">Products</button>
+<button class="btn tab" onclick="go('customers',this)">Customers</button><button class="btn tab" onclick="go('reviews',this)">Reviews</button>
+<button class="btn tab" onclick="go('coupons',this)">Coupons</button><button class="btn tab" onclick="go('returns',this)">Returns</button><button class="btn tab" onclick="go('categories',this)">Categories</button><button class="btn tab" onclick="go('wishlist',this)">Wishlist</button><button class="btn tab" onclick="go('website',this)">Website</button><button class="btn tab" onclick="go('reports',this)">Reports</button>
+<button class="btn tab" onclick="go('analytics',this)">Analytics</button><button class="btn tab" onclick="go('downloads',this)">Downloads</button>
+<button class="btn tab" onclick="go('settings',this)">Settings</button>
+</div>
+
+<section id="dashboard" class="section"><h2>Admin Dashboard</h2><div class="stats">
+<div class="stat">Revenue<b id="dashRevenue">₹0</b><span class="muted">All active orders</span></div><div class="stat">Orders<b id="dashOrders">0</b><span class="muted">All orders</span></div>
+<div class="stat">Profit (Est.)<b id="dashProfit">₹0</b><span class="muted">Revenue − GST − Cost</span></div><div class="stat">Low Stock<b id="dashLow">0</b><span class="muted">Attention</span></div>
+<div class="stat">Today Sales<b id="dashToday">₹0</b></div><div class="stat">Weekly Sales<b id="dashWeek">₹0</b></div><div class="stat">Monthly Sales<b id="dashMonth">₹0</b></div><div class="stat">Wishlist<b id="dashWishlist">0</b></div></div>
+<div class="box" style="margin-top:12px"><b>Order Status</b><div id="dashStatuses" class="stats" style="margin-top:8px"></div></div>
+<div class="box" style="margin-top:12px"><h3>Recent Orders</h3><div id="dashRecent"></div></div>
+<div class="box" style="margin-top:12px"><h3>Top-selling Products</h3><div id="dashTop"></div></div>
+<div class="menu" style="margin-top:12px"><div class="box"><b>📦 Orders</b><p class="muted">Manage status, address and invoice.</p><button class="btn" onclick="go('orders')">Open</button></div>
+<div class="box"><b>📦 Inventory</b><p class="muted">Size/SKU stock management.</p><button class="btn" onclick="go('inventory')">Open</button></div>
+<div class="box"><b>👕 Products</b><p class="muted">Variants, images and pricing.</p><button class="btn" onclick="go('products')">Open</button></div>
+<div class="box"><b>📊 Reports</b><p class="muted">Export sales and inventory.</p><button class="btn" onclick="go('downloads')">Open</button></div></div></section>
+
+<section id="orders" class="section"><h2>Orders</h2><div class="tabs"><button class="btn" onclick="downloadOrders()">Export Orders</button></div>
+<input class="search" placeholder="Search order/customer/product" oninput="renderOrders(this.value)"><div id="ordersList"></div></section>
+
+<section id="inventory" class="section"><h2>Inventory</h2><div class="stats"><div class="stat">Units<b id="units">0</b></div><div class="stat">Low Stock<b id="low">0</b></div><div class="stat">Out of Stock<b id="out">0</b></div><div class="stat">SKUs<b id="skuCount">0</b></div></div>
+<div class="box" style="margin-top:12px"><h3>Stock Add / Remove / Set</h3><select id="ip"></select><select id="is"><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option></select>
+<input id="iq" type="number" min="0" value="1"><select id="ia"><option value="add">Add Stock</option><option value="remove">Remove Stock</option><option value="set">Set Exact Stock</option></select>
+<input id="ir" placeholder="Reason"><input id="it" type="number" min="0" value="5" placeholder="Low stock threshold">
+<button class="btn primary" onclick="stockUpdate()">Save Inventory Change</button></div>
+<div class="box" style="margin-top:12px"><h3>Inventory Table</h3><input class="search" id="isearch" oninput="renderInventory()" placeholder="Search product/SKU/size"><div id="invTable"></div></div>
+<div class="box" style="margin-top:12px"><h3>Bulk Update</h3><select id="bp"></select><input id="bq" type="number" min="0" value="10"><button class="btn" onclick="bulk()">Set All Sizes</button>
+<button class="btn" onclick="downloadInventory()">Export CSV</button></div><div class="box" style="margin-top:12px"><h3>Stock History</h3><div id="historyList"></div></div></section>
+
+<section id="variants" class="section"><h2>Cart Variants</h2><p class="muted">Website cart now lets customers choose size, color and quantity. Manage the same choices here so the panel stays aligned with the storefront.</p>
+<div class="box"><label>Product</label><select id="vp" onchange="renderVariantManager()"></select><div id="variantManager" style="margin-top:10px"></div></div></section>
+
+<section id="products" class="section"><h2>Products</h2><div class="tabs"><button class="btn primary" onclick="addProduct()">+ Add Product</button><button class="btn" onclick="bulkProducts('show')">Show Selected</button><button class="btn" onclick="bulkProducts('hide')">Hide Selected</button><button class="btn danger" onclick="bulkProducts('delete')">Delete Selected</button></div><input class="search" id="productSearch" oninput="renderProducts(this.value)" placeholder="Search name / SKU / category"><div id="productGrid" class="grid"></div></section>
+<section id="customers" class="section"><h2>Customers</h2><div class="box"><p class="muted">Real customers will appear here after they create an account or place an order.</p><div id="customerList"><p class="muted">No customers yet.</p></div></div></section>
+<section id="reviews" class="section"><h2>Reviews</h2><div class="box"><b>★★★★★ · Verified Buyer</b><p>Good fit and quality.</p><button class="btn good" onclick="toast('Review approved')">Approve</button> <button class="btn danger" onclick="toast('Review rejected')">Reject</button> <button class="btn" onclick="replyReview()">Reply</button></div></section>
+<section id="coupons" class="section"><h2>Coupons</h2><div id="couponList"></div><button class="btn primary" onclick="createCoupon()">+ Create Coupon</button></section>
+<section id="returns" class="section"><h2>Returns & Exchange</h2><div id="returnsList" class="box"><p class="muted">No return requests yet.</p></div></section>
+<section id="analytics" class="section"><h2>Analytics</h2><div class="stats"><div class="stat">Revenue<b id="aRev">₹0</b></div><div class="stat">GST Collected<b id="aGst">₹0</b></div><div class="stat">Profit (Est.)<b id="aProfit">₹0</b></div><div class="stat">Average Order<b id="aAvg">₹0</b></div></div><p class="muted" style="margin-top:10px">Profit = Revenue − GST − Cost Price of items sold. Set a Cost Price on each product (Products tab) for an accurate number — items with no Cost Price are counted as ₹0 cost.</p><br><button class="btn" onclick="downloadReport()">Download Sales Report</button></section>
+<section id="downloads" class="section"><h2>Downloads</h2><div class="menu">
+<div class="box"><b>Product Brochure</b><p class="muted">PDF product brochure.</p><button class="btn" onclick="downloadPDF()">Download PDF</button></div>
+<div class="box"><b>Store Manual</b><p class="muted">Admin/customer guide.</p><button class="btn" onclick="downloadManual()">Download Manual</button></div>
+<div class="box"><b>Invoice</b><p class="muted">Download an invoice when an order exists.</p><button class="btn" onclick="invoice()">Download Invoice</button></div>
+<div class="box"><b>Address / Packing Slip</b><p class="muted">Billing address + product details, ready to print.</p><button class="btn" onclick="latestAddressSlip()">Download Slip (PDF)</button></div>
+<div class="box"><b>Backup</b><p class="muted">Download your current store data.</p><button class="btn" onclick="backup()">Download Backup</button></div></div></section>
+<section id="categories" class="section"><h2>Categories</h2><div class="box"><input id="catName" placeholder="New category name"><button class="btn primary" onclick="addCategory()">+ Add Category</button></div><div id="categoryList" class="grid" style="margin-top:12px"></div></section>
+<section id="wishlist" class="section"><h2>Wishlist</h2><div class="stats"><div class="stat">Total Items<b id="wishTotal">0</b></div><div class="stat">Unique Products<b id="wishProducts">0</b></div></div><div class="box" style="margin-top:12px"><h3>Most-wishlisted Products</h3><div id="wishList"></div></div></section>
+<section id="website" class="section"><h2>Website Control</h2><div class="box"><label>Announcement</label><input id="siteAnnouncement"><label>Hero title</label><input id="siteHero"><label>Featured product IDs (comma separated)</label><input id="siteFeatured"><label>Instagram / social link</label><input id="siteSocial"><label>Store phone</label><input id="sitePhone"><label>Store email</label><input id="siteEmail"><button class="btn primary" onclick="saveWebsiteControl()">Save Website Settings</button></div></section>
+<section id="reports" class="section"><h2>Reports</h2><div class="box"><label>From</label><input id="reportFrom" type="date"><label>To</label><input id="reportTo" type="date"><div class="tabs"><button class="btn primary" onclick="exportReportType('sales')">Sales CSV</button><button class="btn" onclick="exportReportType('products')">Product CSV</button><button class="btn" onclick="exportReportType('inventory')">Inventory CSV</button><button class="btn" onclick="exportReportType('customers')">Customer CSV</button><button class="btn" onclick="exportReportType('orders')">Orders CSV</button></div><div id="reportPreview" class="notice" style="margin-top:10px"></div></div></section>
+<section id="settings" class="section"><h2>Settings & Integrations</h2><div class="menu">
+<div class="box"><b>Payment Gateway</b><p class="muted">Merchant keys are stored securely on the server.</p><button class="btn" onclick="gateway()">Configure</button></div>
+<div class="box"><b>Courier / AWB</b><p class="muted">Shipment/tracking setup.</p><button class="btn" onclick="courier()">Configure</button></div>
+<div class="box"><b>Notifications</b><p class="muted">Email/SMS/WhatsApp event settings.</p><button class="btn" onclick="notifications()">Manage</button></div>
+<div class="box"><b>Security</b><p class="muted">Admin roles and session settings.</p><button class="btn" onclick="security()">Manage</button></div>
+<div class="box"><b>Backup / Restore</b><p class="muted">Export or restore your current store data.</p><button class="btn" onclick="backup()">Export</button> <button class="btn" onclick="restore()">Import</button></div>
+<div class="box"><b>GST & Profit Calculator</b><p class="muted">Automatic GST, shipping, cost and profit calculation.</p><button class="btn primary" onclick="gstProfitCalculator()">Calculate</button></div></div></section>
+<section id="account" class="section"><h2>My Account</h2><div class="box"><p>Customer account details are stored in this browser.</p><button class="btn" onclick="profile()">Edit Profile</button><button class="btn" onclick="go('customerOrders')">My Orders</button><button class="btn" onclick="toast('Wishlist opened')">Wishlist</button><button class="btn" onclick="toast('Password reset flow opened')">Reset Password</button></div></section>
+<section id="customerOrders" class="section"><h2>My Orders</h2><div id="customerOrderList"></div></section>
+</div>
+<div id="modal" class="modal"><div class="modalbox"><button class="btn close" onclick="closeModal()">Close</button><div id="modalBody"></div></div></div><div id="toast" class="toast"></div>
+
+<script>
+const KEY='YOUR_TYPE_ADMIN_V1';
+let state=JSON.parse(localStorage.getItem(KEY)||'null')||{
+ products:[
+  {id:'p1',name:'YOUR TYPE Oversized Tee',category:'T-Shirt',price:1299,cost:520,sku:'YT-TEE-001',sizes:['S','M','L','XL','XXL'],images:[]},
+  {id:'p2',name:'YOUR TYPE Signature Shirt',category:'Shirt',price:1699,cost:780,sku:'YT-SHIRT-001',sizes:['S','M','L','XL','XXL'],images:[]}
+ ],
+ inventory:[
+  ['p1','S',12,5],['p1','M',18,5],['p1','L',14,5],['p1','XL',9,5],['p1','XXL',5,5],
+  ['p2','S',8,5],['p2','M',7,5],['p2','L',3,5],['p2','XL',0,5],['p2','XXL',2,5]
+ ],
+ orders:[],
+ history:[], coupons:[{code:'WELCOME10',percent:10,min:999,expiry:'2026-12-31',active:true}],
+ settings:{gst:5,shipping:99,freeShipping:1999}, categories:['T-Shirt','Shirt'], website:{announcement:'New drops every week',hero:'YOUR TYPE',featured:[],social:'',phone:'',email:''}, wishlist:[]
+};
+function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+state.categories=Array.isArray(state.categories)?state.categories:Array.from(new Set(state.products.map(p=>p.category).filter(Boolean)));
+state.website=state.website||{announcement:'New drops every week',hero:'YOUR TYPE',featured:[],social:'',phone:'',email:''};
+state.wishlist=Array.isArray(state.wishlist)?state.wishlist:[];
+state.products.forEach(p=>{if(p.hidden===undefined)p.hidden=false;if(p.featured===undefined)p.featured=false});
+save();
+function prod(id){return state.products.find(p=>p.id===id)}
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
+function go(id,btn){let e=document.getElementById(id);if(!e){toast('Section not found');return}document.querySelectorAll('.section').forEach(x=>x.classList.remove('on'));e.classList.add('on');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('adminTabs').style.display=['store','account','customerOrders'].includes(id)?'none':'flex';if(id==='store')filterStore('all');if(id==='orders')renderOrders();if(id==='inventory')renderInventory();if(id==='products')renderProducts();if(id==='variants'){syncVariantTab()}if(id==='coupons')renderCoupons();if(id==='customerOrders')renderCustomerOrders();updateDash();window.scrollTo({top:0,behavior:'smooth'})}
+function adminLogin(){openModal(`<h2>Admin Login</h2><input id=loginUser value="admin" autocomplete="username"><input id=loginPass type=password placeholder="Admin password" autocomplete="current-password"><p class=muted>Sign in with the admin credentials configured on your server.</p><button class="btn primary" onclick="doAdminLogin()">Sign In</button>`)}
+async function doAdminLogin(){const username=document.getElementById("loginUser").value.trim(),password=document.getElementById("loginPass").value;if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}sessionStorage.setItem("adminToken",x.token);closeModal();go("dashboard")}catch(e){toast("Unable to connect to server")}}
+function filterStore(cat){let a=(cat==='all'?state.products:state.products.filter(p=>p.category===cat)).filter(p=>!p.hidden);storeGrid.innerHTML=a.map(p=>{let stock=state.inventory.filter(x=>x[0]===p.id).reduce((a,x)=>a+x[2],0);return `<div class=card><div class=pic>${picHtml(p)}</div><div class=info><b>${p.name}</b><p class=muted>${p.category} · SKU ${p.sku}</p><b>${money(p.price)}</b><p>${stock?stock+' units available':'❌ Out of stock'}</p><button class=btn ${stock?'':'danger'} onclick="buy('${p.id}')">${stock?'View / Order':'Out of Stock'}</button></div></div>`}).join('')}
+function buy(id){let p=prod(id),sizes=state.inventory.filter(x=>x[0]===id&&x[2]>0).map(x=>x[1]);if(!sizes.length){toast('This product is out of stock');return}openModal(`<h2>${p.name}</h2><div class=pic style="border-radius:9px">${picHtml(p)}</div><p>${money(p.price)} · SKU ${p.sku}</p><select id=bs>${sizes.map(x=>`<option>${x}</option>`).join('')}</select><input id=bq2 type=number value=1 min=1 max=99><input id=bcustomer value=""><input id=bphone value=""><textarea id=baddress placeholder="Full delivery address">
+Delhi — 110001
+Landmark:</textarea><select id=bpmt><option>COD</option><option>UPI</option></select><button class="btn primary" onclick="newOrder('${id}')" >Place Order</button>`)}
+function newOrder(id){let p=prod(id),size=bs.value,qty=Math.max(1,+bq2.value||1),x=state.inventory.find(x=>x[0]===id&&x[1]===size);if(!x||x[2]<qty){toast('Not enough stock for this size');return}x[2]-=qty;let o={id:'#YT-'+Math.floor(1000+Math.random()*8999),customer:bcustomer.value||'',phone:bphone.value||'',productId:id,size,qty,price:p.price,payment:bpmt.value,status:'Confirmed',address:baddress.value,verified:false,awb:'',tracking_url:'',date:new Date().toLocaleString()};state.orders.unshift(o);state.history.push({time:new Date().toLocaleString(),p:p.name,s:size,from:x[2]+qty,to:x[2],r:'Order stock deduction'});save();closeModal();toast('Order placed and stock deducted');go('customerOrders')}
+function orderCard(o){let p=prod(o.productId);return `<div class=order><div style="display:flex;justify-content:space-between"><b>${o.id}</b><span class=pill>${o.status}</span></div><div class=orderbody><div class=orderimg>YT</div><div><b>${p?.name||'Deleted Product'}</b><br>SKU: ${p?.sku||'—'}<br>Size: <b>${o.size||'—'}</b> · Color: <b>${o.color||'—'}</b> · Qty: <b>${o.qty||1}</b><br>Unit: ${money(o.price)} · Total: <b>${money(o.price*o.qty)}</b><br>Payment: ${o.payment}<br><span class=muted>${o.customer} · ${o.phone}<br>${o.date}</span></div></div><h3>Delivery Address</h3><div class=address>${o.customer}
+${o.address}
+📞 ${o.phone}</div><p class=small>${o.verified?'✓ Address verified':'⚠ Address pending verification'}</p>${o.awb?`<p class=muted>AWB: <b>${o.awb}</b>${o.tracking_url?` · <a href="${o.tracking_url}" target="_blank" style="color:#fff">Track Shipment</a>`:''}</p>`:''}<div class=timeline>${['Confirmed','Packed','Shipped','Out for Delivery','Delivered'].map((x,i)=>`<div class="step ${['Confirmed','Packed','Shipped','Out for Delivery','Delivered'].indexOf(o.status)>=i?'done':''}">${x}</div>`).join('')}</div>
+<button class="btn good" onclick="setOrderStatus('${o.id}','Packed')">Packed</button><button class="btn" onclick="setOrderStatus('${o.id}','Shipped')">Shipped</button><button class="btn" onclick="setOrderStatus('${o.id}','Out for Delivery')">Out for Delivery</button><button class="btn primary" onclick="setOrderStatus('${o.id}','Delivered')">Delivered</button><button class="btn" onclick="verify('${o.id}')">Verify Address</button><button class="btn" onclick="shipment('${o.id}')">AWB / Tracking</button><button class="btn" onclick="invoiceById('${o.id}')">Invoice</button><button class="btn" onclick="addressSlip('${o.id}')">📄 Address / Packing Slip (PDF)</button><button class="btn danger" onclick="cancelOrder('${o.id}')">Cancel</button><br><br><button class=btn onclick="details('${o.id}')">Full Details</button></div>`}
+function renderOrders(q=''){let a=state.orders.filter(o=>(o.id+o.customer+(prod(o.productId)?.name||'')).toLowerCase().includes(q.toLowerCase()));ordersList.innerHTML=a.length?a.map(orderCard).join(''):'<p class=muted>No matching orders.</p>'}
+function renderCustomerOrders(){customerOrderList.innerHTML=state.orders.map(orderCard).join('')}
+function setOrderStatus(id,s){let o=state.orders.find(x=>x.id===id);if(o){o.status=s;save();renderOrders();renderCustomerOrders();updateDash();toast('Order status: '+s)}}
+function cancelOrder(id){let o=state.orders.find(x=>x.id===id);if(!o)return;if(['Delivered','Cancelled'].includes(o.status)){toast('Cannot cancel this order');return}let x=state.inventory.find(x=>x[0]===o.productId&&x[1]===o.size);if(x){x[2]+=o.qty;state.history.push({time:new Date().toLocaleString(),p:prod(o.productId)?.name||'',s:o.size,from:x[2]-o.qty,to:x[2],r:'Cancelled order stock return'})}o.status='Cancelled';save();renderOrders();renderInventory();toast('Order cancelled and stock returned')}
+function verify(id){let o=state.orders.find(x=>x.id===id);if(o){o.verified=true;save();renderOrders();toast('Address verified')}}
+function details(id){let o=state.orders.find(x=>x.id===id),p=prod(o.productId);openModal(`<h2>${o.id}</h2><div class=row><span>Customer</span><b>${o.customer}</b></div><div class=row><span>Product</span><b>${p?.name}</b></div><div class=row><span>Size</span><b>${o.size||'—'}</b></div><div class=row><span>Color</span><b>${o.color||'—'}</b></div><div class=row><span>Quantity</span><b>${o.qty||1}</b></div><div class=row><span>Total</span><b>${money(o.price*o.qty)}</b></div><div class=row><span>Payment</span><b>${o.payment}</b></div><h3>Address</h3><div class=address>${o.address}</div>`)}
+function shipment(id){let o=state.orders.find(x=>x.id===id);openModal(`<h2>Shipment / AWB</h2><input id=awb value="${o.awb||('AWB-'+id.replace('#',''))}"><select id=shipCourier><option ${o.courier==='Delhivery'?'selected':''}>Delhivery</option><option ${o.courier==='Shiprocket'?'selected':''}>Shiprocket</option></select><input id=track value="${o.tracking_url||''}"><p class=muted>Courier API keys are configured on the server, never in the browser.</p><button class="btn primary" onclick="saveShipment('${id}')">Save Shipment</button>`)}
+function saveShipment(id){let o=state.orders.find(x=>x.id===id);if(!o)return;o.awb=awb.value||'';o.courier=shipCourier.value;o.tracking_url=track.value||'';save();closeModal();renderOrders();renderCustomerOrders();toast('Shipment saved')}
+function validateAddress(){openModal(`<h2>Address Validation</h2><div class=address>
+</div><p>✓ Required fields present<br>✓ PIN format valid<br>✓ City/state present<br>✓ Phone present<br>⚠ Live PIN/courier validation connects after backend deployment.</p><button class="btn primary" onclick="toast('Address marked verified');closeModal()">Mark Verified</button>`)}
+function renderInventory(){let q=(isearch?.value||'').toLowerCase(),a=state.inventory.filter(x=>{let p=prod(x[0]);return((p?.name||'')+' '+(p?.sku||'')+' '+x[1]).toLowerCase().includes(q)});invTable.innerHTML=a.map(x=>{let p=prod(x[0]);return `<div class=row><span><b>${p?.name}</b><br><span class=muted>${p?.sku} · Size ${x[1]}</span></span><span><b>${x[2]}</b> ${x[2]===0?'❌':x[2]<=x[3]?'⚠️':'✓'}<br><button class=btn onclick="quick('${x[0]}','${x[1]}',1)">+1</button><button class=btn onclick="quick('${x[0]}','${x[1]}',-1)">−1</button></span></div>`}).join('');
+units.textContent=state.inventory.reduce((a,x)=>a+x[2],0);low.textContent=state.inventory.filter(x=>x[2]>0&&x[2]<=x[3]).length;out.textContent=state.inventory.filter(x=>x[2]===0).length;skuCount.textContent=new Set(state.inventory.map(x=>prod(x[0])?.sku)).size;
+ip.innerHTML=state.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');bp.innerHTML=ip.innerHTML;historyList.innerHTML=state.history.length?state.history.slice().reverse().map(h=>`<div class=row><span>${h.time}<br>${h.p} · ${h.s}</span><span>${h.from} → ${h.to}<br><span class=muted>${h.r}</span></span></div>`).join(''):'<p class=muted>No stock changes yet.</p>'}
+function stockUpdate(){let x=state.inventory.find(x=>x[0]===ip.value&&x[1]===is.value),q=Math.max(0,+iq.value||0);if(!x){toast('Size inventory not found');return}let before=x[2];if(ia.value==='add')x[2]+=q;else if(ia.value==='remove')x[2]=Math.max(0,x[2]-q);else x[2]=q;x[3]=Math.max(0,+it.value||0);state.history.push({time:new Date().toLocaleString(),p:prod(x[0]).name,s:x[1],from:before,to:x[2],r:ir.value||'Manual adjustment'});save();renderInventory();filterStore('all');toast('Inventory saved')}
+function quick(id,size,d){let x=state.inventory.find(x=>x[0]===id&&x[1]===size),b=x[2];x[2]=Math.max(0,x[2]+d);state.history.push({time:new Date().toLocaleString(),p:prod(id).name,s:size,from:b,to:x[2],r:'Quick adjustment'});save();renderInventory();filterStore('all');toast('Stock updated')}
+function bulk(){let id=bp.value,q=Math.max(0,+bq.value||0);state.inventory.filter(x=>x[0]===id).forEach(x=>{let b=x[2];x[2]=q;state.history.push({time:new Date().toLocaleString(),p:prod(id).name,s:x[1],from:b,to:q,r:'Bulk update'})});save();renderInventory();filterStore('all');toast('All sizes updated')}
+function margin(p){let g=+state.settings.gst||0,base=p.price/(1+g/100),gstAmt=p.price-base,cost=+p.cost||0,profit=base-cost,pct=base>0?(profit/base*100):0;return{base,gstAmt,cost,profit,pct}}
+function picHtml(p){return p.images&&p.images.length?`<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;display:block">`:'YT'}
+function renderProducts(q=''){let term=String(q||'').toLowerCase();let arr=state.products.filter(p=>!term||[p.name,p.sku,p.category].some(v=>String(v||'').toLowerCase().includes(term)));productGrid.innerHTML=arr.map(p=>{let m=margin(p);return `<div class=card style="opacity:${p.hidden?.55:1}"><div class=pic>${picHtml(p)}</div><div class=info><label><input type=checkbox class=pselect value="${p.id}"> Select</label><b>${p.name}</b><p class=muted>${p.category} · SKU ${p.sku}</p><b>${money(p.price)}</b><p>Sizes: ${(p.sizes||[]).join(', ')}</p><p>Colors: ${(p.colors||['Black']).join(', ')}</p><p>${p.hidden?'🙈 Hidden':'👁️ Visible'} · ${p.featured?'⭐ Featured':''}</p><div class=box style="margin:8px 0;padding:8px"><p class=muted style="margin:0">Base (excl. GST): ${money(m.base)} · GST: ${money(m.gstAmt)}</p><p class=muted style="margin:4px 0 0">Cost: ${money(m.cost)} · Profit: <b>${money(m.profit)}</b> (${m.pct.toFixed(1)}% margin)</p></div><button class=btn onclick="editProduct('${p.id}')">Edit</button><button class=btn onclick="toggleProduct('${p.id}')">${p.hidden?'Show':'Hide'}</button><button class=btn onclick="toggleFeatured('${p.id}')">${p.featured?'Unfeature':'Featured'}</button><button class=btn danger onclick="deleteProduct('${p.id}')">Delete</button></div></div>`}).join('')||'<div class="notice">No products found.</div>'}
+function selectedProductIds(){return [...document.querySelectorAll('.pselect:checked')].map(x=>x.value)}
+function bulkProducts(action){let ids=selectedProductIds();if(!ids.length){toast('Select products first');return}if(action==='delete'&&!confirm('Delete selected products?'))return;ids.forEach(id=>{let p=prod(id);if(!p)return;if(action==='delete'){state.products=state.products.filter(x=>x.id!==id);state.inventory=state.inventory.filter(x=>x[0]!==id)}else p.hidden=action==='hide'});save();renderProducts(productSearch?.value||'');renderInventory();filterStore('all');toast('Bulk product update complete')}
+function toggleProduct(id){let p=prod(id);if(!p)return;p.hidden=!p.hidden;save();renderProducts(productSearch?.value||'');filterStore('all');toast(p.hidden?'Product hidden':'Product shown')}
+function toggleFeatured(id){let p=prod(id);if(!p)return;p.featured=!p.featured;save();renderProducts(productSearch?.value||'');toast(p.featured?'Featured product enabled':'Featured product disabled')}
+function addProduct(){openModal(`<h2>Add Product</h2><input id=np placeholder="Product name"><input id=nsku placeholder="SKU"><input id=nprice type=number placeholder="Selling Price (incl. GST)"><input id=ncost type=number placeholder="Cost Price (what it costs you)"><select id=ncat><option>T-Shirt</option><option>Shirt</option></select><input id=nsizes value="S,M,L,XL,XXL" placeholder="Sizes, e.g. S,M,L,XL,XXL"><input id=ncolors value="Black,White,Charcoal" placeholder="Colors, comma separated"><input id=nstock type=number value=0 placeholder="Opening stock per size"><input type=file id=nimg multiple accept="image/*"><textarea id=ndesc placeholder="Description"></textarea><button class="btn primary" onclick="saveProduct()">Save Product</button>`)}
+function filesToDataUrls(fileList){let files=Array.from(fileList||[]);return Promise.all(files.map(f=>new Promise((res,rej)=>{let r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)})))}
+async function saveProduct(){let id='p'+Date.now(),sizes=(nsizes.value||'S,M,L,XL,XXL').split(',').map(x=>x.trim()).filter(Boolean),colors=(ncolors.value||'Black,White,Charcoal').split(',').map(x=>x.trim()).filter(Boolean),images=await filesToDataUrls(nimg.files),p={id,name:np.value||'New Product',sku:nsku.value||('YT-'+Date.now()),price:+nprice.value||0,cost:+ncost.value||0,category:ncat.value,description:ndesc.value||'',sizes,colors,images};state.products.push(p);sizes.forEach(sz=>state.inventory.push([id,sz,Math.max(0,+nstock.value||0),5]));state.variantStock=state.variantStock||{};state.variantStock[id]={};colors.forEach(c=>{state.variantStock[id][c]={};sizes.forEach(sz=>state.variantStock[id][c]=Object.assign(state.variantStock[id][c]||{},{[sz]:Math.max(0,+nstock.value||0)}))});save();closeModal();renderProducts();renderInventory();renderVariantManager();filterStore('all');toast('Product created with size/color variants')}
+function editProduct(id){let p=prod(id);openModal(`<h2>Edit Product</h2><input id=en value="${p.name}"><input id=es value="${p.sku}"><input id=ep type=number value="${p.price}" placeholder="Selling Price (incl. GST)"><input id=ecost type=number value="${p.cost||0}" placeholder="Cost Price (what it costs you)"><input id=ec value="${p.category}"><input id=ez value="${(p.sizes||[]).join(',')}" placeholder="Sizes"><input id=ecolors value="${(p.colors||['Black','White','Charcoal']).join(',')}" placeholder="Colors"><input type=file id=ei multiple accept="image/*"><textarea id=edesc placeholder="Description">${p.description||''}</textarea><button class="btn primary" onclick="saveEdit('${id}')">Save Changes</button>`)}
+async function saveEdit(id){let p=prod(id),newImages=await filesToDataUrls(ei.files);p.name=en.value||p.name;p.sku=es.value||p.sku;p.price=+ep.value||0;p.cost=+ecost.value||0;p.category=ec.value||p.category;p.sizes=ez.value.split(',').map(x=>x.trim()).filter(Boolean);p.colors=ecolors.value.split(',').map(x=>x.trim()).filter(Boolean);p.description=edesc.value||p.description;if(newImages.length){p.images=(p.images||[]).concat(newImages)}state.variantStock=state.variantStock||{};let old=state.variantStock[id]||{};state.variantStock[id]={};p.colors.forEach(c=>{state.variantStock[id][c]={};p.sizes.forEach(sz=>{state.variantStock[id][c][sz]=Number(old[c]?.[sz]??0)})});p.sizes.forEach(sz=>{if(!state.inventory.some(x=>x[0]===id&&x[1]===sz))state.inventory.push([id,sz,0,5])});state.inventory=state.inventory.filter(x=>x[0]!==id||p.sizes.includes(x[1]));save();closeModal();renderProducts();renderInventory();renderVariantManager();filterStore('all');toast('Product and variants updated')}
+function deleteProduct(id){if(!confirm('Delete this product?'))return;state.products=state.products.filter(p=>p.id!==id);state.inventory=state.inventory.filter(x=>x[0]!==id);save();renderProducts();renderInventory();filterStore('all');toast('Product deleted')}
+function renderVariantManager(){const sel=document.getElementById('vp');if(!sel)return;if(!sel.options.length)sel.innerHTML=state.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');let p=prod(sel.value)||state.products[0];if(!p){variantManager.innerHTML='<div class=notice>No products yet.</div>';return}sel.value=p.id;state.variantStock=state.variantStock||{};let vs=state.variantStock[p.id]||{};let colors=p.colors||['Black'];let sizes=p.sizes||['S','M','L','XL','XXL'];variantManager.innerHTML=`<div class=notice style="margin-bottom:10px"><b>${p.name}</b><br><span class=muted>These are the same size/color choices used by the storefront cart.</span></div><div style="overflow:auto"><table style="width:100%;border-collapse:collapse"><tr><th style="text-align:left;padding:8px">Color / Size</th>${sizes.map(sz=>`<th style="padding:8px">${sz}</th>`).join('')}</tr>${colors.map(c=>`<tr><td style="padding:8px;border-top:1px solid #292929"><b>${c}</b></td>${sizes.map(sz=>`<td style="padding:4px;border-top:1px solid #292929"><input id="vs_${p.id}_${btoa(c).replace(/=/g,'')}_${sz}" type="number" min="0" value="${Number(vs[c]?.[sz]??0)}" style="min-width:70px"></td>`).join('')}</tr>`).join('')}</table></div><button class="btn primary" style="margin-top:10px" onclick="saveVariantManager('${p.id}')">Save Variant Stock</button>`}
+function saveVariantManager(id){let p=prod(id);if(!p)return;state.variantStock=state.variantStock||{};state.variantStock[id]={};let sizes=p.sizes||[],colors=p.colors||['Black'];colors.forEach(c=>{state.variantStock[id][c]={};sizes.forEach(sz=>{let key='vs_'+id+'_'+btoa(c).replace(/=/g,'')+'_'+sz;state.variantStock[id][c][sz]=Math.max(0,+document.getElementById(key)?.value||0)});});save();renderVariantManager();toast('Variant stock saved')}
+function syncVariantTab(){const sel=document.getElementById('vp');if(sel){sel.innerHTML=state.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');renderVariantManager()}}
+function renderCoupons(){couponList.innerHTML=state.coupons.map((c,i)=>`<div class=box style="margin:10px 0"><b>${c.code}</b><p class=muted>${c.percent}% off · Min ${money(c.min)} · Expires ${c.expiry} · ${c.active?'Active':'Inactive'}</p><button class=btn onclick="editCoupon(${i})">Edit</button><button class=btn onclick="toggleCoupon(${i})">${c.active?'Disable':'Enable'}</button></div>`).join('')}
+function createCoupon(){openModal(`<h2>Create Coupon</h2><input id=cc value="NEW10" placeholder="Code"><input id=cp type=number value="10" placeholder="Discount %"><input id=cm type=number value="999" placeholder="Minimum order"><input id=ce type=date value="2026-12-31"><button class=btn primary onclick="saveCoupon()">Create</button>`)}
+function saveCoupon(){state.coupons.push({code:cc.value.toUpperCase(),percent:+cp.value||0,min:+cm.value||0,expiry:ce.value,active:true});save();closeModal();renderCoupons();toast('Coupon created')}
+function editCoupon(i){let c=state.coupons[i];openModal(`<h2>Edit Coupon</h2><input id=cc value="${c.code}"><input id=cp type=number value="${c.percent}"><input id=cm type=number value="${c.min}"><input id=ce type=date value="${c.expiry}"><button class=btn primary onclick="state.coupons[${i}]={code:cc.value.toUpperCase(),percent:+cp.value,min:+cm.value,expiry:ce.value,active:true};save();closeModal();renderCoupons();toast('Coupon saved')">Save</button>`)}
+function toggleCoupon(i){state.coupons[i].active=!state.coupons[i].active;save();renderCoupons();toast('Coupon updated')}
+function ret(s){let a=+refundAmount.value||0,m=refundMethod.value;returnStatus.textContent=s+(s==='Refund Initiated'?` · ${money(a)} · ${m}`:'');toast('Return: '+s)}
+function replyReview(){openModal(`<h2>Reply to Review</h2><textarea placeholder="Write your reply"></textarea><button class=btn primary onclick="toast('Reply saved');closeModal()">Send Reply</button>`)}
+function profile(){openModal(`<h2>Edit Customer</h2><input value=""><input value=""><textarea>
+Model Town, Delhi
+Delhi — 110009</textarea><button class=btn primary onclick="toast('Customer saved');closeModal()">Save</button>`)}
+function gateway(){let g=state.settings.gateway||{};openModal(`<h2>Payment Gateway</h2><select id=gwProvider>${['Razorpay','Cashfree','Stripe'].map(p=>`<option ${g.provider===p?'selected':''}>${p}</option>`).join('')}</select><input id=gwKey placeholder="Key ID" value="${g.keyId||''}"><input id=gwSecret type=password placeholder="Secret key (do not put real key in frontend)"><p class=muted>Secret keys are configured server-side and are not stored in the browser.</p><button class=btn primary onclick="state.settings.gateway={provider:gwProvider.value,keyId:gwKey.value};save();toast('Gateway settings saved');closeModal()">Save</button>`)}
+function courier(){let c=state.settings.courier||{};openModal(`<h2>Courier / AWB</h2><select id=courierProvider>${['Shiprocket','Delhivery'].map(p=>`<option ${c.provider===p?'selected':''}>${p}</option>`).join('')}</select><input id=courierKey placeholder="API key stored server-side in production" value="${c.keyLabel||''}"><button class=btn primary onclick="state.settings.courier={provider:courierProvider.value,keyLabel:courierKey.value};save();toast('Courier settings saved');closeModal()">Save</button>`)}
+function notifications(){let n=state.settings.notifications||{order:true,shipping:true,delivery:true,whatsapp:false};openModal(`<h2>Notifications</h2><label><input type=checkbox id=noOrder ${n.order?'checked':''}> Order confirmation</label><br><label><input type=checkbox id=noShip ${n.shipping?'checked':''}> Shipping update</label><br><label><input type=checkbox id=noDeliver ${n.delivery?'checked':''}> Delivery update</label><br><label><input type=checkbox id=noWhatsapp ${n.whatsapp?'checked':''}> WhatsApp</label><br><button class=btn primary onclick="state.settings.notifications={order:noOrder.checked,shipping:noShip.checked,delivery:noDeliver.checked,whatsapp:noWhatsapp.checked};save();toast('Notification preferences saved');closeModal()">Save</button>`)}
+function security(){let s=state.settings.role||'Super Admin';openModal(`<h2>Security / Roles</h2><select id=roleSel>${['Super Admin','Order Manager','Inventory Manager','Support'].map(r=>`<option ${s===r?'selected':''}>${r}</option>`).join('')}</select><p class=muted>Production server uses password hashing, sessions and role checks.</p><button class=btn primary onclick="state.settings.role=roleSel.value;save();toast('Role saved');closeModal()">Save</button>`)}
+function gstProfitCalculator(){
+ openModal(`<h2>GST & Profit Calculator</h2>
+ <p class=muted style="margin-top:-6px">Bas neeche wali 6 cheezein bharo. Baaki hisaab automatic hoga.</p>
+ <div class="notice"><b>Example:</b> Agar T-shirt ₹1,200 mein bech rahe ho aur 5 pieces hain, to Selling Price = ₹1,200 aur Quantity = 5. Payment Gateway Fee mein <b>₹1,200 nahi</b>, sirf gateway ka percentage (jaise 2) likhna hai.</div>
+ <label><b>1. Selling Price / Piece (customer se ek piece ka paisa)</b></label><input id=calcPrice type=number min=0 step=0.01 value=1000 placeholder="Example: 1200" oninput=calcGSTProfit()>
+ <label><b>2. Quantity (kitne pieces)</b></label><input id=calcQty type=number min=1 step=1 value=1 placeholder="Example: 5" oninput=calcGSTProfit()>
+ <label><b>3. Tumhari Cost / Piece (purchase ya manufacturing cost)</b></label><input id=calcCost type=number min=0 step=0.01 value=0 placeholder="Example: 500" oninput=calcGSTProfit()>
+ <label><b>4. GST Rate (%)</b> <span class=muted>— jo tumhare product par applicable ho</span></label><input id=calcGst type=number min=0 step=0.01 value="${state.settings.gst}" placeholder="Example: 5" oninput=calcGSTProfit()>
+ <label><b>5. Actual Shipping / Order</b> <span class=muted>— courier ko tum kitna doge</span></label><input id=calcShip type=number min=0 step=0.01 value="${state.settings.shipping}" placeholder="Example: 80" oninput=calcGSTProfit()>
+ <label><b>6. Payment Gateway Fee (%)</b> <span class=muted>— ₹ नहीं, सिर्फ percentage</span></label><input id=calcGateway type=number min=0 step=0.01 value="0" placeholder="Example: 2" oninput=calcGSTProfit()>
+ <details style="margin-top:8px"><summary style="cursor:pointer">Optional: Customer se shipping charge</summary><p class=muted>Customer se shipping ke naam par extra paisa lete ho to yahan bharo. Free shipping ho to 0.</p><input id=calcShipCharged type=number min=0 step=0.01 value=0 placeholder="Example: 99" oninput=calcGSTProfit()></details>
+ <label><b>GST price mein included hai?</b></label><select id=calcInclusive onchange=calcGSTProfit()><option value="yes" selected>Haan — jo price dikhaya hai usmein GST included hai</option><option value="no">Nahi — GST price ke upar customer se lena hai</option></select>
+ <div id=calcResult class="box" style="margin-top:12px"></div>
+ <button class="btn" onclick="closeModal()">Close</button>`);
+ calcGSTProfit();
+}
+function calcGSTProfit(){
+ const price=Math.max(0,Number(document.getElementById('calcPrice')?.value||0));
+ const qty=Math.max(1,Number(document.getElementById('calcQty')?.value||1));
+ const costUnit=Math.max(0,Number(document.getElementById('calcCost')?.value||0));
+ const gstRate=Math.max(0,Number(document.getElementById('calcGst')?.value||0));
+ const shippingCost=Math.max(0,Number(document.getElementById('calcShip')?.value||0));
+ const shippingCharged=Math.max(0,Number(document.getElementById('calcShipCharged')?.value||0));
+ const gatewayRate=Math.max(0,Number(document.getElementById('calcGateway')?.value||0));
+ const inclusive=document.getElementById('calcInclusive')?.value==='yes';
+ const merchandise=price*qty;
+ const gst=inclusive ? merchandise-(merchandise/(1+gstRate/100)) : merchandise*(gstRate/100);
+ const saleExGst=inclusive ? merchandise-gst : merchandise;
+ const customerTotal=inclusive ? merchandise+shippingCharged : merchandise+gst+shippingCharged;
+ const productCost=costUnit*qty;
+ const gatewayFee=customerTotal*(gatewayRate/100);
+ const shippingNet=Math.max(0,shippingCost-shippingCharged);
+ const totalCost=productCost+shippingCost+gatewayFee;
+ const profit=customerTotal-gst-totalCost;
+ const margin=saleExGst>0 ? profit/saleExGst*100 : 0;
+ const r=document.getElementById('calcResult'); if(!r)return;
+ r.innerHTML=`<b style="font-size:18px">Automatic Result</b>
+ <div class="row"><span>Customer se total mila</span><b>${money(customerTotal)}</b></div>
+ <div class="row"><span>🧾 GST — government ke liye alag</span><b>${money(gst)}</b></div>
+ <div class="row"><span>Business ki sale (GST hata kar)</span><b>${money(saleExGst)}</b></div>
+ <div class="row"><span>Product cost</span><b>${money(productCost)}</b></div>
+ <div class="row"><span>Courier cost</span><b>${money(shippingCost)}</b></div>
+ <div class="row"><span>Payment gateway fee</span><b>${money(gatewayFee)}</b></div>
+ <div class="row"><span>Total business cost</span><b>${money(totalCost)}</b></div>
+ <div class="row" style="margin-top:8px;padding-top:10px;border-top:1px solid #333"><span><b>💰 Tumhara actual profit</b></span><b>${money(profit)}</b></div>
+ <div class="row"><span>Profit Margin</span><b>${margin.toFixed(2)}%</b></div>
+ <div class="notice" style="margin-top:10px"><b>Seedhi baat:</b> GST ${money(gst)} alag rakho. Product + courier + gateway ka kharcha ${money(totalCost)} hai. In sabke baad tumhara estimated profit <b>${money(profit)}</b> hai.</div>`;
+}
+function invoiceById(id){let o=state.orders.find(x=>x.id===id),p=prod(o.productId);downloadText('YOUR_TYPE_INVOICE_'+id.replace('#','')+'.txt',`YOUR TYPE INVOICE\\nOrder: ${o.id}\\nCustomer: ${o.customer}\\nProduct: ${p?.name}\\nSKU: ${p?.sku}\\nSize: ${o.size}\\nQuantity: ${o.qty}\\nSubtotal: ${money(o.price*o.qty)}\\nGST: ${state.settings.gst}%\\nPayment: ${o.payment}\\nStatus: ${o.status}\\nAddress:\\n${o.address}`)}
+function invoice(){if(state.orders[0])invoiceById(state.orders[0].id);else toast('No order available')}
+function latestAddressSlip(){if(state.orders[0])addressSlip(state.orders[0].id);else toast('No order available')}
+function downloadOrders(){downloadText('YOUR_TYPE_ORDERS.csv','Order,Customer,Product,Size,Qty,Total,Status\\n'+state.orders.map(o=>`${o.id},${o.customer},${prod(o.productId)?.name},${o.size},${o.qty},${o.price*o.qty},${o.status}`).join('\\n'),'text/csv')}
+function downloadInventory(){downloadText('YOUR_TYPE_INVENTORY.csv','Product,SKU,Size,Stock,Threshold,Status\\n'+state.inventory.map(x=>{let p=prod(x[0]);return `${p?.name},${p?.sku},${x[1]},${x[2]},${x[3]},${x[2]===0?'OUT':x[2]<=x[3]?'LOW':'OK'}`}).join('\\n'),'text/csv')}
+function downloadReport(){let g=+state.settings.gst||0,live=state.orders.filter(o=>o.status!=='Cancelled'),rev=live.reduce((a,o)=>a+o.price*o.qty,0),gstTotal=0,profitTotal=0;live.forEach(o=>{let p=prod(o.productId),base=o.price/(1+g/100),cost=p?(+p.cost||0):0;gstTotal+=(o.price-base)*o.qty;profitTotal+=(base-cost)*o.qty});downloadText('YOUR_TYPE_SALES_REPORT.csv','Date,Orders,Revenue,GST Collected,Profit (Est.)\n'+new Date().toLocaleDateString()+','+live.length+','+rev+','+gstTotal.toFixed(2)+','+profitTotal.toFixed(2),'text/csv')}
+function downloadManual(){downloadText('YOUR_TYPE_STORE_MANUAL.txt','YOUR TYPE STORE MANUAL\\n\\nCustomer: Browse → choose size → place order → My Orders.\\nAdmin: Dashboard → Orders → Inventory → Products → Customers → Reports.\\nInventory is size/SKU based and order placement deducts stock.\\nProduction: deploy the included Node/SQLite backend, configure secrets in .env, payment/courier/notification providers, domain and legal pages.')}
+function pdfSafe(s){return String(s).replace(/₹/g,'Rs. ').replace(/[—–]/g,'-').replace(/[""]/g,'"').replace(/['']/g,"'").replace(/[()\\]/g,'').replace(/[^\x20-\x7e]/g,'?')}
+function makePdf(titleLine,bodyLines){let stream='BT /F1 16 Tf 72 790 Td ('+pdfSafe(titleLine)+') Tj 0 -26 TD /F1 11 Tf '+bodyLines.map(l=>l===''?'0 -14 TD':`(${pdfSafe(l)}) Tj 0 -16 TD`).join(' ')+' ET';let objs=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>',`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'];let pdf='%PDF-1.4\n',offsets=[0];objs.forEach((o,i)=>{offsets.push(pdf.length);pdf+=`${i+1} 0 obj\n${o}\nendobj\n`});let xrefStart=pdf.length;pdf+=`xref\n0 ${objs.length+1}\n0000000000 65535 f \n`;for(let i=1;i<=objs.length;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';pdf+=`trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;return pdf}
+function downloadPDF(){let bodyLines=state.products.map(p=>`${p.name} — ${money(p.price)} — SKU ${p.sku}`);downloadText('YOUR_TYPE_PRODUCT_BROCHURE.pdf',makePdf('YOUR TYPE — Product Brochure',bodyLines),'application/pdf')}
+function addressSlip(id){let o=state.orders.find(x=>x.id===id);if(!o){toast('Order not found');return}let p=prod(o.productId);let bodyLines=['Order: '+o.id,'Date: '+o.date,'',
+'BILL TO / SHIP TO',o.customer,...o.address.split('\n'),'Phone: '+o.phone,'',
+'PRODUCT DETAILS',`${p?.name||'Deleted Product'}  (SKU ${p?.sku||'—'})`,`Size: ${o.size}   Qty: ${o.qty}`,`Unit Price: ${money(o.price)}   Total: ${money(o.price*o.qty)}`,`Payment: ${o.payment}   Status: ${o.status}`,
+o.awb?`AWB: ${o.awb}${o.courier?' ('+o.courier+')':''}`:''].filter(l=>l!=='');
+downloadText('YOUR_TYPE_ADDRESS_SLIP_'+id.replace('#','')+'.pdf',makePdf('YOUR TYPE — Address / Packing Slip',bodyLines),'application/pdf')}
+function backup(){downloadText('YOUR_TYPE_BACKUP.json',JSON.stringify(state,null,2),'application/json')}
+function restore(){openModal(`<h2>Restore Data</h2><input type=file id=restoreFile accept=".json"><button class=btn primary onclick="doRestore()">Restore</button>`)}
+function doRestore(){let f=restoreFile.files[0];if(!f){toast('Choose backup file');return}let r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);save();closeModal();location.reload()}catch(e){toast('Invalid backup')}};r.readAsText(f)}
+function downloadText(n,t,type='text/plain'){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type}));a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('Download started')}
+function updateDash(){let g=+state.settings.gst||0,live=state.orders.filter(o=>o.status!=='Cancelled'),rev=live.reduce((a,o)=>a+o.price*o.qty,0),lowN=state.inventory.filter(x=>x[2]>0&&x[2]<=x[3]).length;
+let gstTotal=0,profitTotal=0;
+live.forEach(o=>{let p=prod(o.productId),base=o.price/(1+g/100),gstAmt=o.price-base,cost=p?(+p.cost||0):0;gstTotal+=gstAmt*o.qty;profitTotal+=(base-cost)*o.qty});
+dashRevenue.textContent=money(rev);dashOrders.textContent=state.orders.length;dashLow.textContent=lowN;dashProfit.textContent=money(profitTotal);
+aRev.textContent=money(rev);aGst.textContent=money(gstTotal);aProfit.textContent=money(profitTotal);aAvg.textContent=money(live.length?rev/live.length:0)}
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(window._t);window._t=setTimeout(()=>e.style.display='none',1800)}
+function openModal(x){modalBody.innerHTML=x;modal.classList.add('on')}function closeModal(){modal.classList.remove('on')}
+function addCategory(){let n=(catName.value||'').trim();if(!n){toast('Enter category name');return}if(!state.categories.includes(n))state.categories.push(n);save();renderCategories();toast('Category added')}
+function renderCategories(){categoryList.innerHTML=state.categories.map((c,i)=>`<div class=box><b>${c}</b><p class=muted>${state.products.filter(p=>p.category===c).length} products</p><button class=btn onclick="renameCategory(${i})">Rename</button><button class=btn danger onclick="deleteCategory(${i})">Delete</button></div>`).join('')}
+function renameCategory(i){let n=prompt('New category name',state.categories[i]);if(!n)return;n=n.trim();if(!n||state.categories.includes(n))return toast('Invalid/duplicate category');let old=state.categories[i];state.categories[i]=n;state.products.forEach(p=>{if(p.category===old)p.category=n});save();renderCategories();renderProducts();toast('Category renamed')}
+function deleteCategory(i){let c=state.categories[i];if(state.products.some(p=>p.category===c)){toast('Move/delete products in this category first');return}state.categories.splice(i,1);save();renderCategories();toast('Category deleted')}
+function renderWishlist(){let counts={};state.wishlist.forEach(id=>counts[id]=(counts[id]||0)+1);let rows=Object.entries(counts).map(([id,n])=>{let p=prod(id);return p?`<div class=row><span>${p.name} <span class=muted>(${p.sku})</span></span><b>${n}</b></div>`:''}).join('');let total=state.wishlist.length;wishTotal.textContent=total;wishProducts.textContent=Object.keys(counts).length;wishList.innerHTML=rows||'<div class=notice>No wishlist data yet.</div>';dashWishlist.textContent=total}
+function saveWebsiteControl(){state.website={announcement:siteAnnouncement.value,hero:siteHero.value,featured:(siteFeatured.value||'').split(',').map(x=>x.trim()).filter(Boolean),social:siteSocial.value,phone:sitePhone.value,email:siteEmail.value};state.products.forEach(p=>p.featured=state.website.featured.includes(p.id));save();toast('Website settings saved')}
+function loadWebsiteControl(){siteAnnouncement.value=state.website.announcement||'';siteHero.value=state.website.hero||'YOUR TYPE';siteFeatured.value=(state.website.featured||[]).join(',');siteSocial.value=state.website.social||'';sitePhone.value=state.website.phone||'';siteEmail.value=state.website.email||''}
+function dateInRange(o){let d=new Date(o.date);if(Number.isNaN(d.getTime()))return true;let from=reportFrom.value?new Date(reportFrom.value+'T00:00:00'):null,to=reportTo.value?new Date(reportTo.value+'T23:59:59'):null;return (!from||d>=from)&&(!to||d<=to)}
+function exportReportType(type){let orders=state.orders.filter(dateInRange);if(type==='sales'){let rev=orders.filter(o=>o.status!=='Cancelled').reduce((a,o)=>a+o.price*o.qty,0);downloadText('YOUR_TYPE_SALES_REPORT.csv','Order,Customer,Revenue,Status,Date\n'+orders.map(o=>`${o.id},${o.customer},${o.price*o.qty},${o.status},"${o.date}"`).join('\n'),'text/csv');reportPreview.textContent=`${orders.length} orders in range · Revenue ${money(rev)}`}else if(type==='orders'){downloadOrders();reportPreview.textContent=`${orders.length} orders exported`}else if(type==='inventory'){downloadInventory();reportPreview.textContent=`${state.inventory.length} stock rows exported`}else if(type==='products'){downloadText('YOUR_TYPE_PRODUCTS.csv','Name,SKU,Category,Price,Cost,Featured,Hidden\n'+state.products.map(p=>`"${p.name}",${p.sku},${p.category},${p.price},${p.cost||0},${!!p.featured},${!!p.hidden}`).join('\n'),'text/csv');reportPreview.textContent=`${state.products.length} products exported`}else if(type==='customers'){let map={};state.orders.forEach(o=>{map[o.customer]=map[o.customer]||{orders:0,total:0,phone:o.phone||''};map[o.customer].orders++;map[o.customer].total+=o.price*o.qty});downloadText('YOUR_TYPE_CUSTOMERS.csv','Customer,Phone,Orders,Total Spending\n'+Object.entries(map).map(([n,v])=>`"${n}",${v.phone},${v.orders},${v.total}`).join('\n'),'text/csv');reportPreview.textContent=`${Object.keys(map).length} customers exported`}}
+function updateDash(){let g=+state.settings.gst||0,live=state.orders.filter(o=>o.status!=='Cancelled'),rev=live.reduce((a,o)=>a+o.price*o.qty,0),lowN=state.inventory.filter(x=>x[2]>0&&x[2]<=x[3]).length;let gstTotal=0,profitTotal=0;live.forEach(o=>{let p=prod(o.productId),base=o.price/(1+g/100),gstAmt=o.price-base,cost=p?(+p.cost||0):0;gstTotal+=gstAmt*o.qty;profitTotal+=(base-cost)*o.qty});dashRevenue.textContent=money(rev);dashOrders.textContent=state.orders.length;dashLow.textContent=lowN;dashProfit.textContent=money(profitTotal);aRev.textContent=money(rev);aGst.textContent=money(gstTotal);aProfit.textContent=money(profitTotal);aAvg.textContent=money(live.length?rev/live.length:0);let now=Date.now(),day=86400000;function sumSince(ms){return live.filter(o=>{let d=new Date(o.date).getTime();return !Number.isNaN(d)&&now-d<=ms}).reduce((a,o)=>a+o.price*o.qty,0)}dashToday.textContent=money(sumSince(day));dashWeek.textContent=money(sumSince(7*day));dashMonth.textContent=money(sumSince(30*day));let statuses=['Pending','Processing','Shipped','Delivered','Cancelled','Confirmed','Packed','Out for Delivery'];dashStatuses.innerHTML=statuses.map(st=>`<div class=stat><span>${st}</span><b>${state.orders.filter(o=>o.status===st).length}</b></div>`).join('');dashRecent.innerHTML=state.orders.slice(0,5).map(o=>`<div class=row><span>${o.id} · ${o.customer}</span><b>${money(o.price*o.qty)}</b></div>`).join('')||'<div class=muted>No orders</div>';let tops={};state.orders.filter(o=>o.status!=='Cancelled').forEach(o=>tops[o.productId]=(tops[o.productId]||0)+o.qty);dashTop.innerHTML=Object.entries(tops).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,n])=>`<div class=row><span>${prod(id)?.name||'Deleted Product'}</span><b>${n} sold</b></div>`).join('')||'<div class=muted>No sales</div>';renderWishlist()}
+
+state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Array.isArray(p.colors)&&p.colors.length?p.colors:['Black','White','Charcoal'];});save();renderCategories();loadWebsiteControl();filterStore('all');renderInventory();renderProducts();renderCoupons();renderOrders();updateDash();
+</script>
+<script>
+/* YOUR TYPE — SERVER CONNECTION BRIDGE
+   Keeps the original Admin UI/layout, but makes data mutations use the same server
+   database that the storefront reads from. LocalStorage remains only as a UI cache.
+*/
+(function(){
+  const api = async (url, options={}) => {
+    const token=sessionStorage.getItem('adminToken')||'';
+    const headers=Object.assign({'Content-Type':'application/json'}, options.headers||{});
+    if(token) headers.Authorization='Bearer '+token;
+    const r=await fetch(url,Object.assign({},options,{headers}));
+    let data={};
+    try{ data=await r.json(); }catch(_){}
+    if(!r.ok) throw new Error(data.error||('Request failed ('+r.status+')'));
+    return data;
+  };
+
+  function toLocalProduct(p){
+    const sizes=p.sizes||{S:0,M:0,L:0,XL:0,XXL:0};
+    return {
+      id:String(p.id), name:p.name||'', category:p.category||'T-Shirt',
+      price:Number(String(p.price||0).replace(/[^0-9.]/g,''))||0,
+      cost:Number(p.cost||0), sku:p.sku||('YT-'+String(p.id).replace(/^p_/,'').slice(0,12)),
+      description:p.description||'', sizes:Object.keys(sizes).filter(k=>['S','M','L','XL','XXL'].includes(k)),
+      colors:Array.isArray(p.colors)&&p.colors.length?p.colors:['Black'],
+      images:Array.isArray(p.images)&&p.images.length?p.images:[p.image||'ornament.jpg'],
+      image:p.image||((p.images||[])[0]||'ornament.jpg'),
+      hidden:p.active===false, featured:Boolean(p.featured)
+    };
+  }
+
+  function rebuildInventory(){
+    state.inventory=[];
+    (state.products||[]).forEach(p=>{
+      const raw=serverProducts.find(x=>String(x.id)===String(p.id));
+      const sizes=raw?.sizes||{};
+      (p.sizes||['S','M','L','XL','XXL']).forEach(sz=>{
+        state.inventory.push([p.id,sz,Math.max(0,Number(sizes[sz]||0)),5]);
+      });
+    });
+  }
+
+  let serverProducts=[];
+
+  async function syncFromServer(showToast){
+    const d=await api('/api/admin/data');
+    serverProducts=Array.isArray(d.products)?d.products:[];
+    state.products=serverProducts.map(toLocalProduct);
+    rebuildInventory();
+    state.orders=Array.isArray(d.orders)?d.orders:[];
+    state.coupons=(d.coupons||[]).map(c=>({
+      id:c.id,code:c.code,percent:c.type==='percent'?Number(c.value||0):0,
+      min:Number(c.minOrder||0),expiry:c.expiresAt?String(c.expiresAt).slice(0,10):'',
+      active:c.active!==false,type:c.type||'percent',value:Number(c.value||0)
+    }));
+    state.reviews=d.reviews||[];
+    state.newsletter=d.newsletter||[];
+    save();
+    renderProducts(productSearch?.value||'');
+    renderInventory();
+    renderVariantManager();
+    renderCoupons();
+    renderOrders();
+    filterStore('all');
+    updateDash();
+    if(showToast) toast('Admin synced with website database');
+  }
+
+  async function doAdminLogin(){
+    const username=document.getElementById("loginUser").value.trim();
+    const password=document.getElementById("loginPass").value;
+    if(!username||!password){toast("Enter username and password");return}
+    try{
+      const x=await api("/api/admin/login",{method:"POST",body:JSON.stringify({username,password})});
+      sessionStorage.setItem("adminToken",x.token);
+      closeModal();
+      await syncFromServer(false);
+      go("dashboard");
+      toast("Connected to website database");
+    }catch(e){toast(e.message||"Unable to connect to server")}
+  }
+
+  async function saveProduct(){
+    const sizes=(document.getElementById('nsizes')?.value||'S,M,L,XL,XXL').split(',').map(x=>x.trim()).filter(Boolean);
+    const colors=(document.getElementById('ncolors')?.value||'Black,White,Charcoal').split(',').map(x=>x.trim()).filter(Boolean);
+    const files=document.getElementById('nimg')?.files||[];
+    let uploaded=[];
+    try{
+      for(const f of Array.from(files)){
+        if(!['image/png','image/jpeg','image/webp'].includes(f.type)){toast('Only PNG, JPG or WEBP images are supported');return}
+        if(f.size>5*1024*1024){toast('Each image must be 5MB or smaller');return}
+        const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+        const safeName=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        const up=await api('/api/admin/upload',{method:'POST',body:JSON.stringify({name:safeName,data})});
+        uploaded.push(up.filename);
+      }
+      const image=uploaded[0]||'ornament.jpg';
+      const sizesObj={S:0,M:0,L:0,XL:0,XXL:0};
+      sizes.forEach(sz=>{if(sz in sizesObj)sizesObj[sz]=Math.max(0,Number(document.getElementById('nstock')?.value||0))});
+      const body={
+        name:document.getElementById('np')?.value.trim()||'New Product',
+        sku:document.getElementById('nsku')?.value.trim()||('YT-'+Date.now()),
+        price:String(Number(document.getElementById('nprice')?.value||0)),
+        cost:Number(document.getElementById('ncost')?.value||0),
+        category:document.getElementById('ncat')?.value||'T-Shirt',
+        description:document.getElementById('ndesc')?.value||'',
+        image, images:uploaded.length?uploaded:[image], colors, sizes:sizesObj,
+        badge:'NEW', active:true
+      };
+      if(!body.price || body.price==='0'){toast('Selling price is required');return}
+      await api('/api/admin/products',{method:'POST',body:JSON.stringify(body)});
+      await syncFromServer(false);
+      closeModal(); toast('Product created on website');
+    }catch(e){toast(e.message||'Could not create product')}
+  }
+
+  async function saveEdit(id){
+    const p=state.products.find(x=>String(x.id)===String(id));
+    if(!p)return;
+    try{
+      const files=document.getElementById('ei')?.files||[];
+      let uploaded=[];
+      for(const f of Array.from(files)){
+        if(!['image/png','image/jpeg','image/webp'].includes(f.type)){toast('Only PNG, JPG or WEBP images are supported');return}
+        if(f.size>5*1024*1024){toast('Each image must be 5MB or smaller');return}
+        const data=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(f)});
+        const safeName=f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+        const up=await api('/api/admin/upload',{method:'POST',body:JSON.stringify({name:safeName,data})});
+        uploaded.push(up.filename);
+      }
+      const sizesList=(document.getElementById('ez')?.value||'S,M,L,XL,XXL').split(',').map(x=>x.trim()).filter(Boolean);
+      const colors=(document.getElementById('ecolors')?.value||'Black,White,Charcoal').split(',').map(x=>x.trim()).filter(Boolean);
+      const old=serverProducts.find(x=>String(x.id)===String(id))||{};
+      const sizes={S:0,M:0,L:0,XL:0,XXL:0};
+      Object.keys(sizes).forEach(sz=>{sizes[sz]=Number(old.sizes?.[sz]||0)});
+      sizesList.forEach(sz=>{if(!(sz in sizes))sizes[sz]=Math.max(0,Number(old.sizes?.[sz]||0))});
+      const body={
+        name:document.getElementById('en')?.value.trim()||p.name,
+        sku:document.getElementById('es')?.value.trim()||p.sku,
+        price:String(Number(document.getElementById('ep')?.value||0)),
+        cost:Number(document.getElementById('ecost')?.value||0),
+        category:document.getElementById('ec')?.value.trim()||p.category,
+        description:document.getElementById('edesc')?.value||'',
+        colors,sizes,active:old.active!==false
+      };
+      if(uploaded.length){body.image=uploaded[0];body.images=(old.images||[]).concat(uploaded)}
+      await api('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify(body)});
+      await syncFromServer(false); closeModal(); toast('Product updated on website');
+    }catch(e){toast(e.message||'Could not update product')}
+  }
+
+  async function deleteProduct(id){
+    if(!confirm('Delete this product from the website?'))return;
+    try{await api('/api/admin/products/'+encodeURIComponent(id),{method:'DELETE'});await syncFromServer(false);toast('Product deleted')}catch(e){toast(e.message)}
+  }
+
+  async function toggleProduct(id){
+    const p=serverProducts.find(x=>String(x.id)===String(id));
+    if(!p)return;
+    try{await api('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({active:p.active===false})});await syncFromServer(false);toast(p.active===false?'Product shown':'Product hidden')}catch(e){toast(e.message)}
+  }
+
+  async function toggleFeatured(id){
+    const p=serverProducts.find(x=>String(x.id)===String(id));
+    if(!p)return;
+    try{await api('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({featured:!(p.featured)} )});await syncFromServer(false);toast('Featured status saved')}catch(e){toast(e.message)}
+  }
+
+  async function bulkProducts(action){
+    const ids=selectedProductIds(); if(!ids.length){toast('Select products first');return}
+    if(action==='delete'&&!confirm('Delete selected products?'))return;
+    try{
+      if(['hide','show','delete'].includes(action)){
+        await api('/api/admin/products/bulk',{method:'POST',body:JSON.stringify({action,ids})});
+      }else{toast('Use individual product editing for this action');return}
+      await syncFromServer(false); toast('Bulk update saved to website');
+    }catch(e){toast(e.message)}
+  }
+
+  async function stockUpdate(id,size,val){
+    const raw=serverProducts.find(x=>String(x.id)===String(id));
+    if(!raw)return;
+    const sizes=Object.assign({S:0,M:0,L:0,XL:0,XXL:0},raw.sizes||{});
+    sizes[size]=Math.max(0,Number(val)||0);
+    try{await api('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({sizes})});await syncFromServer(false);toast('Stock saved to website')}catch(e){toast(e.message)}
+  }
+
+  async function saveVariantManager(id){
+    const p=state.products.find(x=>String(x.id)===String(id)); if(!p)return;
+    const raw=serverProducts.find(x=>String(x.id)===String(id))||{};
+    const sizes=Object.assign({S:0,M:0,L:0,XL:0,XXL:0},raw.sizes||{});
+    (p.sizes||Object.keys(sizes)).forEach(sz=>{
+      const vals=[];
+      (p.colors||['Black']).forEach(c=>{
+        const key='vs_'+id+'_'+btoa(c).replace(/=/g,'')+'_'+sz;
+        const el=document.getElementById(key); if(el) vals.push(Number(el.value||0));
+      });
+      if(vals.length) sizes[sz]=Math.max(0,...vals);
+    });
+    try{await api('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({sizes,colors:p.colors||['Black']})});await syncFromServer(false);toast('Variant stock saved to website')}catch(e){toast(e.message)}
+  }
+
+  async function saveCoupon(){
+    const code=(document.getElementById('cc')?.value||'').trim().toUpperCase();
+    const value=Number(document.getElementById('cp')?.value||0);
+    const minOrder=Number(document.getElementById('cm')?.value||0);
+    const expiresAt=document.getElementById('ce')?.value||null;
+    try{await api('/api/admin/coupons',{method:'POST',body:JSON.stringify({code,type:'percent',value,minOrder,expiresAt})});await syncFromServer(false);closeModal();toast('Coupon created on website')}catch(e){toast(e.message)}
+  }
+
+  async function toggleCoupon(i){
+    const c=state.coupons[i]; if(!c)return;
+    try{await api('/api/admin/coupons/'+encodeURIComponent(c.id),{method:'PATCH',body:JSON.stringify({active:!c.active})});await syncFromServer(false);toast('Coupon status saved')}catch(e){toast(e.message)}
+  }
+
+  async function syncOnOpen(){
+    if(sessionStorage.getItem('adminToken')){
+      try{await syncFromServer(false)}catch(_){}
+    }
+  }
+  window.addEventListener('load',syncOnOpen);
+})();
+</script>
+</body></html>

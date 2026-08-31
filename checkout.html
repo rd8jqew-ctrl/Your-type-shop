@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Checkout — YOUR TYPE</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shipping"><div class="shipping-track"><span>🔒 SECURE CHECKOUT</span><span>YOUR TYPE / PREMIUM STREETWEAR</span><span>🔒 SECURE CHECKOUT</span><span>YOUR TYPE / PREMIUM STREETWEAR</span></div></div>
+<header class="siteHeader">
+  <a class="logo" href="index.html">YOUR TYPE</a>
+  <div class="actions"><a href="index.html" style="text-decoration:none;font-size:10px;letter-spacing:1.5px;color:#aaa">← SHOP</a></div>
+</header>
+<main class="checkoutPage">
+  <div>
+    <p class="eyebrow">YOUR TYPE / CHECKOUT</p>
+    <h1>Complete<br>your order.</h1>
+    <form onsubmit="placeOrder(event)" class="form" id="checkoutForm">
+      <div><input id="couponCode" placeholder="Coupon code" autocomplete="off"><button type="button" onclick="applyCoupon()">APPLY COUPON</button><small id="couponMsg"></small></div>
+      <input id="customerName" required placeholder="Full name" autocomplete="name">
+      <input id="customerEmail" required type="email" placeholder="Email address" autocomplete="email">
+      <input id="customerPhone" required type="tel" inputmode="tel" placeholder="Phone number" autocomplete="tel">
+      <h3>Shipping / Billing Address</h3>
+      <input id="customerAddress" required placeholder="Full address" autocomplete="street-address">
+      <div class="two"><input id="customerCity" required placeholder="City" autocomplete="address-level2"><input id="customerPin" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="PIN code" autocomplete="postal-code"></div>
+      <h3>Payment method</h3>
+      <label><input type="radio" name="pay" value="upi" onchange="showUPIPopup()"> UPI</label>
+      <label><input type="radio" name="pay" value="cod" checked> Cash on Delivery</label>
+      <small id="upiNote" style="display:none;color:#888;line-height:1.6">UPI option is enabled. Online gateway connection will be added later.</small>
+      <button class="checkout" type="submit">PLACE ORDER&nbsp;&nbsp; →</button>
+    </form>
+  </div>
+  <aside class="summary">
+    <h2>Order Summary</h2>
+    <div id="summary"></div>
+    <div class="billLines">
+      <div><span>Subtotal</span><b id="sumSubtotal">₹0</b></div>
+      <div><span>Shipping</span><b id="sumShipping">₹0</b></div>
+      <div class="total"><span>Total</span><b id="sumTotal">₹0</b></div>
+    </div>
+  </aside>
+</main>
+
+<div class="orderModal" id="orderModal" aria-hidden="true">
+  <div class="orderModalBackdrop" onclick="closeOrderModal()"></div>
+  <section class="orderCard" role="dialog" aria-modal="true" aria-labelledby="orderCompleteTitle">
+    <button class="orderClose" type="button" aria-label="Close" onclick="closeOrderModal()">×</button>
+    <div class="orderMark">✓</div>
+    <p class="eyebrow">YOUR TYPE / ORDER COMPLETE</p>
+    <h2 id="orderCompleteTitle">Complete<br>your order.</h2>
+    <p class="orderLead">Your order is confirmed.<br>Your Type is on its way to you.</p>
+    <div class="orderMeta">
+      <div><span>ORDER</span><b id="doneOrderId">—</b></div>
+      <div><span>TOTAL</span><b id="doneTotal">₹0</b></div>
+    </div>
+    <div class="orderActions">
+      <button type="button" class="orderPrimary" onclick="continueShopping()">CONTINUE SHOPPING <span>→</span></button>
+      <button type="button" class="orderSecondary" onclick="closeOrderModal()">VIEW DETAILS</button>
+    </div>
+    <p class="orderFine">THANK YOU FOR CHOOSING YOUR TYPE.</p>
+  </section>
+</div>
+<style>
+.orderModal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility .35s ease}
+.orderModal.isOpen{opacity:1;visibility:visible;pointer-events:auto}
+.orderModalBackdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(10px)}
+.orderCard{position:relative;width:min(520px,100%);background:#0b0b0b;border:1px solid #2a2a2a;box-shadow:0 30px 90px rgba(0,0,0,.65);padding:38px;transform:translateY(18px) scale(.97);transition:transform .45s cubic-bezier(.16,1,.3,1)}
+.orderModal.isOpen .orderCard{transform:translateY(0) scale(1)}
+.orderClose{position:absolute;right:16px;top:12px;background:none;border:0;color:#aaa;font-size:30px;line-height:1;cursor:pointer;padding:6px}
+.orderMark{width:48px;height:48px;border:1px solid #777;border-radius:50%;display:grid;place-items:center;font-size:22px;margin-bottom:24px}
+.orderCard .eyebrow{margin:0 0 14px;color:#777;letter-spacing:4px;font-size:10px}
+.orderCard h2{font-size:clamp(34px,6vw,62px);line-height:.9;letter-spacing:-3px;margin:0 0 22px;color:#f4f4f4}
+.orderLead{color:#999;font-size:14px;line-height:1.7;margin:0 0 26px}
+.orderMeta{border-top:1px solid #242424;border-bottom:1px solid #242424;padding:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px}
+.orderMeta span{display:block;color:#666;font-size:9px;letter-spacing:2px;margin-bottom:6px}
+.orderMeta b{font-size:13px;letter-spacing:1px;color:#eee}
+.orderActions{display:flex;gap:10px}
+.orderActions button{min-height:48px;padding:0 18px;font:inherit;font-size:10px;letter-spacing:1.5px;cursor:pointer}
+.orderPrimary{flex:1;border:1px solid #eee;background:#eee;color:#080808}
+.orderSecondary{border:1px solid #333;background:#0b0b0b;color:#ddd}
+.orderFine{color:#555;font-size:8px;letter-spacing:2px;margin:24px 0 0}
+@media(max-width:600px){
+  .orderModal{padding:14px}
+  .orderCard{padding:28px 22px 22px}
+  .orderCard h2{font-size:42px;letter-spacing:-2px}
+  .orderActions{flex-direction:column}
+  .orderSecondary{min-height:44px}
+}
+</style>
+
+<script>
+const cart=JSON.parse(localStorage.getItem('yourTypeCart')||'[]');
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const priceOf=p=>Number(String(p?.[1]??p?.price??0).replace(/[^0-9]/g,''))||0;
+const summary=document.getElementById('summary');
+if(!cart.length){summary.innerHTML='<p style="color:#777;font-size:11px;line-height:1.7">Your bag is empty. <a href="index.html">Return to shop</a>.</p>';document.querySelector('.checkout').disabled=true;}
+else{summary.innerHTML=cart.map(p=>`<div class="sumItem"><img src="photos/${p[2]}" alt=""><span>${p[0]}<small>${p[1]}${p.size?' · SIZE '+p.size:''}${p.color?' · '+p.color.toUpperCase():''} · QTY ${Number(p.qty||1)}</small></span></div>`).join('');}
+const subtotal=cart.reduce((s,p)=>s+priceOf(p)*Number(p.qty||1),0);
+const shipping=subtotal===0?0:(subtotal>=999?0:99);
+let discount=0,appliedCoupon=''; let total=subtotal+shipping;
+document.getElementById('sumSubtotal').textContent=money(subtotal);
+document.getElementById('sumShipping').textContent=shipping===0?(subtotal>=999?'FREE':'—'):money(shipping);
+document.getElementById('sumTotal').textContent=money(total);
+async function applyCoupon(){const code=document.getElementById('couponCode').value.trim();if(!code)return;try{const r=await fetch('/api/coupons/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,subtotal})});const d=await r.json();if(!r.ok)throw Error(d.error);discount=Number(d.discount||0);appliedCoupon=d.code;total=subtotal-discount+shipping;document.getElementById('sumTotal').textContent=money(total);document.getElementById('couponMsg').textContent='Coupon applied: '+money(discount)+' off';}catch(e){document.getElementById('couponMsg').textContent=e.message;discount=0;appliedCoupon='';total=subtotal+shipping;document.getElementById('sumTotal').textContent=money(total)}}
+function showUPIPopup(){
+ const note=document.getElementById('upiNote');
+ if(note) note.style.display='block';
+ let old=document.getElementById('upiInfoPopup'); if(old) old.remove();
+ const wrap=document.createElement('div'); wrap.id='upiInfoPopup'; wrap.innerHTML=`<div class="orderModalBackdrop"></div><section class="orderCard" role="dialog" aria-modal="true" style="position:relative;z-index:2;transform:none"><button class="orderClose" type="button" aria-label="Close" onclick="document.getElementById('upiInfoPopup')?.remove()">×</button><div class="orderMark">₹</div><p class="eyebrow">YOUR TYPE / PAYMENT</p><h2>UPI is ready.</h2><p class="orderLead">UPI has been enabled as a checkout option. The live payment gateway will be connected later.</p><div class="orderActions"><button type="button" class="orderPrimary" onclick="document.getElementById('upiInfoPopup')?.remove()">CONTINUE →</button></div></section>`;
+ wrap.style.cssText='position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px'; document.body.appendChild(wrap);
+}
+
+async function placeOrder(e){
+ e.preventDefault(); if(!cart.length)return;
+ const form=e.currentTarget; if(!form.reportValidity())return;
+ const name=document.getElementById('customerName').value.trim(), city=document.getElementById('customerCity').value.trim(), pin=document.getElementById('customerPin').value.trim(), address=document.getElementById('customerAddress').value.trim(), phone=document.getElementById('customerPhone').value.trim(), email=document.getElementById('customerEmail').value.trim();
+ const payment=document.querySelector('input[name="pay"]:checked')?.value||'cod';
+ const customerToken=localStorage.getItem('yourTypeCustomerToken')||'';
+ const purchase={name,city,pin,address,phone,email,coupon:appliedCoupon,discount,items:cart.map(p=>({name:p[0],image:p[2],price:p[1],size:p.size||'M',color:p.color||'Black',qty:Number(p.qty||1)})),subtotal,shipping,total,payment};
+ const btn=form.querySelector('button[type="submit"]'); if(btn)btn.disabled=true;
+ try{const headers={'Content-Type':'application/json'}; if(customerToken)headers.Authorization='Bearer '+customerToken;
+  const r=await fetch('/api/orders',{method:'POST',headers,body:JSON.stringify(purchase)});const d=await r.json();if(!r.ok)throw new Error(d.error||'Could not place order');
+  purchase.orderId=d.orderId; purchase.date=new Date().toISOString();
+  localStorage.setItem('yourTypeLastPurchase',JSON.stringify(purchase));localStorage.setItem('yourTypeLastOrder',JSON.stringify(purchase));localStorage.removeItem('yourTypeCart');
+  document.getElementById('doneOrderId').textContent=d.orderId;document.getElementById('doneTotal').textContent=money(total);document.getElementById('orderModal').classList.add('isOpen');document.getElementById('orderModal').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+ }catch(err){alert(err.message)}finally{if(btn)btn.disabled=false}
+}
+
+function closeOrderModal(){
+ const m=document.getElementById('orderModal');
+ m.classList.remove('isOpen');
+ m.setAttribute('aria-hidden','true');
+ document.body.style.overflow='';
+}
+function continueShopping(){
+ location.href='index.html';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOrderModal();});
+</script>
+</body></html>

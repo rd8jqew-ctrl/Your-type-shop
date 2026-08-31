@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: your-type-store
+    runtime: node
+    buildCommand: ""
+    startCommand: "node server.js"
+
