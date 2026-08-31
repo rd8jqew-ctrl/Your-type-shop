@@ -136,7 +136,17 @@ save();
 function prod(id){return state.products.find(p=>p.id===id)}
 function money(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
 function go(id,btn){let e=document.getElementById(id);if(!e){toast('Section not found');return}document.querySelectorAll('.section').forEach(x=>x.classList.remove('on'));e.classList.add('on');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('adminTabs').style.display=['store','account','customerOrders'].includes(id)?'none':'flex';if(id==='store')filterStore('all');if(id==='orders')renderOrders();if(id==='inventory')renderInventory();if(id==='products')renderProducts();if(id==='variants'){syncVariantTab()}if(id==='sections')renderSectionManager();if(id==='colors'){syncColorManager()}if(id==='coupons')renderCoupons();if(id==='customerOrders')renderCustomerOrders();updateDash();window.scrollTo({top:0,behavior:'smooth'})}
-function adminLogin(){openModal(`<h2>Admin Login</h2><input id=loginUser value="admin" autocomplete="username"><input id=loginPass type=password placeholder="Admin password" autocomplete="current-password"><p class=muted>Sign in with the admin credentials configured on your server.</p><button class="btn primary" onclick="doAdminLogin()">Sign In</button>`)}
+function adminLogin(){
+  openModal(`<h2>Admin Login</h2><form id="adminLoginForm" autocomplete="off" novalidate onsubmit="event.preventDefault();doAdminLogin()">
+    <label for="loginUser" class="muted">Username</label>
+    <input id="loginUser" name="username" type="text" value="" autocomplete="section-admin username" autocapitalize="none" spellcheck="false" inputmode="text" placeholder="Admin username">
+    <label for="loginPass" class="muted">Password</label>
+    <input id="loginPass" name="password" type="password" autocomplete="section-admin current-password" placeholder="Admin password">
+    <p class="muted">Sign in with the admin credentials configured on your server.</p>
+    <button class="btn primary" type="submit">Sign In</button>
+  </form>`);
+  requestAnimationFrame(()=>document.getElementById('loginUser')?.focus());
+}
 async function doAdminLogin(){const username=document.getElementById("loginUser").value.trim(),password=document.getElementById("loginPass").value;if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}sessionStorage.setItem("adminToken",x.token);closeModal();await loadServerState();go("dashboard")}catch(e){toast("Unable to connect to server")}}
 
 function adminHeaders(){const t=sessionStorage.getItem('adminToken');return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'}}
