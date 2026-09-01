@@ -17,6 +17,54 @@ button:focus:not(:focus-visible){outline:none}
 .card,.heart,.add,.bag,.wishlistHead{user-select:none;-webkit-user-select:none}
 ::selection{background:transparent}
  .adminHiddenSection{display:none!important}\n</style>
+
+<style id="ytPremiumProductMotion">
+/* YOUR TYPE — premium product motion layer. Existing theme/layout stays intact. */
+.card.ytRevealCard{opacity:0;transform:translate3d(0,18px,0) scale(.985);transition:opacity .65s cubic-bezier(.22,.61,.36,1),transform .65s cubic-bezier(.22,.61,.36,1);transition-delay:var(--yt-delay,0ms);will-change:opacity,transform}
+.card.ytRevealCard.ytVisible{opacity:1;transform:none}
+.card.ytRevealCard .pic img{transition:transform .75s cubic-bezier(.22,.61,.36,1),filter .45s ease}
+.card.ytRevealCard:hover .pic img{transform:scale(1.035)}
+.card.ytRevealCard .info{transition:transform .45s cubic-bezier(.22,.61,.36,1)}
+.card.ytRevealCard:hover .info{transform:translateY(-2px)}
+.card.ytRevealCard .badge{transition:transform .35s ease,opacity .35s ease}
+.card.ytRevealCard:hover .badge{transform:translateY(-2px)}
+
+/* Compact premium S / M / L / XL selector — same footprint language on desktop + mobile. */
+.card .sizes{display:flex!important;align-items:center;gap:8px!important;flex-wrap:nowrap!important;margin:12px 0 14px!important}
+.card .sizes button{width:38px!important;height:38px!important;min-width:38px!important;min-height:38px!important;padding:0!important;margin:0!important;border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.015)!important;color:inherit!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:11px!important;line-height:1!important;letter-spacing:.08em!important;border-radius:2px!important;transition:transform .2s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease!important}
+.card .sizes button:not(:disabled):hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55)!important}
+.card .sizes button.chosen{background:#fff!important;color:#000!important;border-color:#fff!important;box-shadow:0 5px 18px rgba(255,255,255,.08);transform:translateY(-1px)}
+.card .sizes button:disabled{opacity:.28!important;cursor:not-allowed!important}
+.card .sizes button:active{transform:scale(.94)!important}
+
+.modalSizes{gap:8px!important}
+.modalSizes button{min-width:44px!important;min-height:40px!important;padding:0 12px!important;border-radius:2px!important;transition:transform .2s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease!important}
+.modalSizes button.chosen{background:#fff!important;color:#000!important;border-color:#fff!important;box-shadow:0 6px 20px rgba(255,255,255,.08)}
+.cartChoiceBtns{gap:8px!important}
+.cartChoiceBtns button{min-width:38px!important;min-height:38px!important;padding:0 10px!important;transition:transform .2s ease,border-color .25s ease,background .25s ease!important}
+.cartChoiceBtns button.chosen{background:#fff!important;color:#000!important;border-color:#fff!important}
+
+/* Subtle premium feedback for wishlist/cart interactions. */
+.card .heart.ytLikePop{animation:ytLikePop .42s cubic-bezier(.22,.61,.36,1)}
+.card .add.ytAddPop{animation:ytAddPop .48s cubic-bezier(.22,.61,.36,1)}
+@keyframes ytLikePop{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes ytAddPop{0%{transform:scale(1)}45%{transform:scale(.97)}100%{transform:scale(1)}}
+
+/* Curated product sections use the exact same motion language. */
+.curatedSection .curatedGrid .card.ytRevealCard{transition-duration:.62s}
+.trendCard.ytRevealCard{opacity:0;transform:translateY(16px);transition:opacity .65s ease,transform .65s ease;transition-delay:var(--yt-delay,0ms)}
+.trendCard.ytRevealCard.ytVisible{opacity:1;transform:none}
+
+@media (max-width:520px){
+  .card .sizes{gap:7px!important;margin-top:10px!important;margin-bottom:12px!important}
+  .card .sizes button{width:34px!important;height:34px!important;min-width:34px!important;min-height:34px!important;font-size:10px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .card.ytRevealCard,.trendCard.ytRevealCard{opacity:1!important;transform:none!important;transition:none!important}
+  .card.ytRevealCard .pic img,.card.ytRevealCard .info,.card.ytRevealCard .badge{transition:none!important}
+}
+</style>
+
 </head>
 <body>
 <div class="shipping" aria-label="Free shipping announcement"><div class="shipping-track"><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span><span>✦ FREE SHIPPING ON PREPAID ORDERS ABOVE ₹999</span></div></div>
@@ -820,5 +868,58 @@ document.addEventListener('click',function(e){
   if(control && control.disabled) e.preventDefault();
 },true);
 </script>
+
+<script id="ytPremiumProductMotionJS">
+/* Premium product animation observer. Handles products rendered later by API/admin updates too. */
+(function(){
+  const targets=['#products','#bestSellerGrid','#newCollectionGrid','#womenTopsGrid'];
+  let io=null;
+  function revealCards(root){
+    if(!root)return;
+    const cards=root.querySelectorAll('.card');
+    cards.forEach((card,i)=>{
+      card.classList.add('ytRevealCard');
+      card.style.setProperty('--yt-delay',Math.min(i,7)*65+'ms');
+      if(io)io.observe(card); else card.classList.add('ytVisible');
+    });
+  }
+  function revealTrends(){
+    document.querySelectorAll('.trendCards .trendCard').forEach((card,i)=>{
+      card.classList.add('ytRevealCard');
+      card.style.setProperty('--yt-delay',i*90+'ms');
+      if(io)io.observe(card); else card.classList.add('ytVisible');
+    });
+  }
+  function boot(){
+    if('IntersectionObserver' in window){
+      io=new IntersectionObserver(entries=>entries.forEach(entry=>{
+        if(entry.isIntersecting){entry.target.classList.add('ytVisible');io.unobserve(entry.target)}
+      }),{threshold:.12,rootMargin:'0px 0px -5% 0px'});
+    }
+    targets.forEach(sel=>revealCards(document.querySelector(sel)));
+    revealTrends();
+    const mo=new MutationObserver(muts=>{
+      let changed=false;
+      muts.forEach(m=>{if(m.addedNodes&&m.addedNodes.length)changed=true});
+      if(changed){targets.forEach(sel=>revealCards(document.querySelector(sel)));revealTrends();}
+    });
+    targets.forEach(sel=>{const el=document.querySelector(sel);if(el)mo.observe(el,{childList:true,subtree:true})});
+    document.querySelectorAll('.card .pic img').forEach(img=>{
+      img.addEventListener('load',()=>img.closest('.card')?.classList.add('ytImageReady'),{once:true});
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+
+  document.addEventListener('click',function(e){
+    const size=e.target.closest?.('.card .sizes button');
+    if(size&&!size.disabled){size.animate?.([{transform:'scale(.94)'},{transform:'scale(1)'}],{duration:220,easing:'cubic-bezier(.22,.61,.36,1)'});}
+    const add=e.target.closest?.('[data-add-to-bag]');
+    if(add&&!add.disabled){add.classList.remove('ytAddPop');void add.offsetWidth;add.classList.add('ytAddPop');}
+    const heart=e.target.closest?.('.card .heart');
+    if(heart){heart.classList.remove('ytLikePop');void heart.offsetWidth;heart.classList.add('ytLikePop');}
+  },true);
+})();
+</script>
+
 </body>
 </html>
