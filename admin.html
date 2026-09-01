@@ -169,7 +169,7 @@ function renderSectionManager(){
  };
  state.sectionSettings=state.sectionSettings||Object.fromEntries(Object.keys(defaults).map(k=>[k,true]));
  state.website=state.website||{}; state.website.sectionProducts=state.website.sectionProducts||{};
- const products=(serverProducts&&serverProducts.length?serverProducts:state.products||[]);
+ const products=(state.products||[]);
  const escv=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
  sectionMap.innerHTML=Object.entries(defaults).map(([key,v],n)=>{
    const assigned=Array.isArray(state.website.sectionProducts[key])?state.website.sectionProducts[key].map(String):[];
