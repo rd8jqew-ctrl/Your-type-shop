@@ -128,6 +128,9 @@ let state=JSON.parse(localStorage.getItem(KEY)||'null')||{
  history:[], coupons:[{code:'WELCOME10',percent:10,min:999,expiry:'2026-12-31',active:true}],
  settings:{gst:5,shipping:99,freeShipping:1999}, categories:['T-Shirt','Shirt'], website:{announcement:'New drops every week',hero:'YOUR TYPE',featured:[],sectionProducts:{},social:'',phone:'',email:''}, wishlist:[]
 };
+function getAdminToken(){return sessionStorage.getItem('adminToken')||localStorage.getItem('adminToken')||''}
+function setAdminToken(t){sessionStorage.setItem('adminToken',t);localStorage.setItem('adminToken',t)}
+function clearAdminToken(){sessionStorage.removeItem('adminToken');localStorage.removeItem('adminToken')}
 function save(){localStorage.setItem(KEY,JSON.stringify(state));}
 state.categories=Array.isArray(state.categories)?state.categories:Array.from(new Set(state.products.map(p=>p.category).filter(Boolean)));
 state.website=state.website||{announcement:'New drops every week',hero:'YOUR TYPE',featured:[],social:'',phone:'',email:''};
@@ -136,7 +139,7 @@ state.products.forEach(p=>{if(p.hidden===undefined)p.hidden=false;if(p.featured=
 save();
 function prod(id){return state.products.find(p=>p.id===id)}
 function money(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
-function go(id,btn){let e=document.getElementById(id);if(!e){toast('Section not found');return}document.querySelectorAll('.section').forEach(x=>x.classList.remove('on'));e.classList.add('on');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('adminTabs').style.display=['store','account','customerOrders'].includes(id)?'none':'flex';if(id==='store')filterStore('all');if(id==='orders')renderOrders();if(id==='inventory')renderInventory();if(id==='products')renderProducts();if(id==='variants'){syncVariantTab()}if(id==='sections')renderSectionManager();if(id==='colors'){syncColorManager()}if(id==='coupons')renderCoupons();if(id==='customerOrders')renderCustomerOrders();updateDash();window.scrollTo({top:0,behavior:'smooth'})}
+function go(id,btn){let e=document.getElementById(id);if(!e){toast('Section not found');return}if(!['store','account','customerOrders'].includes(id))localStorage.setItem('ytAdminSection',id);document.querySelectorAll('.section').forEach(x=>x.classList.remove('on'));e.classList.add('on');document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('adminTabs').style.display=['store','account','customerOrders'].includes(id)?'none':'flex';if(id==='store')filterStore('all');if(id==='orders')renderOrders();if(id==='inventory')renderInventory();if(id==='products')renderProducts();if(id==='variants'){syncVariantTab()}if(id==='sections')renderSectionManager();if(id==='colors'){syncColorManager()}if(id==='coupons')renderCoupons();if(id==='customerOrders')renderCustomerOrders();updateDash();window.scrollTo({top:0,behavior:'smooth'})}
 function adminLogin(){
   openModal(`<h2>Admin Login</h2><form id="adminLoginForm" autocomplete="off" novalidate onsubmit="event.preventDefault();doAdminLogin()">
     <label for="loginUser" class="muted">Username</label>
@@ -150,10 +153,10 @@ function adminLogin(){
 }
 async function doAdminLogin(){const username=String(document.getElementById("loginUser")?.value||"").trim(),password=String(document.getElementById("loginPass")?.value||"");if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}sessionStorage.setItem("adminToken",x.token);closeModal();await loadServerState();go("dashboard")}catch(e){toast("Unable to connect to server")}}
 
-function adminHeaders(){const t=sessionStorage.getItem('adminToken');return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'}}
-async function loadServerState(){const t=sessionStorage.getItem('adminToken');if(!t)return;try{const r=await fetch('/api/admin/data',{headers:{Authorization:'Bearer '+t},cache:'no-store'});if(!r.ok)return;const d=await r.json();if(Array.isArray(d.products)){state.products=d.products.map(p=>({id:p.id,name:p.name,price:Number(String(p.price||'').replace(/[^0-9.]/g,''))||0,cost:Number(p.cost||0),sku:p.sku||'',category:p.category||'T-Shirts',description:p.description||'',sizes:Object.keys(p.sizes||{}).filter(k=>['S','M','L','XL','XXL'].includes(k)),colors:Array.isArray(p.colors)&&p.colors.length?p.colors:['Black','White','Charcoal'],images:p.images&&p.images.length?p.images:[p.image],hidden:p.active===false,featured:Boolean(p.featured),sections:Array.isArray(p.sections)?p.sections:[]}));state.inventory=[];state.products.forEach(p=>Object.entries(d.products.find(x=>x.id===p.id)?.sizes||{}).forEach(([sz,n])=>state.inventory.push([p.id,sz,Number(n||0),5])));state.categories=Array.from(new Set(state.products.map(p=>p.category).filter(Boolean)));save();renderProducts();renderInventory();filterStore('all');}const sr=await fetch('/api/site-config',{cache:'no-store'});if(sr.ok){const sd=await sr.json();state.website={...(state.website||{}),...(sd.site||{})};state.sectionSettings=(sd.site&&sd.site.sections)||state.sectionSettings;save();}}catch(e){console.warn('Server sync failed',e)}}
-async function serverPatchProduct(id,payload){const t=sessionStorage.getItem('adminToken');if(!t)return false;try{const r=await fetch('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',headers:adminHeaders(),body:JSON.stringify(payload)});if(!r.ok)return false;return true}catch(e){return false}}
-async function serverCreateProduct(p){const t=sessionStorage.getItem('adminToken');if(!t)return false;try{const payload={name:p.name,price:String(p.price),image:(p.images&&p.images[0]&&String(p.images[0]).startsWith('data:'))?'':(p.images&&p.images[0]||''),images:p.images||[],sizes:Object.fromEntries((p.sizes||[]).map(sz=>[sz,Number(p._stock||0)])),category:p.category||'T-Shirts',colors:p.colors||[]};const r=await fetch('/api/admin/products',{method:'POST',headers:adminHeaders(),body:JSON.stringify(payload)});return r.ok}catch(e){return false}}
+function adminHeaders(){const t=getAdminToken();return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'}}
+async function loadServerState(){const t=getAdminToken();if(!t)return;try{const r=await fetch('/api/admin/data',{headers:{Authorization:'Bearer '+t},cache:'no-store'});if(!r.ok)return;const d=await r.json();if(Array.isArray(d.products)){state.products=d.products.map(p=>({id:p.id,name:p.name,price:Number(String(p.price||'').replace(/[^0-9.]/g,''))||0,cost:Number(p.cost||0),sku:p.sku||'',category:p.category||'T-Shirts',description:p.description||'',sizes:Object.keys(p.sizes||{}).filter(k=>['S','M','L','XL','XXL'].includes(k)),colors:Array.isArray(p.colors)&&p.colors.length?p.colors:['Black','White','Charcoal'],images:p.images&&p.images.length?p.images:[p.image],hidden:p.active===false,featured:Boolean(p.featured),sections:Array.isArray(p.sections)?p.sections:[]}));state.inventory=[];state.products.forEach(p=>Object.entries(d.products.find(x=>x.id===p.id)?.sizes||{}).forEach(([sz,n])=>state.inventory.push([p.id,sz,Number(n||0),5])));state.categories=Array.from(new Set(state.products.map(p=>p.category).filter(Boolean)));save();renderProducts();renderInventory();filterStore('all');}const sr=await fetch('/api/site-config',{cache:'no-store'});if(sr.ok){const sd=await sr.json();state.website={...(state.website||{}),...(sd.site||{})};state.sectionSettings=(sd.site&&sd.site.sections)||state.sectionSettings;save();}}catch(e){console.warn('Server sync failed',e)}}
+async function serverPatchProduct(id,payload){const t=getAdminToken();if(!t)return false;try{const r=await fetch('/api/admin/products/'+encodeURIComponent(id),{method:'PATCH',headers:adminHeaders(),body:JSON.stringify(payload)});if(!r.ok)return false;return true}catch(e){return false}}
+async function serverCreateProduct(p){const t=getAdminToken();if(!t)return false;try{const payload={name:p.name,price:String(p.price),image:(p.images&&p.images[0]&&String(p.images[0]).startsWith('data:'))?'':(p.images&&p.images[0]||''),images:p.images||[],sizes:Object.fromEntries((p.sizes||[]).map(sz=>[sz,Number(p._stock||0)])),category:p.category||'T-Shirts',colors:p.colors||[]};const r=await fetch('/api/admin/products',{method:'POST',headers:adminHeaders(),body:JSON.stringify(payload)});return r.ok}catch(e){return false}}
 function colorCss(name){const n=String(name||'').toLowerCase().replace(/\s+/g,'');const map={black:'#000',white:'#fff',red:'#e53935',blue:'#2878ff',green:'#22a65a',yellow:'#f1c40f',orange:'#f39c12',purple:'#8e44ad',pink:'#ff5c8a',brown:'#8b5a2b',grey:'#777',gray:'#777',charcoal:'#333',cream:'#f1e5c8',beige:'#d8c3a5'};return map[n]||'#555'}
 function renderSectionManager(){
  const defaults={
@@ -185,7 +188,7 @@ async function saveSectionSettings(){
  state.sectionSettings=Object.fromEntries([...document.querySelectorAll('[data-section-key]')].map(x=>[x.dataset.sectionKey,x.checked]));
  state.website=state.website||{}; state.website.hero=sectionHeroTitle.value||'YOUR TYPE'; state.website.announcement=sectionAnnouncement.value||'';
  state.website.sectionProducts=Object.fromEntries(Object.keys(state.sectionSettings).map(key=>[key,[...document.querySelectorAll(`[data-section-product="${key}"]:checked`)].map(x=>x.value)]));
- save(); const t=sessionStorage.getItem('adminToken');
+ save(); const t=getAdminToken();
  if(t){try{const r=await fetch('/api/admin/site-config',{method:'PATCH',headers:adminHeaders(),body:JSON.stringify({hero:state.website.hero,announcement:state.website.announcement,sections:state.sectionSettings,sectionProducts:state.website.sectionProducts})});if(!r.ok)throw new Error('Server save failed')}catch(e){toast('Could not save section settings to server');return}}
  renderSectionManager(); toast('Website section settings saved')
 }
@@ -222,7 +225,7 @@ function margin(p){let g=+state.settings.gst||0,base=p.price/(1+g/100),gstAmt=p.
 function picHtml(p){return p.images&&p.images.length?`<img src="${p.images[0]}" style="width:100%;height:100%;object-fit:cover;display:block">`:'YT'}
 function renderProducts(q=''){let term=String(q||'').toLowerCase();let arr=state.products.filter(p=>!term||[p.name,p.sku,p.category].some(v=>String(v||'').toLowerCase().includes(term)));productGrid.innerHTML=arr.map(p=>{let m=margin(p);return `<div class=card style="opacity:${p.hidden?.55:1}"><div class=pic>${picHtml(p)}</div><div class=info><label><input type=checkbox class=pselect value="${p.id}"> Select</label><b>${p.name}</b><p class=muted>${p.category} · SKU ${p.sku}</p><b>${money(p.price)}</b><p>Sizes: ${(p.sizes||[]).join(', ')}</p><p>Colors: ${(p.colors||['Black']).join(', ')}</p><p>${p.hidden?'🙈 Hidden':'👁️ Visible'} · ${p.featured?'⭐ Featured':''}</p><div class=box style="margin:8px 0;padding:8px"><p class=muted style="margin:0">Base (excl. GST): ${money(m.base)} · GST: ${money(m.gstAmt)}</p><p class=muted style="margin:4px 0 0">Cost: ${money(m.cost)} · Profit: <b>${money(m.profit)}</b> (${m.pct.toFixed(1)}% margin)</p></div><button class=btn onclick="editProduct('${p.id}')">Edit</button><button class=btn onclick="toggleProduct('${p.id}')">${p.hidden?'Show':'Hide'}</button><button class=btn onclick="toggleFeatured('${p.id}')">${p.featured?'Unfeature':'Featured'}</button><button class=btn danger onclick="deleteProduct('${p.id}')">Delete</button></div></div>`}).join('')||'<div class="notice">No products found.</div>'}
 function selectedProductIds(){return [...document.querySelectorAll('.pselect:checked')].map(x=>x.value)}
-async function bulkProducts(action){let ids=selectedProductIds();if(!ids.length){toast('Select products first');return}if(action==='delete'&&!confirm('Delete selected products?'))return;let ok=false;const t=sessionStorage.getItem('adminToken');if(t){try{const r=await fetch('/api/admin/products/bulk',{method:'POST',headers:adminHeaders(),body:JSON.stringify({ids,action})});ok=r.ok}catch(e){}}ids.forEach(id=>{let p=prod(id);if(!p)return;if(action==='delete'){state.products=state.products.filter(x=>x.id!==id);state.inventory=state.inventory.filter(x=>x[0]!==id)}else p.hidden=action==='hide'});save();renderProducts(productSearch?.value||'');renderInventory();filterStore('all');toast(ok?'Bulk product update applied to website':'Bulk product update saved locally')}
+async function bulkProducts(action){let ids=selectedProductIds();if(!ids.length){toast('Select products first');return}if(action==='delete'&&!confirm('Delete selected products?'))return;let ok=false;const t=getAdminToken();if(t){try{const r=await fetch('/api/admin/products/bulk',{method:'POST',headers:adminHeaders(),body:JSON.stringify({ids,action})});ok=r.ok}catch(e){}}ids.forEach(id=>{let p=prod(id);if(!p)return;if(action==='delete'){state.products=state.products.filter(x=>x.id!==id);state.inventory=state.inventory.filter(x=>x[0]!==id)}else p.hidden=action==='hide'});save();renderProducts(productSearch?.value||'');renderInventory();filterStore('all');toast(ok?'Bulk product update applied to website':'Bulk product update saved locally')}
 async function toggleProduct(id){let p=prod(id);if(!p)return;const next=!p.hidden;const ok=await serverPatchProduct(id,{active:!next});p.hidden=next;save();renderProducts(productSearch?.value||'');filterStore('all');toast(ok?(p.hidden?'Product hidden on website':'Product shown on website'):(p.hidden?'Product hidden locally':'Product shown locally'))}
 function toggleFeatured(id){let p=prod(id);if(!p)return;p.featured=!p.featured;save();renderProducts(productSearch?.value||'');toast(p.featured?'Featured product enabled':'Featured product disabled')}
 function addProduct(){openModal(`<h2>Add Product</h2><input id=np placeholder="Product name"><input id=nsku placeholder="SKU"><input id=nprice type=number placeholder="Selling Price (incl. GST)"><input id=ncost type=number placeholder="Cost Price (what it costs you)"><select id=ncat><option>T-Shirt</option><option>Shirt</option></select><input id=nsizes value="S,M,L,XL,XXL" placeholder="Sizes, e.g. S,M,L,XL,XXL"><input id=ncolors value="Black,White,Charcoal" placeholder="Colors, comma separated"><input id=nstock type=number value=0 placeholder="Opening stock per size"><input type=file id=nimg multiple accept="image/*"><textarea id=ndesc placeholder="Description"></textarea><button class="btn primary" onclick="saveProduct()">Save Product</button>`)}
@@ -342,7 +345,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
 */
 (function(){
   const api = async (url, options={}) => {
-    const token=sessionStorage.getItem('adminToken')||'';
+    const token=getAdminToken()||'';
     const headers=Object.assign({'Content-Type':'application/json'}, options.headers||{});
     if(token) headers.Authorization='Bearer '+token;
     const r=await fetch(url,Object.assign({},options,{headers}));
@@ -553,7 +556,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
   }
 
   async function syncOnOpen(){
-    if(sessionStorage.getItem('adminToken')){
+    if(getAdminToken()){
       try{await syncFromServer(false)}catch(_){}
     }
   }
@@ -564,7 +567,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
 <script>
 /* YOUR TYPE — FINAL SERVER/UI COMPATIBILITY PATCH */
 (function(){
-  const api2=async(url,opt={})=>{const t=sessionStorage.getItem('adminToken')||'';const h=Object.assign({'Content-Type':'application/json'},opt.headers||{});if(t)h.Authorization='Bearer '+t;const r=await fetch(url,Object.assign({},opt,{headers:h}));let d={};try{d=await r.json()}catch(_){}if(!r.ok){if(r.status===401&&url!=='/api/admin/login'){sessionStorage.removeItem('adminToken');throw new Error('Session expired. Please sign in again.')}throw new Error(d.error||('Request failed ('+r.status+')'))}return d};
+  const api2=async(url,opt={})=>{const t=getAdminToken()||'';const h=Object.assign({'Content-Type':'application/json'},opt.headers||{});if(t)h.Authorization='Bearer '+t;const r=await fetch(url,Object.assign({},opt,{headers:h}));let d={};try{d=await r.json()}catch(_){}if(!r.ok){if(r.status===401&&url!=='/api/admin/login'){clearAdminToken();throw new Error('Session expired. Please sign in again.')}throw new Error(d.error||('Request failed ('+r.status+')'))}return d};
   const num=v=>Number(String(v??0).replace(/[^0-9.-]/g,''))||0;
   const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const productById=id=>state.products.find(p=>String(p.id)===String(id));
@@ -588,7 +591,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
     save();renderProducts(productSearch?.value||'');renderInventory();if(typeof renderVariantManager==='function')renderVariantManager();if(typeof renderSectionManager==='function')renderSectionManager();if(typeof syncColorManager==='function')syncColorManager();renderCoupons();renderOrders();if(typeof renderCustomerOrders==='function')renderCustomerOrders();filterStore('all');updateDash();
   }
 
-  window.doAdminLogin=async function(){const u=String(document.getElementById('loginUser')?.value||'').trim(),pw=String(document.getElementById('loginPass')?.value||'');if(!u||!pw){toast('Enter username and password');return}try{const x=await api2('/api/admin/login',{method:'POST',body:JSON.stringify({username:u,password:pw})});sessionStorage.setItem('adminToken',x.token);closeModal();await sync();go('dashboard');toast('Connected to website database')}catch(e){toast(e.message||'Login failed')}};
+  window.doAdminLogin=async function(){const u=String(document.getElementById('loginUser')?.value||'').trim(),pw=String(document.getElementById('loginPass')?.value||'');if(!u||!pw){toast('Enter username and password');return}try{const x=await api2('/api/admin/login',{method:'POST',body:JSON.stringify({username:u,password:pw})});setAdminToken(x.token);closeModal();await sync();go('dashboard');toast('Connected to website database')}catch(e){toast(e.message||'Login failed')}};
 
   window.renderOrders=function(q=''){const term=String(q||'').toLowerCase();const a=state.orders.filter(o=>(o.id+' '+o.customer+' '+(productById(o.productId)?.name||'')).toLowerCase().includes(term));ordersList.innerHTML=a.length?a.map(orderCard).join(''):'<p class="muted">No matching orders.</p>';};
   window.renderCustomerOrders=function(){customerOrderList.innerHTML=state.orders.length?state.orders.map(orderCard).join(''):'<p class="muted">No orders yet.</p>';};
@@ -621,7 +624,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
   window.orderCard=function(o){const p=productById(o.productId),qty=Math.max(1,num(o.qty)),price=num(o.price);return `<div class="order"><div style="display:flex;justify-content:space-between"><b>${esc(o.id||'—')}</b><span class="pill">${esc(o.status||'New')}</span></div><div class="orderbody"><div class="orderimg">${p?picHtml(p):'YT'}</div><div><b>${esc(p?.name||'Product')}</b><br>SKU: ${esc(p?.sku||'—')}<br>Size: <b>${esc(o.size||'—')}</b> · Color: <b>${esc(o.color||'—')}</b> · Qty: <b>${qty}</b><br>Unit: ${money(price)} · Total: <b>${money(price*qty)}</b><br>Payment: ${esc(o.payment||'COD')}<br><span class="muted">${esc(o.customer||'—')} · ${esc(o.phone||'—')}<br>${esc(o.date||'—')}</span></div></div><h3>Delivery Address</h3><div class="address">${esc(o.customer||'—')}\n${esc(o.address||'—')}\n📞 ${esc(o.phone||'—')}</div><p class="small">${o.verified?'✓ Address verified':'⚠ Address pending verification'}</p>${o.awb?`<p class="muted">AWB: <b>${esc(o.awb)}</b>${o.tracking_url?` · <a href="${esc(o.tracking_url)}" target="_blank" rel="noopener" style="color:#fff">Track Shipment</a>`:''}</p>`:''}<div class="timeline">${['Confirmed','Packed','Shipped','Out for Delivery','Delivered'].map((x,i)=>`<div class="step ${['Confirmed','Packed','Shipped','Out for Delivery','Delivered'].indexOf(o.status)>=i?'done':''}">${x}</div>`).join('')}</div><button class="btn good" onclick="setOrderStatus('${esc(o.id)}','Packed')">Packed</button><button class="btn" onclick="setOrderStatus('${esc(o.id)}','Shipped')">Shipped</button><button class="btn" onclick="setOrderStatus('${esc(o.id)}','Out for Delivery')">Out for Delivery</button><button class="btn primary" onclick="setOrderStatus('${esc(o.id)}','Delivered')">Delivered</button><button class="btn" onclick="verify('${esc(o.id)}')">Verify Address</button><button class="btn" onclick="shipment('${esc(o.id)}')">AWB / Tracking</button><button class="btn" onclick="invoiceById('${esc(o.id)}')">Invoice</button><button class="btn" onclick="addressSlip('${esc(o.id)}')">📄 Address / Packing Slip (PDF)</button><button class="btn danger" onclick="cancelOrder('${esc(o.id)}')">Cancel</button><br><br><button class="btn" onclick="details('${esc(o.id)}')">Full Details</button></div>`};
 
   window.syncAdminNow=sync;
-  window.addEventListener('load',()=>{if(sessionStorage.getItem('adminToken'))sync().catch(e=>toast(e.message))});
+  window.addEventListener('load',()=>{if(getAdminToken()){sync().then(()=>{const saved=localStorage.getItem('ytAdminSection');if(saved&&document.getElementById(saved))go(saved)}).catch(e=>toast(e.message))}});
 })();
 </script>
 
@@ -630,8 +633,9 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
    category filtering, order quantities, settings persistence, reviews/customers,
    and safer product-image fallbacks. */
 (function(){
-  const api=async(url,opt={})=>{const t=sessionStorage.getItem('adminToken')||'';const h=Object.assign({'Content-Type':'application/json'},opt.headers||{});if(t)h.Authorization='Bearer '+t;const r=await fetch(url,Object.assign({},opt,{headers:h}));let d={};try{d=await r.json()}catch(_){}if(!r.ok)throw new Error(d.error||('Request failed ('+r.status+')'));return d};
+  const api=async(url,opt={})=>{const t=getAdminToken()||'';const h=Object.assign({'Content-Type':'application/json'},opt.headers||{});if(t)h.Authorization='Bearer '+t;const r=await fetch(url,Object.assign({},opt,{headers:h}));let d={};try{d=await r.json()}catch(_){}if(!r.ok){if(r.status===401&&getAdminToken())clearAdminToken();throw new Error(d.error||('Request failed ('+r.status+')'))}return d};
   const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
   const num=v=>Number(String(v??0).replace(/[^0-9.-]/g,''))||0;
   const pid=id=>state.products.find(p=>String(p.id)===String(id));
   const normalizeCat=c=>String(c||'').toLowerCase().replace(/[-_\s]+/g,'');
@@ -639,7 +643,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
   window.picHtml=function(p){const raw=String(p?.image||p?.images?.[0]||'');if(!raw)return '<span>YT</span>';let src=raw;if(/^data:|^https?:|^\//i.test(raw)===false)src=raw;return `<img src="${esc(src)}" alt="${esc(p?.name||'Product')}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.remove();this.parentElement.classList.add('img-fallback');this.parentElement.dataset.fallback='YT'">`};
 
   async function refreshAdminData(){
-    if(!sessionStorage.getItem('adminToken'))return;
+    if(!getAdminToken())return;
     const d=await api('/api/admin/data');
     state.users=Array.isArray(d.users)?d.users:[];
     state.reviews=Array.isArray(d.reviews)?d.reviews:[];
@@ -730,7 +734,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
     const badOrders=orders.filter(o=>!o.orderId&&!o.id); add('Order IDs present',badOrders.length===0,badOrders.length+' orders missing an ID');
     const badTotals=orders.filter(o=>!Number.isFinite(Number(o.total??o.price))); add('Order totals numeric',badTotals.length===0,badTotals.length+' invalid totals');
     const funcs=['go','adminLogin','saveProduct','saveEdit','deleteProduct','stockUpdate','saveCoupon','toggleCoupon','updateDash']; add('Core UI handlers',funcs.every(n=>typeof window[n]==='function'),funcs.filter(n=>typeof window[n]!=='function').join(', ')||'All present');
-    add('Admin token available',!!sessionStorage.getItem('adminToken'),'Required for server-side changes');
+    add('Admin token available',!!getAdminToken(),'Required for server-side changes');
     const passed=checks.filter(x=>x.ok).length, failed=checks.length-passed;
     const el=document.getElementById('diagResult'); if(!el)return; el.innerHTML='<div class="notice"><b>'+passed+' passed · '+failed+' warning(s)</b></div>'+checks.map(x=>'<div class="row"><span>'+ (x.ok?'🟢 ':'🟠 ')+diagEsc(x.name)+'<br><small class="muted">'+diagEsc(x.detail)+'</small></span><b>'+ (x.ok?'PASS':'CHECK') +'</b></div>').join('');
   };
