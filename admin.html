@@ -474,6 +474,8 @@ button:active,.btn:active,.yt-quick-card:active{transform:scale(.97)!important}
 <div id="modal" class="modal"><div class="modalbox"><button class="btn close" onclick="closeModal()">Close</button><div id="modalBody"></div></div></div><div id="toast" class="toast"></div>
 
 <script>
+// Shared numeric helper: used by the server-backed Website Control handlers.
+window.num=window.num||function(v){return Number(String(v??0).replace(/[^0-9.-]/g,''))||0};
 const KEY='YOUR_TYPE_ADMIN_V1';
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||{
  products:[
@@ -708,9 +710,18 @@ const FC_SECTIONS = {
  womenTops:'Women Tops', highlights:'Highlights', editorial:'Editorial', newsletter:'Newsletter'
 };
 function fcEscape(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-async function fcServer(url,opt={}){return api2(url,opt)}
+async function fcServer(url,opt={}){
+  const token=(typeof getAdminToken==='function'?getAdminToken():'')||'';
+  const headers=Object.assign({'Content-Type':'application/json'},opt.headers||{});
+  if(token) headers.Authorization='Bearer '+token;
+  const r=await fetch(url,Object.assign({},opt,{headers}));
+  let d={}; try{d=await r.json()}catch(_){}
+  if(!r.ok){if(r.status===401&&typeof clearAdminToken==='function')clearAdminToken();throw new Error(d.error||('Request failed ('+r.status+')'))}
+  return d;
+}
+const fcNum=v=>Number(String(v??0).replace(/[^0-9.-]/g,''))||0;
 async function loadFullControl(){
-  if(typeof api2!=='function') return;
+  if(typeof fcServer!=='function') return;
   try{
     const d=await api2('/api/admin/data');
     const site=d.site||{}, st=d.settings||{};
@@ -737,13 +748,13 @@ function toggleAllHomepageSections(on){document.querySelectorAll('[data-fc-secti
 async function saveFullStoreSettings(){
   try{
     await fcServer('/api/admin/settings',{method:'PATCH',body:JSON.stringify({
-      gst:num(fcGST.value),shipping:num(fcShipping.value),freeShipping:num(fcFreeShipping.value)
+      gst:fcNum(fcGST.value),shipping:fcNum(fcShipping.value),freeShipping:fcNum(fcFreeShipping.value)
     })});
     await fcServer('/api/admin/store-settings',{method:'PATCH',body:JSON.stringify({
       name:fcStoreName.value.trim(),phone:fcPhone.value.trim(),whatsapp:fcWhatsapp.value.trim(),
       email:fcEmail.value.trim(),address:fcAddress.value.trim(),currency:fcCurrency.value.trim()||'INR'
     })});
-    await sync(); toast('Store settings saved to server');
+    if(window.syncAdminNow) await window.syncAdminNow(); toast('Store settings saved to server');
   }catch(e){toast(e.message)}
 }
 async function saveFullHomepage(){
@@ -755,7 +766,7 @@ async function saveFullHomepage(){
     await fcServer('/api/admin/site-content',{method:'PATCH',body:JSON.stringify({
       banner:fcBanner.value.trim(),bannerButton:fcBannerButton.value.trim(),bannerLink:fcBannerLink.value.trim()
     })});
-    await sync(); toast('Homepage control saved to server');
+    if(window.syncAdminNow) await window.syncAdminNow(); toast('Homepage control saved to server');
   }catch(e){toast(e.message)}
 }
 function renderFullSectionProducts(){
@@ -768,7 +779,7 @@ async function saveFullSectionProducts(){
     const map=Object.assign({},state.website?.sectionProducts||{});
     map[key]=[...document.querySelectorAll('[data-fc-product]:checked')].map(x=>x.dataset.fcProduct);
     await fcServer('/api/admin/site-config',{method:'PATCH',body:JSON.stringify({sectionProducts:map})});
-    await sync(); renderFullSectionProducts(); toast('Section products saved to server');
+    if(window.syncAdminNow) await window.syncAdminNow(); renderFullSectionProducts(); toast('Section products saved to server');
   }catch(e){toast(e.message)}
 }
 async function uploadFullMedia(){
@@ -813,7 +824,7 @@ async function restoreServerBackup(){
   try{
     const text=await f.text(), payload=JSON.parse(text);
     await fcServer('/api/admin/restore',{method:'POST',body:JSON.stringify({confirm:confirmText,backup:payload})});
-    closeModal(); await sync(); await loadFullControl(); toast('Server backup restored');
+    closeModal(); if(window.syncAdminNow) await window.syncAdminNow(); await loadFullControl(); toast('Server backup restored');
   }catch(e){toast(e.message)}
 }
 </script>
@@ -1240,4 +1251,82 @@ async function restoreServerBackup(){
 })();
 </script>
 
+<script>
+/* YOUR TYPE — FINAL SAFE CONTROL PATCH
+   Only fixes admin actions that previously used local-only state or an undefined helper.
+   Existing theme, layout, authentication UI and server secrets are left untouched. */
+(function(){
+  const api=async(url,opt={})=>{
+    const token=getAdminToken()||'';
+    const headers=Object.assign({'Content-Type':'application/json'},opt.headers||{});
+    if(token) headers.Authorization='Bearer '+token;
+    const r=await fetch(url,Object.assign({},opt,{headers}));
+    let d={}; try{d=await r.json()}catch(_){ }
+    if(!r.ok){ if(r.status===401) clearAdminToken(); throw new Error(d.error||('Request failed ('+r.status+')')); }
+    return d;
+  };
+
+  // The original button used a browser-only backup. Make it use the protected server backup.
+  window.backup=async function(){
+    try{
+      if(!getAdminToken()){toast('Please sign in as admin first');return}
+      const d=await api('/api/admin/backup');
+      downloadText('YOUR_TYPE_BACKUP.json',JSON.stringify(d,null,2),'application/json');
+    }catch(e){toast(e.message)}
+  };
+
+  // Restore now uses the protected server restore endpoint instead of replacing localStorage.
+  window.restore=function(){
+    openModal('<h2>Restore Server Data</h2><p class="muted">This restores server store data. Permanently deleted product IDs remain protected.</p><input type="file" id="restoreFile" accept=".json"><input id="restoreConfirm" placeholder="Type RESTORE_YOUR_TYPE"><button class="btn danger" onclick="doRestore()">Restore Server Data</button>');
+  };
+  window.doRestore=async function(){
+    const f=document.getElementById('restoreFile')?.files?.[0];
+    const confirmText=document.getElementById('restoreConfirm')?.value||'';
+    if(!f){toast('Choose backup file');return}
+    if(confirmText!=='RESTORE_YOUR_TYPE'){toast('Confirmation text is incorrect');return}
+    try{
+      const payload=JSON.parse(await f.text());
+      await api('/api/admin/restore',{method:'POST',body:JSON.stringify({confirm:confirmText,backup:payload})});
+      closeModal();
+      if(window.syncAdminNow) await window.syncAdminNow();
+      if(typeof loadFullControl==='function') await loadFullControl();
+      toast('Server backup restored successfully');
+    }catch(e){toast(e.message||'Restore failed')}
+  };
+
+  // The older Website settings form contains social/phone/email fields. Persist those too.
+  window.saveWebsiteControl=async function(){
+    const featured=(document.getElementById('siteFeatured')?.value||'').split(',').map(x=>x.trim()).filter(Boolean);
+    const payload={
+      hero:document.getElementById('siteHero')?.value||'YOUR TYPE',
+      announcement:document.getElementById('siteAnnouncement')?.value||'',
+      social:document.getElementById('siteSocial')?.value||'',
+      phone:document.getElementById('sitePhone')?.value||'',
+      email:document.getElementById('siteEmail')?.value||''
+    };
+    try{
+      await api('/api/admin/site-config',{method:'PATCH',body:JSON.stringify(payload)});
+      for(const p of (state.products||[])){
+        const want=featured.includes(String(p.id));
+        if(Boolean(p.featured)!==want){
+          await api('/api/admin/products/'+encodeURIComponent(p.id),{method:'PATCH',body:JSON.stringify({featured:want})});
+        }
+      }
+      if(window.syncAdminNow) await window.syncAdminNow();
+      toast('Website settings saved to server');
+    }catch(e){toast(e.message)}
+  };
+
+  // Make global palette genuinely server-backed.
+  window.saveGlobalColors=async function(){
+    const palette=(document.getElementById('globalColors')?.value||'').split(',').map(x=>x.trim()).filter(Boolean);
+    if(!palette.length){toast('Enter at least one color');return}
+    try{
+      await api('/api/admin/site-config',{method:'PATCH',body:JSON.stringify({colorPalette:palette})});
+      if(window.syncAdminNow) await window.syncAdminNow();
+      toast('Global color palette saved to server');
+    }catch(e){toast(e.message)}
+  };
+})();
+</script>
 </body></html>
