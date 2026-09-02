@@ -54,23 +54,6 @@
       "Red",
       "Blue",
       "Green"
-    ],
-    "store": {
-      "name": "YOUR TYPE",
-      "phone": "",
-      "whatsapp": "",
-      "email": "",
-      "address": "",
-      "currency": "INR"
-    },
-    "content": {
-      "banner": "",
-      "bannerButton": "",
-      "bannerLink": ""
-    },
-    "categories": [
-      "T-Shirt",
-      "Shirt"
     ]
   },
   "settings": {

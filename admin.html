@@ -28,6 +28,223 @@ button,.btn,a,summary{touch-action:manipulation}
 .pill{border:1px solid #444;border-radius:99px;padding:4px 8px;font-size:11px}.notice{padding:10px;border:1px solid #444;border-radius:9px;background:#141414}
 @media(min-width:700px){.stats,.grid,.menu{grid-template-columns:repeat(4,1fr)}}
 .adminMap{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.adminMapCard{background:#101010;border:1px solid #292929;border-radius:12px;padding:13px}.adminMapCard h3{margin:0 0 6px;font-size:15px}.adminMapCard p{margin:5px 0;color:#999;line-height:1.45}.switchRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}.switchRow input{width:auto;margin:0;transform:scale(1.2)}.colorSwatches{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.swatch{display:inline-flex;align-items:center;gap:7px;border:1px solid #333;border-radius:99px;padding:7px 10px;background:#151515}.swatch i{width:18px;height:18px;border-radius:50%;border:1px solid #777;display:inline-block}.help{border-left:3px solid #777;padding:10px 12px;background:#121212;color:#bbb;line-height:1.5;border-radius:8px}.adminHiddenNote{color:#777;font-size:12px}.controlNav{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:12px}.controlGroup{background:#111;border:1px solid #292929;border-radius:12px;padding:12px}.controlGroup h3{margin:0 0 9px;font-size:14px}.controlLinks{display:grid;gap:7px}.controlLink{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 11px;background:#151515;border:1px solid #292929;border-radius:9px;color:#fff;cursor:pointer}.controlLink span:last-child{color:#888;font-size:12px}.phaseTag{font-size:10px;border:1px solid #444;border-radius:99px;padding:3px 7px;color:#aaa}@media(min-width:700px){.controlNav{grid-template-columns:repeat(3,1fr)}}@media(min-width:700px){.adminMap{grid-template-columns:repeat(3,1fr)}}
+
+/* YOUR TYPE PREMIUM ADMIN UI — visual layer only; existing handlers stay intact */
+:root{--yt-bg:#070707;--yt-panel:#101010;--yt-panel2:#151515;--yt-line:#292929;--yt-text:#f5f5f5;--yt-muted:#8d8d8d;--yt-soft:#bdbdbd;--yt-accent:#fff}
+body{background:radial-gradient(circle at 85% -10%,#202020 0,#0a0a0a 34%,#070707 70%);font-family:Arial,Helvetica,sans-serif;letter-spacing:.01em}
+header{height:64px;padding:10px 16px;background:rgba(8,8,8,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08);box-shadow:0 8px 28px #0008}
+.logo{font-size:14px;letter-spacing:4px}
+.wrap{max-width:1180px;padding:0 16px}
+h1,h2,h3{letter-spacing:-.025em}h2{font-size:24px;margin:18px 0 10px}
+.btn{position:relative;overflow:hidden;border-color:#303030;background:linear-gradient(180deg,#181818,#111);box-shadow:0 2px 0 #000,0 8px 20px #0004;transition:transform .16s ease,background .2s ease,border-color .2s ease,box-shadow .2s ease}
+.btn:hover{background:linear-gradient(180deg,#232323,#151515);border-color:#4a4a4a;box-shadow:0 5px 18px #0008;transform:translateY(-1px)}
+.btn:active,.btn.yt-pressed{transform:scale(.96);box-shadow:0 1px 5px #000}
+.btn.primary{background:linear-gradient(180deg,#fff,#dedede);color:#050505;border-color:#fff;font-weight:800}
+.btn.primary:hover{background:#fff}
+.tabs{gap:7px;padding:9px 0 15px}
+#adminTabs{display:none!important}
+#adminTabs .tab{display:none}
+.yt-admin-shell{margin:8px 0 18px;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:linear-gradient(180deg,#111,#0c0c0c);box-shadow:0 14px 40px #0008}
+.yt-admin-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}.yt-kicker{font-size:10px;letter-spacing:2.5px;color:#777}.yt-title{font-size:25px;font-weight:900;margin-top:3px}.yt-sub{font-size:12px;color:#888;margin-top:4px}.yt-status{font-size:11px;color:#aaa;border:1px solid #303030;background:#141414;border-radius:999px;padding:7px 10px;white-space:nowrap}
+.yt-nav-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.yt-nav-card{border:1px solid #292929;border-radius:13px;background:#111;overflow:hidden;transition:.2s ease}.yt-nav-card.open{border-color:#555;background:#151515;box-shadow:0 8px 24px #0008}.yt-nav-head{width:100%;border:0;background:transparent;color:#fff;text-align:left;padding:12px;display:flex;align-items:center;justify-content:space-between;font-weight:800;cursor:pointer}.yt-nav-head small{display:block;color:#777;font-weight:400;margin-top:3px}.yt-chevron{transition:transform .2s}.yt-nav-card.open .yt-chevron{transform:rotate(180deg)}.yt-nav-links{display:none;padding:0 8px 8px;grid-template-columns:1fr 1fr;gap:6px}.yt-nav-card.open .yt-nav-links{display:grid}.yt-nav-link{border:1px solid #292929;background:#0d0d0d;color:#ddd;border-radius:9px;padding:10px 9px;text-align:left;font-size:12px;cursor:pointer;min-height:42px;transition:.16s}.yt-nav-link:hover{background:#202020;border-color:#444}.yt-nav-link.active{background:#fff;color:#050505;border-color:#fff;font-weight:800}
+.yt-home-actions{display:flex;gap:8px;overflow:auto;padding-bottom:2px;margin-top:10px}.yt-home-actions .btn{white-space:nowrap}
+.section.on{animation:ytPageIn .28s ease both}@keyframes ytPageIn{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:none}}
+.stat,.card,.box,.order,.controlGroup,.adminMapCard{background:linear-gradient(180deg,#121212,#0e0e0e);border-color:#292929;box-shadow:0 8px 25px #0005;transition:transform .18s ease,border-color .2s ease,box-shadow .2s ease}.stat:hover,.card:hover,.box:hover{border-color:#3d3d3d;box-shadow:0 12px 30px #0008}
+.stat b{font-size:25px}.stat{min-height:88px}
+.search,input,select,textarea{background:#101010;border-color:#2d2d2d;transition:border-color .2s,box-shadow .2s,background .2s}.search:focus,input:focus,select:focus,textarea:focus{outline:none;border-color:#666;box-shadow:0 0 0 3px #fff1;background:#151515}
+.toast{display:none;bottom:22px;padding:0;overflow:hidden;background:#121212;color:#fff;border:1px solid #444;border-radius:13px;box-shadow:0 14px 40px #000c;min-width:230px;text-align:center;font-weight:700;animation:ytToastIn .25s ease}.toast::before{content:'✓';display:inline-grid;place-items:center;width:28px;height:28px;margin-right:8px;border-radius:50%;background:#fff;color:#000}@keyframes ytToastIn{from{opacity:0;transform:translate(-50%,12px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.yt-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}.yt-section-title span{color:#777;font-size:11px}.yt-badge{border:1px solid #333;border-radius:999px;padding:5px 8px;color:#aaa;font-size:10px;letter-spacing:1px}
+@media(max-width:699px){header{height:58px;padding:8px 12px}.wrap{padding:0 11px}.yt-admin-shell{padding:11px;border-radius:15px}.yt-admin-top{align-items:flex-start}.yt-title{font-size:21px}.yt-nav-grid{grid-template-columns:1fr 1fr}.yt-nav-links{grid-template-columns:1fr}.yt-nav-head{min-height:64px;padding:10px}.yt-status{display:none}.stats{gap:7px}.stat{padding:11px;min-height:76px}.stat b{font-size:21px}.box,.order,.card{border-radius:12px}.btn{box-shadow:0 3px 14px #0005}.toast{bottom:18px;min-width:220px}.hero{padding:20px 4px}.hero h1,h1{font-size:31px}}
+@media(min-width:700px){.yt-admin-shell{padding:16px}.yt-nav-links{grid-template-columns:1fr 1fr 1fr}}
+
+
+/* === YOUR TYPE REAL PREMIUM APP SHELL v2 === */
+:root{--yt-purple:#7c2cff;--yt-purple2:#a855f7;--yt-bg:#05070b;--yt-panel:#0b1018;--yt-panel2:#101722;--yt-line:#1c2735;--yt-text:#f8fafc;--yt-muted:#8792a2;--yt-green:#22c55e;--yt-blue:#38bdf8;--yt-orange:#f59e0b}
+html,body{background:#05070b!important;color:var(--yt-text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 500px at 75% -5%,rgba(124,44,255,.15),transparent 58%),radial-gradient(700px 500px at 10% 100%,rgba(56,189,248,.05),transparent 65%),#05070b!important}
+header{height:68px!important;padding:10px 18px!important;background:rgba(5,7,11,.82)!important;border-bottom:1px solid rgba(255,255,255,.07)!important;backdrop-filter:blur(20px);box-shadow:0 10px 35px rgba(0,0,0,.35)!important;position:sticky!important}
+.logo{font-size:15px!important;letter-spacing:4px!important;color:#fff}
+.wrap{max-width:1280px!important;padding:0 20px!important}
+.btn{border:1px solid #253043!important;background:linear-gradient(180deg,#121925,#0c121b)!important;color:#eef2f7!important;border-radius:11px!important;box-shadow:0 8px 25px rgba(0,0,0,.2)!important;transition:transform .16s,border-color .2s,background .2s,box-shadow .2s!important}
+.btn:hover{border-color:#4a3b78!important;background:linear-gradient(180deg,#19152a,#101522)!important;transform:translateY(-1px)!important}
+.btn.primary{background:linear-gradient(135deg,#6d20ff,#9b43ff)!important;border-color:#9d55ff!important;color:#fff!important;box-shadow:0 8px 28px rgba(124,44,255,.32)!important}
+input,select,textarea,.search{background:#0a1018!important;border-color:#202c3c!important;color:#eef2f7!important;border-radius:10px!important}
+input:focus,select:focus,textarea:focus,.search:focus{border-color:#7c2cff!important;box-shadow:0 0 0 3px rgba(124,44,255,.13)!important}
+.stat,.box,.card,.order,.controlGroup,.adminMapCard{background:linear-gradient(180deg,rgba(16,23,34,.96),rgba(9,14,21,.96))!important;border:1px solid #1c2735!important;border-radius:15px!important;box-shadow:0 14px 40px rgba(0,0,0,.28)!important}
+.stat:hover,.box:hover,.card:hover{border-color:#303d50!important}
+.section{max-width:100%!important}.section.on{animation:ytEnter .25s ease both}@keyframes ytEnter{from{opacity:.45;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* premium navigation */
+#ytPremiumAdminNav{margin:14px 0 22px!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+#ytPremiumAdminNav .yt-admin-top{padding:18px 2px 12px!important;margin:0!important;align-items:center!important}
+#ytPremiumAdminNav .yt-kicker{color:#8b5cf6!important;letter-spacing:2.2px!important;font-weight:800}
+#ytPremiumAdminNav .yt-title{font-size:30px!important;letter-spacing:-.04em!important}
+#ytPremiumAdminNav .yt-sub{color:#7f8a9b!important}
+#ytPremiumAdminNav .yt-status{border-color:#273244!important;background:#0d141e!important;color:#aab4c2!important}
+.yt-home-actions{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:9px!important;padding:0!important;margin:6px 0 12px!important}
+.yt-home-actions .btn{min-height:48px!important}
+.yt-nav-grid{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:8px!important}
+.yt-nav-card{background:#0b111a!important;border:1px solid #1d2939!important;border-radius:13px!important}
+.yt-nav-card.open{border-color:#5b3a9a!important;background:linear-gradient(180deg,#111324,#0b111a)!important;box-shadow:0 12px 30px rgba(0,0,0,.3)!important}
+.yt-nav-head{padding:12px 11px!important}.yt-nav-head small{color:#738095!important}.yt-nav-link{background:#0a1018!important;border-color:#1e2938!important}.yt-nav-link.active{background:linear-gradient(135deg,#6d20ff,#9b43ff)!important;color:#fff!important;border-color:#9d55ff!important}
+/* Dashboard target layout */
+#dashboard>h2{font-size:0;margin:0 0 18px!important}
+#dashboard>h2:after{content:'Welcome back, Admin! 👋';font-size:28px;letter-spacing:-.04em;font-weight:850;display:block}
+#dashboard:before{content:'Here’s what’s happening with your store today.';display:block;color:#7e8a9a;font-size:13px;margin:-12px 0 18px}
+#dashboard>.stats{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:11px!important}
+#dashboard>.stats .stat{min-height:108px!important;position:relative;overflow:hidden}
+#dashboard>.stats .stat:after{content:'';position:absolute;right:-18px;bottom:-25px;width:95px;height:70px;border-radius:50%;background:radial-gradient(circle,rgba(124,44,255,.22),transparent 68%)}
+#dashboard>.stats .stat b{font-size:25px!important;margin:8px 0 5px!important}
+#dashboard>.stats .stat:nth-child(1) b{color:#c084fc}.dashboardQuick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+.yt-quick-card{padding:15px;border:1px solid #1c2735;border-radius:14px;background:#0b111a;cursor:pointer;transition:.18s}.yt-quick-card:hover{transform:translateY(-2px);border-color:#4a3b78}.yt-quick-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(124,44,255,.16);color:#c084fc;font-size:17px;margin-bottom:10px}.yt-quick-card b{font-size:13px}.yt-quick-card span{display:block;color:#758196;font-size:11px;margin-top:3px}
+.yt-dashboard-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:12px;margin-top:12px}.yt-chart{min-height:260px}.yt-chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.yt-chart-title{font-size:16px;font-weight:800}.yt-chart-sub{font-size:11px;color:#738095}.yt-bars{height:170px;display:flex;align-items:flex-end;gap:7px;padding:18px 5px 5px;border-top:1px solid #182332}.yt-bar{flex:1;min-width:6px;height:var(--h);background:linear-gradient(180deg,#a855f7,#5b21b6);border-radius:7px 7px 2px 2px;box-shadow:0 0 18px rgba(124,44,255,.18)}.yt-chart-labels{display:flex;justify-content:space-between;color:#667386;font-size:10px;margin-top:5px}.yt-summary{display:grid;gap:8px}.yt-summary-row{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid #182332;border-radius:11px;background:#0a1018}.yt-summary-row span{color:#aeb8c6;font-size:12px}.yt-summary-row b{font-size:12px}.yt-dot{width:9px;height:9px;border-radius:50%;background:#7c2cff;display:inline-block;margin-right:8px}.yt-dot.green{background:#22c55e}.yt-dot.blue{background:#38bdf8}.yt-dot.orange{background:#f59e0b}
+#dashboard>.box{margin-top:12px!important}
+#dashboard>.menu{display:none}
+/* Control Center should feel like a settings app */
+#controlCenter>h2{font-size:28px;letter-spacing:-.04em}#controlCenter>.stats{gap:10px}.controlGroup,.adminMapCard{box-shadow:none!important}
+/* mobile app shell */
+.yt-mobile-bottom{display:none}
+@media(max-width:699px){
+ body{padding-bottom:76px!important}
+ header{height:58px!important;padding:8px 12px!important}
+ .wrap{padding:0 12px!important}
+ #ytPremiumAdminNav{margin:6px 0 14px!important}
+ #ytPremiumAdminNav .yt-admin-top{padding:8px 1px 12px!important}
+ #ytPremiumAdminNav .yt-title{font-size:20px!important}.yt-sub{font-size:11px!important}
+ #ytPremiumAdminNav .yt-status{font-size:10px;padding:6px 8px}
+ .yt-home-actions{grid-template-columns:repeat(2,1fr)!important;gap:7px!important}
+ .yt-home-actions .btn{min-height:43px!important;padding:8px!important}
+ .yt-nav-grid{grid-template-columns:repeat(2,1fr)!important;gap:7px!important}
+ .yt-nav-card{border-radius:12px!important}.yt-nav-links{grid-template-columns:1fr!important}
+ #dashboard>h2:after{font-size:23px}.section.on{padding-bottom:12px}
+ #dashboard>.stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ #dashboard>.stats .stat{min-height:92px!important;padding:12px!important}
+ #dashboard>.stats .stat b{font-size:21px!important}
+ .dashboardQuick{grid-template-columns:repeat(4,1fr);gap:6px;overflow:auto;padding-bottom:2px}.yt-quick-card{min-width:78px;padding:10px}.yt-quick-icon{width:30px;height:30px;margin-bottom:7px}.yt-quick-card b{font-size:11px}.yt-quick-card span{font-size:9px}
+ .yt-dashboard-grid{grid-template-columns:1fr!important}
+ .yt-chart{min-height:225px}.yt-bars{height:135px;gap:4px}.yt-chart-labels{font-size:9px}
+ .yt-mobile-bottom{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:10px;right:10px;bottom:10px;height:62px;background:rgba(9,14,21,.94);border:1px solid #273244;border-radius:18px;z-index:80;backdrop-filter:blur(18px);box-shadow:0 18px 50px rgba(0,0,0,.55);padding:5px}
+ .yt-mobile-bottom button{border:0;background:transparent;color:#7f8b9b;border-radius:13px;font-size:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0}.yt-mobile-bottom button b{font-size:18px;line-height:18px;font-weight:500}.yt-mobile-bottom button.active{background:rgba(124,44,255,.2);color:#d8b4fe;box-shadow:inset 0 0 0 1px rgba(168,85,247,.2)}
+ #adminTabs{display:none!important}
+}
+@media(min-width:700px){.yt-mobile-bottom{display:none!important}}
+
+/* ===== YOUR TYPE browser QA polish ===== */
+#dashboard:before{content:none!important}
+#dashboard>h2{display:none!important}
+@media(max-width:699px){.dashboardQuick{grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:visible!important}.yt-quick-card{min-width:0!important}}
+
+/* ===== YOUR TYPE reference implementation ===== */
+:root{
+ --yt-bg:#050a12;--yt-panel:#0a111b;--yt-panel2:#0d1622;--yt-border:#1a2737;
+ --yt-text:#f4f6fb;--yt-muted:#778398;--yt-purple:#7c2cff;--yt-purple2:#a855f7;
+}
+html{background:var(--yt-bg)}
+body{background:radial-gradient(900px 500px at 70% -10%,rgba(91,33,182,.14),transparent 60%),#050a12!important;color:var(--yt-text)!important;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif!important}
+header{background:rgba(4,9,15,.94)!important;border-bottom:1px solid #182332!important;backdrop-filter:blur(16px)}
+.wrap{max-width:1250px!important}
+.btn{background:#0b121c!important;border-color:#202d3e!important;border-radius:11px!important;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease!important}
+.btn:hover{background:#111b29!important;border-color:#35455a!important;transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#6417ed,#8b2cff)!important;border-color:#974cff!important;box-shadow:0 8px 25px rgba(124,44,255,.28)!important}
+.box,.stat,.card,.order,.controlGroup,.adminMapCard{background:linear-gradient(180deg,#0c141f,#080f18)!important;border-color:var(--yt-border)!important;box-shadow:0 15px 40px rgba(0,0,0,.22)!important}
+h1,h2,h3{letter-spacing:-.025em}
+input,select,textarea,.search{background:#09111b!important;border-color:#1d2a3a!important}
+input:focus,select:focus,textarea:focus,.search:focus{border-color:#7c2cff!important;box-shadow:0 0 0 3px rgba(124,44,255,.12)!important}
+
+/* desktop: persistent left app sidebar */
+@media(min-width:1000px){
+ header{display:none!important}
+ .wrap{margin-left:270px!important;margin-right:22px!important;padding:0 18px!important;max-width:none!important}
+ #ytPremiumAdminNav{position:fixed!important;left:14px!important;top:14px!important;bottom:14px!important;width:238px!important;height:auto!important;margin:0!important;padding:16px!important;overflow:auto!important;background:linear-gradient(180deg,#09111b,#060b12)!important;border:1px solid #1b2838!important;border-radius:20px!important;box-shadow:0 25px 70px rgba(0,0,0,.45)!important;z-index:70!important}
+ #ytPremiumAdminNav .yt-admin-top{display:block!important;padding:6px 4px 18px!important}
+ #ytPremiumAdminNav .yt-kicker{font-size:10px!important;color:#a855f7!important}
+ #ytPremiumAdminNav .yt-title{font-size:22px!important;margin-top:6px!important}
+ #ytPremiumAdminNav .yt-sub{font-size:11px!important;line-height:1.45!important}
+ #ytPremiumAdminNav .yt-status{margin-top:12px!important;display:inline-block!important}
+ #ytPremiumAdminNav .yt-home-actions{display:grid!important;grid-template-columns:1fr!important}
+ #ytPremiumAdminNav .yt-home-actions .btn{text-align:left!important}
+ #ytPremiumAdminNav .yt-nav-grid{display:block!important}
+ #ytPremiumAdminNav .yt-nav-card{margin:7px 0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+ #ytPremiumAdminNav .yt-nav-head{width:100%!important;background:transparent!important;border:0!important;text-align:left!important;color:#8995a7!important;padding:8px 6px!important}
+ #ytPremiumAdminNav .yt-nav-head span:first-child{display:flex!important;flex-direction:column!important;gap:2px!important}
+ #ytPremiumAdminNav .yt-nav-head small{font-size:10px!important;color:#596679!important}
+ #ytPremiumAdminNav .yt-nav-links{display:grid!important;gap:3px!important;padding:0 0 4px!important}
+ #ytPremiumAdminNav .yt-nav-link{border:0!important;background:transparent!important;text-align:left!important;padding:9px 10px!important;border-radius:9px!important;color:#b5bfcc!important}
+ #ytPremiumAdminNav .yt-nav-link.active{background:linear-gradient(135deg,#5d18dd,#7622ef)!important;color:#fff!important;box-shadow:0 6px 20px rgba(124,44,255,.24)!important}
+ .yt-home-actions{margin-bottom:12px!important}
+ .yt-dashboard-welcome{padding-top:28px!important}
+}
+
+/* dashboard target */
+.yt-dashboard-welcome{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.yt-dashboard-welcome h2{font-size:28px;margin:3px 0 4px!important}
+.yt-dashboard-welcome p{margin:0;color:#748196;font-size:12px}
+.yt-eyebrow{font-size:10px;letter-spacing:2px;color:#9b5cff;font-weight:800}
+.yt-icon-btn{width:42px;height:42px;border:1px solid #202d3e;background:#0c141f;color:#fff;border-radius:12px;cursor:pointer;font-size:18px}
+.yt-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+.yt-kpi{min-height:118px!important;position:relative;overflow:hidden!important;padding:15px!important}
+.yt-kpi>span{font-size:12px;color:#aab5c4}
+.yt-kpi>b{font-size:24px!important;margin:9px 0 5px!important}
+.yt-kpi small{color:#758297;font-size:10px}
+.yt-kpi:before{content:'';position:absolute;right:-20px;top:-20px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.18),transparent 68%)}
+.yt-kpi-sales>b{color:#d2a5ff}.yt-kpi-orders>b{color:#8ff0bc}.yt-kpi-customers>b{color:#6bbcff}.yt-kpi-low>b{color:#ffb74d}
+.yt-mini-line{position:absolute;right:10px;bottom:13px;width:62px;height:25px;border-bottom:2px solid #9b5cff;transform:skewY(-12deg);opacity:.7}
+.yt-kpi-orders .yt-mini-line{border-color:#22c55e}.yt-kpi-customers .yt-mini-line{border-color:#38bdf8}.yt-kpi-low .yt-mini-line{border-color:#f59e0b}
+.yt-hidden-value{display:none}
+.yt-section-heading{display:flex;align-items:end;justify-content:space-between;margin:20px 0 9px}
+.yt-section-heading h3{margin:0;font-size:16px}.yt-section-heading p{margin:3px 0 0;color:#68758a;font-size:11px}
+.yt-quick-grid{grid-template-columns:repeat(4,1fr)!important;gap:9px!important;margin:0!important}
+.yt-quick-card{min-height:88px;padding:13px!important;background:#0a121d!important;border:1px solid #172536!important;border-radius:13px!important}
+.yt-quick-card:hover{border-color:#58349b!important;background:#0d1622!important;transform:translateY(-2px)}
+.yt-quick-icon{width:33px;height:33px!important;margin-bottom:9px!important;background:rgba(124,44,255,.13)!important;color:#c084fc!important;border-radius:10px!important}
+.yt-quick-card b{font-size:12px!important}.yt-quick-card span{font-size:10px!important;color:#6f7d91!important}
+.yt-dashboard-grid{grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr)!important;gap:11px!important;margin-top:12px!important}
+.yt-sales-chart{min-height:330px!important}.yt-summary-box{min-height:330px!important}
+.yt-select-mini{background:#0b121c;border:1px solid #1d2a3a;color:#c8d0dc;border-radius:9px;padding:7px 9px;font-size:10px}
+.yt-chart-area{height:220px;display:flex;gap:7px;align-items:stretch}
+.yt-ylabels{width:35px;display:flex;flex-direction:column;justify-content:space-between;color:#59677b;font-size:9px;padding:7px 0 8px}
+.yt-line-chart{flex:1;border-top:1px solid #182332;border-bottom:1px solid #182332;background:repeating-linear-gradient(to bottom,transparent 0,transparent 43px,#13202e 44px);border-radius:5px;overflow:hidden}
+.yt-line-chart svg{width:100%;height:100%;display:block}
+.yt-report-btn{width:100%;margin-top:11px}
+.yt-summary{gap:7px!important}.yt-summary-row{background:#0a111b!important;border-color:#172536!important;padding:11px!important}
+.yt-summary-row b{font-size:12px}
+
+/* mobile: app-like target */
+@media(max-width:699px){
+ body{padding-bottom:82px!important}
+ header{height:62px!important;padding:9px 13px!important}
+ header .logo{font-size:17px!important;letter-spacing:2.6px!important}
+ header>div:last-child{display:flex!important;gap:6px!important}
+ header>div:last-child .btn{min-height:40px!important;padding:7px 11px!important}
+ .wrap{padding:0 12px!important}
+ #ytPremiumAdminNav{display:none!important}
+ .yt-dashboard-welcome{padding-top:14px!important;margin-bottom:13px!important}
+ .yt-dashboard-welcome h2{font-size:22px!important}
+ .yt-dashboard-welcome p{font-size:11px!important}
+ .yt-eyebrow{font-size:9px!important}
+ .yt-icon-btn{width:38px;height:38px}
+ .yt-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .yt-kpi{min-height:105px!important;padding:12px!important}
+ .yt-kpi>b{font-size:21px!important}
+ .yt-kpi>span{font-size:11px}
+ .yt-section-heading{margin:17px 0 8px}
+ .yt-section-heading h3{font-size:15px}
+ .yt-quick-grid{grid-template-columns:repeat(4,minmax(76px,1fr))!important;overflow-x:auto!important;display:grid!important;padding-bottom:3px}
+ .yt-quick-card{min-width:76px!important;min-height:82px!important;padding:10px!important}
+ .yt-quick-card span{display:none!important}
+ .yt-quick-card b{font-size:10px!important}
+ .yt-quick-icon{width:29px!important;height:29px!important;font-size:14px!important}
+ .yt-dashboard-grid{grid-template-columns:1fr!important;gap:9px!important}
+ .yt-sales-chart,.yt-summary-box{min-height:280px!important}
+ .yt-chart-area{height:175px!important}
+ .yt-chart-labels{font-size:9px!important}
+ .yt-summary-row{padding:11px!important}
+ .yt-mobile-bottom{left:9px!important;right:9px!important;bottom:9px!important;height:64px!important;border-radius:19px!important;background:rgba(7,12,19,.95)!important;border-color:#1e2b3c!important}
+ .yt-mobile-bottom button{color:#718095!important}.yt-mobile-bottom button.active{background:linear-gradient(135deg,rgba(105,27,235,.35),rgba(124,44,255,.16))!important;color:#d9b7ff!important}
+}
+
+/* touch feedback */
+button,.btn,.yt-quick-card,.yt-icon-btn{will-change:transform}
+button:active,.btn:active,.yt-quick-card:active{transform:scale(.97)!important}
 </style></head>
 <body>
 <header><div class="logo">YOUR TYPE</div><div><button class="btn" onclick="location.href='/'">Store</button> <button class="btn primary" onclick="adminLogin()">Admin</button></div></header>
@@ -38,6 +255,46 @@ button,.btn,a,summary{touch-action:manipulation}
 <div class="tabs"><button class="btn" onclick="filterStore('all')">All</button><button class="btn" onclick="filterStore('T-Shirt')">T-Shirts</button><button class="btn" onclick="filterStore('Shirt')">Shirts</button><button class="btn" onclick="go('account')">My Account</button><button class="btn" onclick="go('customerOrders')">My Orders</button></div>
 <div id="storeGrid" class="grid"></div></section>
 
+
+<div id="ytPremiumAdminNav" class="yt-admin-shell" style="display:none">
+  <div class="yt-admin-top">
+    <div><div class="yt-kicker">YOUR TYPE / ADMIN SYSTEM</div><div class="yt-title">Control your store.</div><div class="yt-sub">Everything important, organised in simple sections.</div></div>
+    <div class="yt-status" id="ytNavStatus">● Admin mode</div>
+  </div>
+  <div class="yt-home-actions">
+    <button class="btn primary" onclick="ytNavGo('dashboard',this)">⌂ Dashboard</button>
+    <button class="btn" onclick="ytNavGo('controlCenter',this)">✦ Website Control</button>
+    <button class="btn" onclick="ytNavGo('products',this)">＋ Product</button>
+    <button class="btn" onclick="ytNavGo('orders',this)">Orders</button>
+  </div>
+  <div class="yt-nav-grid" style="margin-top:10px">
+    <div class="yt-nav-card open"><button class="yt-nav-head" onclick="ytToggleGroup(this)"><span>Overview<small>Dashboard & customers</small></span><span class="yt-chevron">⌄</span></button><div class="yt-nav-links">
+      <button class="yt-nav-link active" data-yt-target="dashboard" onclick="ytNavGo('dashboard',this)">Dashboard</button><button class="yt-nav-link" data-yt-target="orders" onclick="ytNavGo('orders',this)">Orders</button><button class="yt-nav-link" data-yt-target="customers" onclick="ytNavGo('customers',this)">Customers</button><button class="yt-nav-link" data-yt-target="wishlist" onclick="ytNavGo('wishlist',this)">Wishlist</button>
+    </div></div>
+    <div class="yt-nav-card"><button class="yt-nav-head" onclick="ytToggleGroup(this)"><span>Products<small>Catalog & stock</small></span><span class="yt-chevron">⌄</span></button><div class="yt-nav-links">
+      <button class="yt-nav-link" data-yt-target="products" onclick="ytNavGo('products',this)">Products</button><button class="yt-nav-link" data-yt-target="inventory" onclick="ytNavGo('inventory',this)">Inventory</button><button class="yt-nav-link" data-yt-target="variants" onclick="ytNavGo('variants',this)">Variants</button><button class="yt-nav-link" data-yt-target="categories" onclick="ytNavGo('categories',this)">Categories</button><button class="yt-nav-link" data-yt-target="reviews" onclick="ytNavGo('reviews',this)">Reviews</button>
+    </div></div>
+    <div class="yt-nav-card"><button class="yt-nav-head" onclick="ytToggleGroup(this)"><span>Website<small>Homepage & sections</small></span><span class="yt-chevron">⌄</span></button><div class="yt-nav-links">
+      <button class="yt-nav-link" data-yt-target="controlCenter" onclick="ytNavGo('controlCenter',this)">Website Control</button><button class="yt-nav-link" data-yt-target="website" onclick="ytNavGo('website',this)">Website</button><button class="yt-nav-link" data-yt-target="sections" onclick="ytNavGo('sections',this)">Sections</button><button class="yt-nav-link" data-yt-target="colors" onclick="ytNavGo('colors',this)">Colors</button>
+    </div></div>
+    <div class="yt-nav-card"><button class="yt-nav-head" onclick="ytToggleGroup(this)"><span>Sales<small>Offers & returns</small></span><span class="yt-chevron">⌄</span></button><div class="yt-nav-links">
+      <button class="yt-nav-link" data-yt-target="coupons" onclick="ytNavGo('coupons',this)">Coupons</button><button class="yt-nav-link" data-yt-target="returns" onclick="ytNavGo('returns',this)">Returns</button><button class="yt-nav-link" data-yt-target="analytics" onclick="ytNavGo('analytics',this)">Analytics</button>
+    </div></div>
+    <div class="yt-nav-card"><button class="yt-nav-head" onclick="ytToggleGroup(this)"><span>Reports<small>Exports & insights</small></span><span class="yt-chevron">⌄</span></button><div class="yt-nav-links">
+      <button class="yt-nav-link" data-yt-target="reports" onclick="ytNavGo('reports',this)">Reports</button><button class="yt-nav-link" data-yt-target="downloads" onclick="ytNavGo('downloads',this)">Downloads</button><button class="yt-nav-link" data-yt-target="diagnostics" onclick="ytNavGo('diagnostics',this)">Diagnostics</button>
+    </div></div>
+    <div class="yt-nav-card"><button class="yt-nav-head" onclick="ytToggleGroup(this)"><span>Settings<small>Store & admin</small></span><span class="yt-chevron">⌄</span></button><div class="yt-nav-links">
+      <button class="yt-nav-link" data-yt-target="settings" onclick="ytNavGo('settings',this)">Settings</button>
+    </div></div>
+  </div>
+</div>
+<div class="yt-mobile-bottom" id="ytMobileBottom">
+  <button class="active" data-target="dashboard" onclick="ytNavGo('dashboard',this)"><b>⌂</b><span>Dashboard</span></button>
+  <button data-target="orders" onclick="ytNavGo('orders',this)"><b>▣</b><span>Orders</span></button>
+  <button data-target="products" onclick="ytNavGo('products',this)"><b>▤</b><span>Products</span></button>
+  <button data-target="controlCenter" onclick="ytNavGo('controlCenter',this)"><b>⋮⋮</b><span>More</span></button>
+</div>
+
 <div id="adminTabs" class="tabs" style="display:none"><button class="btn tab active" onclick="go('controlCenter',this)">Control Center</button>
 <button class="btn tab" onclick="go('dashboard',this)">Dashboard</button><button class="btn tab" onclick="go('orders',this)">Orders</button>
 <button class="btn tab" onclick="go('inventory',this)">Inventory</button><button class="btn tab" onclick="go('variants',this)">Variants</button><button class="btn tab" onclick="go('products',this)">Products</button>
@@ -47,17 +304,51 @@ button,.btn,a,summary{touch-action:manipulation}
 <button class="btn tab" onclick="go('settings',this)">Settings</button>
 </div>
 
-<section id="dashboard" class="section"><h2>Admin Dashboard</h2><div class="stats">
-<div class="stat">Revenue<b id="dashRevenue">₹0</b><span class="muted">All active orders</span></div><div class="stat">Orders<b id="dashOrders">0</b><span class="muted">All orders</span></div>
-<div class="stat">Profit (Est.)<b id="dashProfit">₹0</b><span class="muted">Revenue − GST − Cost</span></div><div class="stat">Low Stock<b id="dashLow">0</b><span class="muted">Attention</span></div>
-<div class="stat">Today Sales<b id="dashToday">₹0</b></div><div class="stat">Weekly Sales<b id="dashWeek">₹0</b></div><div class="stat">Monthly Sales<b id="dashMonth">₹0</b></div><div class="stat">Wishlist<b id="dashWishlist">0</b></div></div>
-<div class="box" style="margin-top:12px"><b>Order Status</b><div id="dashStatuses" class="stats" style="margin-top:8px"></div></div>
-<div class="box" style="margin-top:12px"><h3>Recent Orders</h3><div id="dashRecent"></div></div>
-<div class="box" style="margin-top:12px"><h3>Top-selling Products</h3><div id="dashTop"></div></div>
-<div class="menu" style="margin-top:12px"><div class="box"><b>📦 Orders</b><p class="muted">Manage status, address and invoice.</p><button class="btn" onclick="go('orders')">Open</button></div>
-<div class="box"><b>📦 Inventory</b><p class="muted">Size/SKU stock management.</p><button class="btn" onclick="go('inventory')">Open</button></div>
-<div class="box"><b>👕 Products</b><p class="muted">Variants, images and pricing.</p><button class="btn" onclick="go('products')">Open</button></div>
-<div class="box"><b>📊 Reports</b><p class="muted">Export sales and inventory.</p><button class="btn" onclick="go('downloads')">Open</button></div></div></section>
+<section id="dashboard" class="section">
+  <div class="yt-dashboard-welcome">
+    <div><div class="yt-eyebrow">YOUR TYPE / ADMIN</div><h2>Welcome back, Admin! 👋</h2><p>Here’s what’s happening with your store today.</p></div>
+    <button class="yt-icon-btn" onclick="go('settings')" aria-label="Settings">⚙</button>
+  </div>
+  <div class="stats yt-kpi-grid">
+    <div class="stat yt-kpi yt-kpi-sales"><span>Total Sales</span><b id="dashRevenue">₹0</b><small>↑ Store revenue</small><i class="yt-mini-line"></i></div>
+    <div class="stat yt-kpi yt-kpi-orders"><span>Total Orders</span><b id="dashOrders">0</b><small>All orders</small><i class="yt-mini-line"></i></div>
+    <div class="stat yt-kpi yt-kpi-customers"><span>Total Customers</span><b id="ytDashCustomers">0</b><small>Registered customers</small><i class="yt-mini-line"></i></div>
+    <div class="stat yt-kpi yt-kpi-low"><span>Low Stock</span><b id="dashLow">0</b><small>Needs attention</small><i class="yt-mini-line"></i></div>
+  </div>
+  <span id="dashProfit" class="yt-hidden-value">₹0</span>
+
+  <div class="yt-section-heading"><div><h3>Quick Access</h3><p>Manage your store from one place</p></div></div>
+  <div class="dashboardQuick yt-quick-grid">
+    <div class="yt-quick-card" onclick="go('products')"><div class="yt-quick-icon">▤</div><b>Products</b><span>Manage catalog</span></div>
+    <div class="yt-quick-card" onclick="go('orders')"><div class="yt-quick-icon">▣</div><b>Orders</b><span>Track sales</span></div>
+    <div class="yt-quick-card" onclick="go('customers')"><div class="yt-quick-icon">♙</div><b>Customers</b><span>View accounts</span></div>
+    <div class="yt-quick-card" onclick="go('coupons')"><div class="yt-quick-icon">⌁</div><b>Coupons</b><span>Offers & discounts</span></div>
+    <div class="yt-quick-card" onclick="go('inventory')"><div class="yt-quick-icon">▦</div><b>Inventory</b><span>Stock control</span></div>
+    <div class="yt-quick-card" onclick="go('controlCenter')"><div class="yt-quick-icon">▧</div><b>Media</b><span>Website media</span></div>
+    <div class="yt-quick-card" onclick="go('reports')"><div class="yt-quick-icon">▥</div><b>Reports</b><span>Business reports</span></div>
+    <div class="yt-quick-card" onclick="go('settings')"><div class="yt-quick-icon">⚙</div><b>Settings</b><span>Store control</span></div>
+  </div>
+
+  <div class="yt-dashboard-grid">
+    <div class="box yt-chart yt-sales-chart">
+      <div class="yt-chart-head"><div><div class="yt-chart-title">Sales Overview</div><div class="yt-chart-sub">Revenue performance</div></div><button class="yt-select-mini">This Month⌄</button></div>
+      <div class="yt-chart-area"><div class="yt-ylabels"><span>100K</span><span>75K</span><span>50K</span><span>25K</span><span>0</span></div><div class="yt-line-chart"><svg viewBox="0 0 600 190" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ytArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8b2cff" stop-opacity=".38"/><stop offset="1" stop-color="#8b2cff" stop-opacity="0"/></linearGradient></defs><path d="M0,155 L25,140 L50,145 L75,112 L100,125 L125,90 L150,103 L175,75 L200,95 L225,72 L250,86 L275,62 L300,80 L325,45 L350,70 L375,55 L400,78 L425,40 L450,63 L475,32 L500,48 L525,28 L550,42 L575,18 L600,32 L600,190 L0,190 Z" fill="url(#ytArea)"/><polyline points="0,155 25,140 50,145 75,112 100,125 125,90 150,103 175,75 200,95 225,72 250,86 275,62 300,80 325,45 350,70 375,55 400,78 425,40 450,63 475,32 500,48 525,28 550,42 575,18 600,32" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+      <div class="yt-chart-labels"><span>1 Aug</span><span>8 Aug</span><span>15 Aug</span><span>22 Aug</span><span>29 Aug</span></div>
+    </div>
+    <div class="box yt-summary-box"><div class="yt-chart-head"><div><div class="yt-chart-title">Sales Summary</div><div class="yt-chart-sub">Quick totals</div></div></div>
+      <div class="yt-summary">
+        <div class="yt-summary-row"><span><i class="yt-dot green"></i>Today Sales</span><b id="dashToday">₹0</b></div>
+        <div class="yt-summary-row"><span><i class="yt-dot blue"></i>This Week Sales</span><b id="dashWeek">₹0</b></div>
+        <div class="yt-summary-row"><span><i class="yt-dot"></i>This Month Sales</span><b id="dashMonth">₹0</b></div>
+        <div class="yt-summary-row"><span><i class="yt-dot orange"></i>Wishlist</span><b id="dashWishlist">0</b></div>
+      </div>
+      <button class="btn primary yt-report-btn" onclick="go('reports')">View Detailed Report&nbsp; →</button>
+    </div>
+  </div>
+  <div class="box" style="margin-top:12px"><h3>Order Status</h3><div id="dashStatuses" class="stats" style="margin-top:8px"></div></div>
+  <div class="box" style="margin-top:12px"><h3>Recent Orders</h3><div id="dashRecent"></div></div>
+  <div class="box" style="margin-top:12px"><h3>Top-selling Products</h3><div id="dashTop"></div></div>
+</section>
 
 <section id="controlCenter" class="section">
 <h2>Full Website Control</h2>
@@ -390,7 +681,7 @@ function downloadText(n,t,type='text/plain'){let a=document.createElement('a');a
 function updateDash(){let g=+state.settings.gst||0,live=state.orders.filter(o=>o.status!=='Cancelled'),rev=live.reduce((a,o)=>a+o.price*o.qty,0),lowN=state.inventory.filter(x=>x[2]>0&&x[2]<=x[3]).length;
 let gstTotal=0,profitTotal=0;
 live.forEach(o=>{let p=prod(o.productId),base=o.price/(1+g/100),gstAmt=o.price-base,cost=p?(+p.cost||0):0;gstTotal+=gstAmt*o.qty;profitTotal+=(base-cost)*o.qty});
-dashRevenue.textContent=money(rev);dashOrders.textContent=state.orders.length;dashLow.textContent=lowN;dashProfit.textContent=money(profitTotal);
+dashRevenue.textContent=money(rev);dashOrders.textContent=state.orders.length;dashLow.textContent=lowN;dashProfit.textContent=money(profitTotal);const ytc=document.getElementById('ytDashCustomers');if(ytc)ytc.textContent=state.users.length;
 aRev.textContent=money(rev);aGst.textContent=money(gstTotal);aProfit.textContent=money(profitTotal);aAvg.textContent=money(live.length?rev/live.length:0)}
 function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(window._t);window._t=setTimeout(()=>e.style.display='none',1800)}
 function openModal(x){modalBody.innerHTML=x;modal.classList.add('on')}function closeModal(){modal.classList.remove('on')}
@@ -930,4 +1221,23 @@ async function restoreServerBackup(){
   const st=document.createElement('style'); st.textContent='html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:699px){.wrap{width:100%;max-width:100%;padding-left:12px;padding-right:12px}.modal{padding:10px}.modalbox{width:100%;max-width:100%;max-height:94vh}.orderbody{grid-template-columns:72px minmax(0,1fr)}.row{min-width:0}.row>*{min-width:0;overflow-wrap:anywhere}}'; document.head.appendChild(st);
 })();
 </script>
+
+<script>
+(function(){
+  function showNav(){const n=document.getElementById('ytPremiumAdminNav');if(n)n.style.display='block';}
+  window.ytToggleGroup=function(head){const card=head?.parentElement;if(card)card.classList.toggle('open')};
+  window.ytNavGo=function(id,el){
+    if(typeof window.go==='function') window.go(id);
+    document.querySelectorAll('.yt-nav-link').forEach(x=>x.classList.toggle('active',x.getAttribute('data-yt-target')===id));
+    document.querySelectorAll('.yt-home-actions .btn').forEach(x=>x.classList.remove('primary')); document.querySelectorAll('#ytMobileBottom button').forEach(x=>x.classList.toggle('active',x.getAttribute('data-target')===id));
+    const h=[...document.querySelectorAll('.yt-home-actions .btn')].find(x=>(x.getAttribute('onclick')||'').includes("'"+id+"'")); if(h)h.classList.add('primary');
+    showNav();
+  };
+  document.addEventListener('DOMContentLoaded',()=>{
+    showNav();
+    document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;b.classList.add('yt-pressed');setTimeout(()=>b.classList.remove('yt-pressed'),150);});
+  });
+})();
+</script>
+
 </body></html>
