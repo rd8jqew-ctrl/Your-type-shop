@@ -1,4 +1,4 @@
-doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -28,8 +28,6 @@ button,.btn,a,summary{touch-action:manipulation}
 .pill{border:1px solid #444;border-radius:99px;padding:4px 8px;font-size:11px}.notice{padding:10px;border:1px solid #444;border-radius:9px;background:#141414}
 @media(min-width:700px){.stats,.grid,.menu{grid-template-columns:repeat(4,1fr)}}
 .adminMap{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.adminMapCard{background:#101010;border:1px solid #292929;border-radius:12px;padding:13px}.adminMapCard h3{margin:0 0 6px;font-size:15px}.adminMapCard p{margin:5px 0;color:#999;line-height:1.45}.switchRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px}.switchRow input{width:auto;margin:0;transform:scale(1.2)}.colorSwatches{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.swatch{display:inline-flex;align-items:center;gap:7px;border:1px solid #333;border-radius:99px;padding:7px 10px;background:#151515}.swatch i{width:18px;height:18px;border-radius:50%;border:1px solid #777;display:inline-block}.help{border-left:3px solid #777;padding:10px 12px;background:#121212;color:#bbb;line-height:1.5;border-radius:8px}.adminHiddenNote{color:#777;font-size:12px}@media(min-width:700px){.adminMap{grid-template-columns:repeat(3,1fr)}}
-
-.fullControlCard{background:#101010;border:1px solid #292929;border-radius:12px;padding:13px}.fullControlCard h3{margin:0 0 5px;font-size:15px}.fullControlCard p{margin:5px 0;color:#999;line-height:1.45}.fullControlCard .switchRow{margin-top:9px}.fullControlProducts{margin-top:9px;max-height:180px;overflow:auto;border-top:1px solid #292929;padding-top:8px}.fullControlProducts label{display:flex;gap:7px;align-items:center;padding:4px 0;color:#ddd}.fullControlProducts input{width:auto;margin:0}.controlSub{color:#777;font-size:12px}.websiteSaveNote{margin-top:9px;color:#999;font-size:12px}
 </style></head>
 <body>
 <header><div class="logo">YOUR TYPE</div><div><button class="btn" onclick="location.href='/'">Store</button> <button class="btn primary" onclick="adminLogin()">Admin</button></div></header>
@@ -43,7 +41,7 @@ button,.btn,a,summary{touch-action:manipulation}
 <div id="adminTabs" class="tabs" style="display:none">
 <button class="btn tab active" onclick="go('dashboard',this)">Dashboard</button><button class="btn tab" onclick="go('orders',this)">Orders</button>
 <button class="btn tab" onclick="go('inventory',this)">Inventory</button><button class="btn tab" onclick="go('variants',this)">Variants</button><button class="btn tab" onclick="go('products',this)">Products</button>
-<button class="btn tab" onclick="go('customers',this)">Customers</button><button class="btn tab" onclick="go('reviews',this)">Reviews</button>
+<button class="btn tab" onclick="go('customers',this)">Customers</button><button class="btn tab" onclick="go('diagnostics',this)">Diagnostics</button><button class="btn tab" onclick="go('reviews',this)">Reviews</button>
 <button class="btn tab" onclick="go('coupons',this)">Coupons</button><button class="btn tab" onclick="go('returns',this)">Returns</button><button class="btn tab" onclick="go('categories',this)">Categories</button><button class="btn tab" onclick="go('wishlist',this)">Wishlist</button><button class="btn tab" onclick="go('website',this)">Website</button><button class="btn tab" onclick="go('sections',this)">Sections</button><button class="btn tab" onclick="go('colors',this)">Colors</button><button class="btn tab" onclick="go('reports',this)">Reports</button>
 <button class="btn tab" onclick="go('analytics',this)">Analytics</button><button class="btn tab" onclick="go('downloads',this)">Downloads</button>
 <button class="btn tab" onclick="go('settings',this)">Settings</button>
@@ -90,25 +88,8 @@ button,.btn,a,summary{touch-action:manipulation}
 <div class="box"><b>Backup</b><p class="muted">Download your current store data.</p><button class="btn" onclick="backup()">Download Backup</button></div></div></section>
 <section id="categories" class="section"><h2>Categories</h2><div class="box"><input id="catName" placeholder="New category name"><button class="btn primary" onclick="addCategory()">+ Add Category</button></div><div id="categoryList" class="grid" style="margin-top:12px"></div></section>
 <section id="wishlist" class="section"><h2>Wishlist</h2><div class="stats"><div class="stat">Total Items<b id="wishTotal">0</b></div><div class="stat">Unique Products<b id="wishProducts">0</b></div></div><div class="box" style="margin-top:12px"><h3>Most-wishlisted Products</h3><div id="wishList"></div></div></section>
-<section id="website" class="section"><h2>Full Website Control</h2>
-<div class="help"><b>Yahan se poori homepage control hogi.</b> Product add/edit alag hai. Yahan aap section ko ON/OFF, section ke products, hero text, announcement, buttons, benefits aur newsletter control kar sakte ho. Theme/layout ko change nahi kiya gaya.</div>
-<div class="box" style="margin-top:12px"><h3>GLOBAL WEBSITE CONTROL</h3>
-<label>Top announcement</label><input id="siteAnnouncement" placeholder="New drops every week">
-<label>Brand / Hero title</label><input id="siteHero" placeholder="YOUR TYPE">
-<label>Hero description</label><textarea id="siteHeroDescription" placeholder="Premium fabrics. Heavy graphics. Built for those who move different."></textarea>
-<div class="grid" style="margin-top:6px"><div><label>Hero Button 1</label><input id="heroBtn1Text" placeholder="SHOP NOW"></div><div><label>Button 1 Link</label><input id="heroBtn1Link" placeholder="/shop"></div><div><label>Hero Button 2</label><input id="heroBtn2Text" placeholder="EXPLORE"></div><div><label>Button 2 Link</label><input id="heroBtn2Link" placeholder="/collections"></div></div>
-<label>Featured product IDs (comma separated)</label><input id="siteFeatured" placeholder="Product IDs separated by comma">
-<label>Instagram / social link</label><input id="siteSocial" placeholder="https://instagram.com/..."><label>Store phone</label><input id="sitePhone"><label>Store email</label><input id="siteEmail" type="email">
-</div>
-<div class="adminMap" id="fullWebsiteMap"></div>
-<div class="box" style="margin-top:12px"><h3>MADE TO STAND OUT / BENEFITS</h3>
-<div class="grid"><div><label><input id="benefit1On" type="checkbox" checked> Premium Quality</label><input id="benefit1Title" placeholder="PREMIUM QUALITY"><input id="benefit1Text" placeholder="HANDPICKED FABRICS"></div>
-<div><label><input id="benefit2On" type="checkbox" checked> Secure Payments</label><input id="benefit2Title" placeholder="SECURE PAYMENTS"><input id="benefit2Text" placeholder="100% SAFE & SECURE"></div>
-<div><label><input id="benefit3On" type="checkbox" checked> Free Shipping</label><input id="benefit3Title" placeholder="FREE SHIPPING"><input id="benefit3Text" placeholder="ON PREPAID ORDERS"></div>
-<div><label><input id="benefit4On" type="checkbox" checked> Easy Returns</label><input id="benefit4Title" placeholder="EASY RETURNS"><input id="benefit4Text" placeholder="7 DAYS RETURN POLICY"></div></div></div>
-<div class="box" style="margin-top:12px"><h3>NEWSLETTER</h3><label><input id="newsletterOn" type="checkbox" checked> Visible</label><input id="newsletterTitle" placeholder="Be First to the Next Drop"><textarea id="newsletterDescription" placeholder="Newsletter signup text"></textarea><input id="newsletterButton" placeholder="JOIN THE LIST"></div>
-<div class="box" style="margin-top:12px"><button class="btn primary" onclick="saveFullWebsiteControl()">SAVE WEBSITE CHANGES</button> <button class="btn" onclick="loadFullWebsiteControl()">Reload Saved Settings</button></div>
-</section>
+<section id="diagnostics" class="section"><h2>Store Diagnostics</h2><div class="box"><p class="muted">Safe read-only scan of the current admin data and UI connections. Your existing theme and layout are unchanged.</p><button class="btn primary" onclick="runDiagnostics()">Scan Entire Store</button><div id="diagResult" style="margin-top:12px"></div></div></section>
+<section id="website" class="section"><h2>Website Control</h2><div class="box"><label>Announcement</label><input id="siteAnnouncement"><label>Hero title</label><input id="siteHero"><label>Featured product IDs (comma separated)</label><input id="siteFeatured"><label>Instagram / social link</label><input id="siteSocial"><label>Store phone</label><input id="sitePhone"><label>Store email</label><input id="siteEmail"><button class="btn primary" onclick="saveWebsiteControl()">Save Website Settings</button></div></section>
 <section id="sections" class="section"><h2>Website Sections</h2>
 <div class="help"><b>Is panel ka purpose:</b> yahan se aapko clearly dikhega ki website ka kaunsa section kahan hai. <b>ON</b> = website par dikhega, <b>OFF</b> = section temporarily hide hoga. Isse Product update aur Website section update ka confusion nahi rahega.</div>
 <div class="adminMap" id="sectionMap"></div>
@@ -189,7 +170,7 @@ function renderSectionManager(){
  };
  state.sectionSettings=state.sectionSettings||Object.fromEntries(Object.keys(defaults).map(k=>[k,true]));
  state.website=state.website||{}; state.website.sectionProducts=state.website.sectionProducts||{};
- const products=(serverProducts&&serverProducts.length?serverProducts:state.products||[]);
+ const products=Array.isArray(state.products)?state.products:[];
  const escv=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
  sectionMap.innerHTML=Object.entries(defaults).map(([key,v],n)=>{
    const assigned=Array.isArray(state.website.sectionProducts[key])?state.website.sectionProducts[key].map(String):[];
@@ -583,7 +564,7 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
 <script>
 /* YOUR TYPE — FINAL SERVER/UI COMPATIBILITY PATCH */
 (function(){
-  const api2=async(url,opt={})=>{const t=sessionStorage.getItem('adminToken')||'';const h=Object.assign({'Content-Type':'application/json'},opt.headers||{});if(t)h.Authorization='Bearer '+t;const r=await fetch(url,Object.assign({},opt,{headers:h}));let d={};try{d=await r.json()}catch(_){}if(!r.ok)throw new Error(d.error||('Request failed ('+r.status+')'));return d};
+  const api2=async(url,opt={})=>{const t=sessionStorage.getItem('adminToken')||'';const h=Object.assign({'Content-Type':'application/json'},opt.headers||{});if(t)h.Authorization='Bearer '+t;const r=await fetch(url,Object.assign({},opt,{headers:h}));let d={};try{d=await r.json()}catch(_){}if(!r.ok){if(r.status===401&&url!=='/api/admin/login'){sessionStorage.removeItem('adminToken');throw new Error('Session expired. Please sign in again.')}throw new Error(d.error||('Request failed ('+r.status+')'))}return d};
   const num=v=>Number(String(v??0).replace(/[^0-9.-]/g,''))||0;
   const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   const productById=id=>state.products.find(p=>String(p.id)===String(id));
@@ -733,54 +714,28 @@ state.variantStock=state.variantStock||{};state.products.forEach(p=>{p.colors=Ar
   window.addEventListener('load',()=>setTimeout(()=>refreshAdminData().catch(e=>console.warn(e)),200));
 })();
 </script>
+
 <script>
-/* YOUR TYPE — FULL WEBSITE CONTROL
-   Uses the existing /api/admin/site-config structure and keeps the current theme/layout. */
 (function(){
-  const defaults={
-    home:['Engineered for the Street','Hero / top section'],
-    collections:['Wear the Statement','THE UNIFORM / 01 collection'],
-    motion:['Watch in Motion','YOUR TYPE / MOTION showcase'],
-    featured:['Featured Products','THE DROP / 01 product section'],
-    bestSellers:['Best Sellers','THE MOST WANTED / 02 products'],
-    newCollection:['New Collection','DROP 02 / NEW products'],
-    trending:['Trending Now','NOW IN THE FEED / 03'],
-    womenTops:["Women's Tops",'WOMEN / EDIT 04'],
-    highlights:['Made to Stand Out','Benefits / highlights section'],
-    newsletter:['Be First to the Next Drop','Newsletter signup section']
+  function diagEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  window.runDiagnostics=function(){
+    const checks=[]; const add=(name,ok,detail)=>checks.push({name,ok,detail});
+    const products=Array.isArray(state.products)?state.products:[]; const orders=Array.isArray(state.orders)?state.orders:[];
+    add('Products data loaded',Array.isArray(state.products),products.length+' products in admin state');
+    add('Orders data loaded',Array.isArray(state.orders),orders.length+' orders in admin state');
+    add('Unique product IDs',new Set(products.map(p=>String(p.id))).size===products.length,'');
+    const skus=products.map(p=>String(p.sku||'').trim()).filter(Boolean); add('Unique SKUs',new Set(skus).size===skus.length,skus.length+' non-empty SKUs');
+    add('Valid product prices',products.every(p=>Number.isFinite(Number(p.price))&&Number(p.price)>=0),'');
+    add('Valid size stock',products.every(p=>{const z=p.sizes||{};return ['S','M','L','XL','XXL'].every(k=>Number.isFinite(Number(z[k]??0))&&Number(z[k]??0)>=0)}),'');
+    const badOrders=orders.filter(o=>!o.orderId&&!o.id); add('Order IDs present',badOrders.length===0,badOrders.length+' orders missing an ID');
+    const badTotals=orders.filter(o=>!Number.isFinite(Number(o.total??o.price))); add('Order totals numeric',badTotals.length===0,badTotals.length+' invalid totals');
+    const funcs=['go','adminLogin','saveProduct','saveEdit','deleteProduct','stockUpdate','saveCoupon','toggleCoupon','updateDash']; add('Core UI handlers',funcs.every(n=>typeof window[n]==='function'),funcs.filter(n=>typeof window[n]!=='function').join(', ')||'All present');
+    add('Admin token available',!!sessionStorage.getItem('adminToken'),'Required for server-side changes');
+    const passed=checks.filter(x=>x.ok).length, failed=checks.length-passed;
+    const el=document.getElementById('diagResult'); if(!el)return; el.innerHTML='<div class="notice"><b>'+passed+' passed · '+failed+' warning(s)</b></div>'+checks.map(x=>'<div class="row"><span>'+ (x.ok?'🟢 ':'🟠 ')+diagEsc(x.name)+'<br><small class="muted">'+diagEsc(x.detail)+'</small></span><b>'+ (x.ok?'PASS':'CHECK') +'</b></div>').join('');
   };
-  const e=id=>document.getElementById(id);
-  const esc2=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  function renderFullWebsiteMap(){
-    const box=e('fullWebsiteMap'); if(!box)return;
-    state.sectionSettings=state.sectionSettings||Object.fromEntries(Object.keys(defaults).map(k=>[k,true]));
-    state.website=state.website||{};state.website.sectionProducts=state.website.sectionProducts||{};
-    const products=Array.isArray(serverProducts)&&serverProducts.length?serverProducts:(state.products||[]);
-    box.innerHTML=Object.entries(defaults).map(([key,v],i)=>{
-      const assigned=Array.isArray(state.website.sectionProducts[key])?state.website.sectionProducts[key].map(String):[];
-      const choices=products.map(p=>`<label><input type="checkbox" data-full-product="${key}" value="${esc2(p.id)}" ${assigned.includes(String(p.id))?'checked':''}><span>${esc2(p.name||p.id)}</span></label>`).join('')||'<span class="controlSub">No products yet</span>';
-      const c=(state.website.sectionContent&&state.website.sectionContent[key])||{};
-      return `<div class="fullControlCard"><div class="controlSub">SECTION ${String(i+1).padStart(2,'0')}</div><h3>${esc2(v[0])}</h3><p>${esc2(v[1])}</p><div class="switchRow"><span>${state.sectionSettings[key]===false?'OFF — hidden':'ON — visible'}</span><input type="checkbox" data-full-section="${key}" ${state.sectionSettings[key]!==false?'checked':''}></div><label>Section title</label><input data-full-title="${key}" value="${esc2(c.title||v[0])}"><label>Section description</label><input data-full-desc="${key}" value="${esc2(c.description||'')}"><div style="display:flex;gap:6px;margin-top:8px"><button type="button" class="btn" onclick="fullSectionAll('${key}',true)">ALL</button><button type="button" class="btn" onclick="fullSectionAll('${key}',false)">NONE</button></div><div class="fullControlProducts">${choices}</div></div>`;
-    }).join('');
-  }
-  window.fullSectionAll=function(key,on){document.querySelectorAll(`[data-full-product="${key}"]`).forEach(x=>x.checked=!!on)};
-  window.loadFullWebsiteControl=function(){
-    const w=state.website||{};e('siteAnnouncement').value=w.announcement||'';e('siteHero').value=w.hero||'YOUR TYPE';
-    e('siteHeroDescription').value=w.heroDescription||'';e('heroBtn1Text').value=w.heroBtn1Text||'SHOP NOW';e('heroBtn1Link').value=w.heroBtn1Link||'/shop';e('heroBtn2Text').value=w.heroBtn2Text||'EXPLORE';e('heroBtn2Link').value=w.heroBtn2Link||'/collections';
-    e('siteFeatured').value=Array.isArray(w.featured)?w.featured.join(', '):(w.featured||'');e('siteSocial').value=w.social||'';e('sitePhone').value=w.phone||'';e('siteEmail').value=w.email||'';
-    const b=w.benefits||{};for(let i=1;i<=4;i++){e('benefit'+i+'On').checked=b[i]?.on!==false;e('benefit'+i+'Title').value=b[i]?.title||['PREMIUM QUALITY','SECURE PAYMENTS','FREE SHIPPING','EASY RETURNS'][i-1];e('benefit'+i+'Text').value=b[i]?.text||['HANDPICKED FABRICS','100% SAFE & SECURE','ON PREPAID ORDERS','7 DAYS RETURN POLICY'][i-1]}
-    e('newsletterOn').checked=w.newsletter?.visible!==false;e('newsletterTitle').value=w.newsletter?.title||'Be First to the Next Drop';e('newsletterDescription').value=w.newsletter?.description||'';e('newsletterButton').value=w.newsletter?.button||'JOIN THE LIST';renderFullWebsiteMap();
-  };
-  window.saveFullWebsiteControl=async function(){
-    state.website=state.website||{};const sections=Object.fromEntries([...document.querySelectorAll('[data-full-section]')].map(x=>[x.dataset.fullSection,x.checked]));const sectionProducts=Object.fromEntries(Object.keys(sections).map(k=>[k,[...document.querySelectorAll(`[data-full-product="${k}"]:checked`)].map(x=>x.value)]));const sectionContent=Object.fromEntries(Object.keys(sections).map(k=>[k,{title:document.querySelector(`[data-full-title="${k}"]`)?.value||'',description:document.querySelector(`[data-full-desc="${k}"]`)?.value||''}]));
-    const featured=(e('siteFeatured').value||'').split(',').map(x=>x.trim()).filter(Boolean);
-    const benefits={};for(let i=1;i<=4;i++)benefits[i]={on:e('benefit'+i+'On').checked,title:e('benefit'+i+'Title').value,text:e('benefit'+i+'Text').value};
-    const website={...state.website,announcement:e('siteAnnouncement').value||'',hero:e('siteHero').value||'YOUR TYPE',heroDescription:e('siteHeroDescription').value||'',heroBtn1Text:e('heroBtn1Text').value||'SHOP NOW',heroBtn1Link:e('heroBtn1Link').value||'/shop',heroBtn2Text:e('heroBtn2Text').value||'EXPLORE',heroBtn2Link:e('heroBtn2Link').value||'/collections',featured,social:e('siteSocial').value||'',phone:e('sitePhone').value||'',email:e('siteEmail').value||'',benefits,newsletter:{visible:e('newsletterOn').checked,title:e('newsletterTitle').value||'Be First to the Next Drop',description:e('newsletterDescription').value||'',button:e('newsletterButton').value||'JOIN THE LIST'},sectionProducts,sectionContent};
-    state.website=website;state.sectionSettings=sections;save();
-    const t=sessionStorage.getItem('adminToken');if(!t){toast('Login required to save website changes');return}
-    try{const r=await fetch('/api/admin/site-config',{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({hero:website.hero,announcement:website.announcement,sections,sectionProducts,sectionContent,heroDescription:website.heroDescription,heroBtn1Text:website.heroBtn1Text,heroBtn1Link:website.heroBtn1Link,heroBtn2Text:website.heroBtn2Text,heroBtn2Link:website.heroBtn2Link,benefits:website.benefits,newsletter:website.newsletter,featured:website.featured,social:website.social,phone:website.phone,email:website.email})});let d={};try{d=await r.json()}catch(_){}if(!r.ok)throw new Error(d.error||'Server save failed');if(d.site)state.website={...state.website,...d.site};save();renderFullWebsiteMap();toast('Full website control saved');}catch(err){toast(err.message||'Could not save website settings')}
-  };
-  const oldGo2=window.go;window.go=function(id,btn){oldGo2(id,btn);if(id==='website')setTimeout(loadFullWebsiteControl,0)};
-  window.addEventListener('load',()=>setTimeout(()=>{if(sessionStorage.getItem('adminToken')){loadFullWebsiteControl()}},250));
+  // Keep the existing mobile presentation stable: no theme/color/layout redesign, only prevent accidental horizontal overflow.
+  const st=document.createElement('style'); st.textContent='html,body{width:100%;max-width:100%;overflow-x:hidden} @media(max-width:699px){.wrap{width:100%;max-width:100%;padding-left:12px;padding-right:12px}.modal{padding:10px}.modalbox{width:100%;max-width:100%;max-height:94vh}.orderbody{grid-template-columns:72px minmax(0,1fr)}.row{min-width:0}.row>*{min-width:0;overflow-wrap:anywhere}}'; document.head.appendChild(st);
 })();
-</script></body></html>
+</script>
+</body></html>

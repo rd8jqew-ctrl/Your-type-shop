@@ -219,7 +219,7 @@ function toggleCustomerCare(){
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalBox"><div class="modalTop"><h2 id="modalTitle">YOUR TYPE</h2><button onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
 <script>
-let products = [["Akari Flight Tee", "₹1,549", "akari-flight-tee.jpg", "SALE", "₹2,200"], ["Ghamand Chroma Instinct", "₹1,399", "chroma-instinct-tee.jpg", "SALE", "₹2,100"], ["Ghamand Buddha's Blessing", "₹1,499", "buddhas-blessing-tee.jpg", "SALE", "₹2,200"], ["Burning Oath T-Shirt", "₹1,399", "burning-oath-tshirt.jpg", "NEW"], ["Who Are You T-Shirt", "₹1,499", "who-are-you-tshirt.jpg", "NEW"], ["What You Fear T-Shirt", "₹1,399", "what-you-fear-tshirt.jpg", "NEW"], ["Specter of Stillness T-Shirt", "₹1,499", "specter-stillness-tshirt.jpg", "NEW"], ["Crowned Destiny Tee", "₹1,399", "crowned-destiny-tee.jpg", "NEW"], ["Chaos Oversize Tee", "₹1,399", "chaos.jpg", "NEW"], ["Burning Oath Tee", "₹1,499", "bushido.jpg", "NEW"], ["Chaos Destiny Tee", "₹1,399", "graffiti.jpg", "NEW"], ["Instinct Oversize Tee", "₹1,399", "armor.jpg", "NEW"], ["Bushido Graphic Tee", "₹1,499", "bushido.jpg", "NEW"], ["Inferno Street Tee", "₹1,449", "chaos.jpg", "NEW"], ["Midnight Graffiti Tee", "₹1,349", "graffiti.jpg", "NEW"], ["Ritual Oversize Tee", "₹1,499", "ornament.jpg", "NEW"], ["Dark Armor Tee", "₹1,399", "armor.jpg", "NEW"]];
+let products = [];
 function storageGet(key,fallback='[]'){
  try{const v=localStorage.getItem(key); if(v!==null)return v;}catch(e){}
  try{const m=document.cookie.match(new RegExp('(?:^|; )'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'=([^;]*)')); if(m)return decodeURIComponent(m[1]);}catch(e){}
@@ -509,19 +509,15 @@ function trackOrder(){showModal('Track Order',`<input id="trackNo" class="modalI
 function lookupOrder(){const id=(document.getElementById('trackNo')?.value||'').trim();if(!id)return;fetch('/api/orders/'+encodeURIComponent(id)).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Order not found');document.getElementById('trackResult').innerHTML='<b>'+d.orderId+'</b><br>Status: '+d.status+'<br>Total: '+money(d.total)+'<br>Placed: '+new Date(d.date).toLocaleString('en-IN')}).catch(e=>document.getElementById('trackResult').textContent=e.message)}
 function showAbout(){showModal('About YOUR TYPE','<p class="muted">YOUR TYPE is a dark streetwear label built around bold graphics, oversized silhouettes and premium everyday pieces.</p>')} function showContact(){showModal('Contact Us','<p class="muted">Email: support@yourtype.store</p><p class="muted">We reply within 1–2 business days.</p>')} function showPolicy(title,text){showModal(title,'<p class="muted">'+text+'</p>')}
 async function loadSiteConfig(){try{const r=await fetch('/api/site-config',{cache:'no-store'});const d=await r.json(),site=d.site||{},sec=site.sections||{};ytSectionProducts=site.sectionProducts||{};const map={home:'home',collections:'collections',motion:'motion',featured:'shop',bestSellers:'bestSellers',newCollection:'newCollection',trending:'trending',womenTops:'womenTops',highlights:'highlights',editorial:'editorial',newsletter:'newsletter'};Object.entries(map).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('adminHiddenSection',sec[key]===false)});const hero=document.getElementById('siteHeroTitle');if(hero&&site.hero)hero.textContent=String(site.hero);const ann=document.querySelector('.shipping');if(ann&&site.announcement)ann.setAttribute('aria-label',site.announcement);renderCurated(); }catch(_){}} loadSiteConfig(); setInterval(loadSiteConfig,15000); 
-fetch('/api/products').then(r=>r.json()).then(d=>{if(Array.isArray(d.products)&&d.products.length){products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);}renderProducts();renderCurated();updateCart();updateWishlist();}).catch(()=>{renderProducts();renderCurated();updateCart();updateWishlist();});
+fetch('/api/products',{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!Array.isArray(d.products))throw new Error('Invalid product response');products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);renderProducts();renderCurated();rebuildBottomsSlides();rebuildMotionSlides();updateCart();updateWishlist();}).catch(()=>{products=[];renderProducts();renderCurated();rebuildBottomsSlides();rebuildMotionSlides();updateCart();updateWishlist();});
 // Keep an already-open storefront fresh when Admin changes product data.
 let _ytLastProductSignature='';
-async function refreshStorefrontProducts(){try{const r=await fetch('/api/products',{cache:'no-store'});const d=await r.json();if(!Array.isArray(d.products))return;const sig=JSON.stringify(d.products.map(p=>[p.id,p.name,p.price,p.image,p.active,p.sizes,p.colors,p.featured,p.badge,p.oldPrice]));if(sig===_ytLastProductSignature)return;_ytLastProductSignature=sig;products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);renderProducts();renderCurated();}
+async function refreshStorefrontProducts(){try{const r=await fetch('/api/products',{cache:'no-store'});const d=await r.json();if(!Array.isArray(d.products))return;const sig=JSON.stringify(d.products.map(p=>[p.id,p.name,p.price,p.image,p.active,p.sizes,p.colors,p.featured,p.badge,p.oldPrice]));if(sig===_ytLastProductSignature)return;_ytLastProductSignature=sig;products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);renderProducts();renderCurated();rebuildBottomsSlides();rebuildMotionSlides();}
 catch(_){}}
 setInterval(refreshStorefrontProducts,15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshStorefrontProducts();});
-const bottomsSlides=[
-  {image:'graffiti.jpg',name:'Chaos Destiny Tee',price:'₹1,399'},
-  {image:'ornament.jpg',name:'Dragon Wide Leg Pants',price:'₹1,699'},
-  {image:'bushido.jpg',name:'Shadow Combat Pants',price:'₹1,599'},
-  {image:'chaos.jpg',name:'Graphic Wide Leg Pants',price:'₹1,699'}
-];
+let bottomsSlides=[];
+function rebuildBottomsSlides(){bottomsSlides=products.slice(0,4).map(p=>({image:p[2],name:p[0],price:p[1]}));bottomsIndex=Math.min(bottomsIndex,Math.max(0,bottomsSlides.length-1));try{bottomsRender()}catch(_){}}
 let bottomsIndex=0;
 let bottomsDragging=false;
 let bottomsDragX=0;
@@ -529,6 +525,7 @@ let bottomsSuppressClickUntil=0;
 
 function bottomsDistance(i){
   let d=i-bottomsIndex, n=bottomsSlides.length;
+  if(!n)return 0;
   if(d>n/2)d-=n;
   if(d<-n/2)d+=n;
   return d;
@@ -549,6 +546,7 @@ function bottomsRender(){
   });
 }
 function bottomsGo(dir){
+  if(!bottomsSlides.length)return;
   bottomsIndex=(bottomsIndex+dir+bottomsSlides.length)%bottomsSlides.length;
   bottomsDragX=0;
   bottomsRender();
@@ -615,13 +613,8 @@ function bottomsGo(dir){
   bottomsRender();
 })();
 
-const motionSlides=[
-  {image:'chaos.jpg',name:'Chaos Oversize Tee',price:'₹1,399'},
-  {image:'bushido.jpg',name:'Burning Oath Tee',price:'₹1,499'},
-  {image:'graffiti.jpg',name:'Chaos Destiny Tee',price:'₹1,399'},
-  {image:'armor.jpg',name:'Instinct Oversize Tee',price:'₹1,399'},
-  {image:'bushido.jpg',name:'Bushido Graphic Tee',price:'₹1,499'}
-];
+let motionSlides=[];
+function rebuildMotionSlides(){motionSlides=products.slice(0,5).map(p=>({image:p[2],name:p[0],price:p[1]}));motionIndex=Math.min(motionIndex,Math.max(0,motionSlides.length-1));try{motionRender()}catch(_){}}
 let motionIndex=0;
 let motionDragging=false;
 let motionDragX=0;
@@ -631,6 +624,7 @@ let motionSuppressClickUntil=0;
 
 function motionDistance(i){
   let d=i-motionIndex, n=motionSlides.length;
+  if(!n)return 0;
   if(d>n/2)d-=n;
   if(d<-n/2)d+=n;
   return d;
@@ -656,6 +650,7 @@ function motionRender(){
   });
 }
 function motionGo(dir){
+  if(!motionSlides.length)return;
   motionIndex=(motionIndex+dir+motionSlides.length)%motionSlides.length;
   motionDragX=0;
   motionRender();
@@ -819,18 +814,6 @@ document.addEventListener('click',function(e){
   const control=e.target.closest('button,a,input,select,textarea');
   if(control && control.disabled) e.preventDefault();
 },true);
-</script>
-<script id="ytFullWebsiteConfigBridge">
-(function(){
-  const setText=(el,v)=>{if(el&&v!==undefined&&v!==null&&String(v)!=='')el.textContent=String(v)};
-  async function apply(){try{const r=await fetch('/api/site-config',{cache:'no-store'}),d=await r.json(),s=d.site||{};
-    setText(document.getElementById('siteHeroTitle'),s.hero);setText(document.querySelector('.heroCopy .sub'),s.heroDescription);
-    const b=document.querySelectorAll('.heroCopy .buttons .btn');if(b[0]){setText(b[0],(s.heroBtn1Text||'SHOP NOW')+' →');if(s.heroBtn1Link)b[0].href=s.heroBtn1Link}if(b[1]){setText(b[1],(s.heroBtn2Text||'EXPLORE')+' →');if(s.heroBtn2Link)b[1].href=s.heroBtn2Link}
-    const sc=s.sectionContent||{},map={collections:'collections',motion:'motion',featured:'shop',bestSellers:'bestSellers',newCollection:'newCollection',trending:'trending',womenTops:'womenTops'};Object.entries(map).forEach(([k,id])=>{const sec=document.getElementById(id),c=sc[k]||{},h=sec?.querySelector('.sectionHead');if(h){setText(h.querySelector('h2'),c.title);setText(h.querySelector('.sectionNote'),c.description)}});
-    const trust=document.querySelector('.trust'),bs=s.benefits||{};if(trust)[1,2,3,4].forEach((n,i)=>{const el=trust.children[i],x=bs[n];if(el){el.style.display=x&&x.on===false?'none':'';if(x){setText(el.querySelector('b'),x.title);setText(el.querySelector('small'),x.text)}}});
-    const news=document.getElementById('newsletter'),nw=s.newsletter||{};if(news){news.style.display=nw.visible===false?'none':'';setText(news.querySelector('h2'),nw.title);setText(news.querySelector('button'),nw.button)}
-  }catch(_){}} apply();setInterval(apply,15000);
-})();
 </script>
 </body>
 </html>
