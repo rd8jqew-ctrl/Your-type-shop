@@ -36,6 +36,9 @@ db.deletedProductIds ||= [];
 db.deletedProductIds=[...new Set(db.deletedProductIds.map(String).concat([...LEGACY_DELETED_PRODUCT_IDS]))];
 db.products=db.products.filter(p=>!LEGACY_DELETED_PRODUCT_IDS.has(String(p.id)));
 db.settings ||= {gst:5,shipping:99,freeShipping:1999};
+db.site.store ||= {name:'YOUR TYPE',phone:'',whatsapp:'',email:'',address:'',currency:'INR'};
+db.site.content ||= {banner:'',bannerButton:'',bannerLink:''};
+db.site.categories ||= ['T-Shirt','Shirt'];
 db.site ||= {hero:'YOUR TYPE',announcement:'New drops every week',sections:{home:true,collections:true,motion:true,featured:true,bestSellers:true,newCollection:true,trending:true,womenTops:true,highlights:true,editorial:true,newsletter:true},sectionProducts:{},colorPalette:['Black','White','Charcoal','Red','Blue','Green']};
 db.site.sections ||= {home:true,collections:true,motion:true,featured:true,bestSellers:true,newCollection:true,trending:true,womenTops:true,highlights:true,editorial:true,newsletter:true};
 db.site.sectionProducts ||= {}; db.site.colorPalette ||= ['Black','White','Charcoal','Red','Blue','Green'];
@@ -110,7 +113,29 @@ async function api(req,res,p){
 
   if(req.method==='POST'&&p==='/api/admin/products/bulk'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req),ids=Array.isArray(x.ids)?x.ids.map(String):[],action=String(x.action||'');if(!ids.length||!['show','hide','delete'].includes(action))return send(res,400,{error:'Invalid bulk action'},'application/json',origin);if(action==='delete'){db.deletedProductIds=[...new Set(db.deletedProductIds.concat(ids))];ids.forEach(removeProductFromSections);db.products=db.products.filter(p=>!ids.includes(String(p.id)));}else db.products.forEach(p=>{if(ids.includes(String(p.id))&&!productDeleted(p.id))p.active=action==='show'});audit('products.bulk',{action,ids});save(db);return send(res,200,{ok:true},'application/json',origin)}
   if(req.method==='POST'&&p==='/api/admin/upload'){
-   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req),name=path.basename(String(x.name||'')).replace(/[^a-zA-Z0-9._-]/g,'_'),data=String(x.data||''),m=data.match(/^data:(image\/(?:png|jpeg|webp));base64,(.+)$/);if(!name||!m)return send(res,400,{error:'Valid PNG, JPG or WEBP image data is required'},'application/json',origin);const buf=Buffer.from(m[2],'base64');if(buf.length>5*1024*1024)return send(res,413,{error:'Image must be 5MB or smaller'},'application/json',origin);const ext=m[1]==='image/jpeg'?'.jpg':m[1]==='image/webp'?'.webp':'.png',base=path.basename(name,path.extname(name))||'image',filename=base.replace(/[^a-zA-Z0-9._-]/g,'_')+'-'+crypto.randomBytes(4).toString('hex')+ext;fs.writeFileSync(path.join(UPLOADS,filename),buf);audit('upload',{filename});save(db);return send(res,201,{ok:true,filename,url:'/uploads/'+encodeURIComponent(filename)},'application/json',origin);
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const x=await body(req),name=path.basename(String(x.name||'')).replace(/[^a-zA-Z0-9._-]/g,'_'),data=String(x.data||'');
+   const m=data.match(/^data:(image\/(?:png|jpeg|webp)|video\/(?:mp4|webm));base64,(.+)$/);
+   if(!name||!m)return send(res,400,{error:'Valid PNG/JPG/WEBP/MP4/WEBM media is required'},'application/json',origin);
+   const buf=Buffer.from(m[2],'base64'),isVideo=m[1].startsWith('video/');
+   if(buf.length>(isVideo?20:5)*1024*1024)return send(res,413,{error:isVideo?'Video must be 20MB or smaller':'Image must be 5MB or smaller'},'application/json',origin);
+   const extMap={'image/jpeg':'.jpg','image/webp':'.webp','image/png':'.png','video/mp4':'.mp4','video/webm':'.webm'};
+   const ext=extMap[m[1]],base=path.basename(name,path.extname(name))||'media',filename=base.replace(/[^a-zA-Z0-9._-]/g,'_')+'-'+crypto.randomBytes(4).toString('hex')+ext;
+   fs.writeFileSync(path.join(UPLOADS,filename),buf);audit('upload',{filename,type:m[1]});save(db);
+   return send(res,201,{ok:true,filename,url:'/uploads/'+encodeURIComponent(filename),type:m[1]},'application/json',origin);
+  }
+  if(req.method==='GET'&&p==='/api/admin/media'){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const media=fs.readdirSync(UPLOADS,{withFileTypes:true}).filter(x=>x.isFile()).map(x=>{const name=x.name,st=fs.statSync(path.join(UPLOADS,name)),ext=path.extname(name).toLowerCase();const type=mime[ext]||'application/octet-stream';return {name,size:st.size,type,modifiedAt:st.mtime.toISOString()}}).sort((a,b)=>b.modifiedAt.localeCompare(a.modifiedAt));
+   return send(res,200,{media},'application/json',origin);
+  }
+  if(req.method==='DELETE'&&p.startsWith('/api/admin/media/')){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const filename=path.basename(decodeURIComponent(p.slice('/api/admin/media/'.length))),file=path.join(UPLOADS,filename);
+   if(!fs.existsSync(file)||!fs.statSync(file).isFile())return send(res,404,{error:'Media not found'},'application/json',origin);
+   const used=db.products.some(pr=>[pr.image,...(Array.isArray(pr.images)?pr.images:[])].some(v=>String(v||'').endsWith('/'+filename)||String(v||'')===filename||String(v||'').endsWith('uploads/'+filename)));
+   if(used)return send(res,409,{error:'Media is used by a product. Change the product image first.'},'application/json',origin);
+   fs.unlinkSync(file);audit('media.delete',{filename});save(db);return send(res,200,{ok:true},'application/json',origin);
   }
   if(req.method==='GET'&&p.startsWith('/uploads/')){const filename=path.basename(decodeURIComponent(p.slice('/uploads/'.length))),file=path.join(UPLOADS,filename);if(!fs.existsSync(file)||fs.statSync(file).isDirectory())return send(res,404,'Not found','text/plain',origin);return send(res,200,fs.readFileSync(file),mime[path.extname(file).toLowerCase()]||'application/octet-stream',origin)}
 
@@ -124,6 +149,39 @@ async function api(req,res,p){
 
   if(req.method==='PATCH'&&p.startsWith('/api/admin/returns/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/returns/'.length)),x=await body(req),r=db.returns.find(v=>String(v.id)===id);if(!r)return send(res,404,{error:'Return not found'},'application/json',origin);if(x.status!==undefined)r.status=String(x.status);if(x.refundAmount!==undefined)r.refundAmount=Math.max(0,Number(x.refundAmount||0));save(db);return send(res,200,r,'application/json',origin)}
 
+  if(req.method==='PATCH'&&p==='/api/admin/categories'){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const x=await body(req),cats=Array.isArray(x.categories)?[...new Set(x.categories.map(v=>String(v).trim()).filter(Boolean))]:null;
+   if(!cats)return send(res,400,{error:'categories must be an array'},'application/json',origin);
+   db.site.categories=cats;audit('categories.update',{count:cats.length});save(db);return send(res,200,{ok:true,categories:cats},'application/json',origin);
+  }
+  if(req.method==='PATCH'&&p==='/api/admin/store-settings'){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const x=await body(req);db.site.store={...db.site.store,...Object.fromEntries(['name','phone','whatsapp','email','address','currency'].filter(k=>x[k]!==undefined).map(k=>[k,String(x[k]||'')]))};
+   audit('store.settings.update');save(db);return send(res,200,{ok:true,store:db.site.store},'application/json',origin);
+  }
+  if(req.method==='PATCH'&&p==='/api/admin/site-content'){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const x=await body(req);db.site.content={...db.site.content,...Object.fromEntries(['banner','bannerButton','bannerLink'].filter(k=>x[k]!==undefined).map(k=>[k,String(x[k]||'')]))};
+   audit('site.content.update');save(db);return send(res,200,{ok:true,content:db.site.content},'application/json',origin);
+  }
+  if(req.method==='GET'&&p==='/api/admin/backup'){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const backup=JSON.parse(JSON.stringify(db));backup.sessions={};backup.meta={format:'YOUR_TYPE_SERVER_BACKUP',createdAt:new Date().toISOString(),version:1};
+   return send(res,200,backup,'application/json',origin);
+  }
+  if(req.method==='POST'&&p==='/api/admin/restore'){
+   if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
+   const x=await body(req);if(x.confirm!=='RESTORE_YOUR_TYPE'||!x.backup||typeof x.backup!=='object')return send(res,400,{error:'Valid restore confirmation and backup are required'},'application/json',origin);
+   const b=x.backup;
+   for(const k of ['orders','newsletter','users','products','reviews','coupons','returns','notifications','audit'])if(!Array.isArray(b[k]))return send(res,400,{error:'Backup is missing '+k},'application/json',origin);
+   const oldDeleted=db.deletedProductIds||[];
+   db.orders=b.orders;db.newsletter=b.newsletter;db.users=b.users;db.products=b.products.filter(pr=>!productDeleted(pr.id));
+   db.reviews=b.reviews;db.coupons=b.coupons;db.returns=b.returns;db.notifications=b.notifications;db.audit=Array.isArray(b.audit)?b.audit:[];db.settings={...db.settings,...(b.settings||{})};
+   db.site={...db.site,...(b.site||{})};db.site.sections={...db.site.sections,...(b.site?.sections||{})};db.site.sectionProducts={...db.site.sectionProducts,...(b.site?.sectionProducts||{})};
+   db.deletedProductIds=[...new Set([...oldDeleted,...(b.deletedProductIds||[]),...LEGACY_DELETED_PRODUCT_IDS].map(String))];
+   db.sessions={};audit('server.restore',{safe:true});save(db);return send(res,200,{ok:true},'application/json',origin);
+  }
   return send(res,404,{error:'Not found'},'application/json',origin);
  }catch(e){console.error(e);return send(res,500,{error:'Server error'},'application/json',origin)}
 }
