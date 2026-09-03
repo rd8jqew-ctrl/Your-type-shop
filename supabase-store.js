@@ -123,8 +123,10 @@ async function persistDb(db, initial=false){
   await replaceTable('newsletter',newsletterRows,'email');
   await replaceTable('notifications',notificationRows,'id');
   await replaceTable('audit',auditRows,'id');
-  await request('site_config','POST',{id:1,hero:d.site?.hero||'YOUR TYPE',announcement:d.site?.announcement||'',sections:d.site?.sections||{},section_products:d.site?.sectionProducts||{},color_palette:d.site?.colorPalette||[],store:d.site?.store||{},content:d.site?.content||{},categories:d.site?.categories||[]});
-  await request('store_settings','POST',{id:1,gst:Number(d.settings?.gst||0),shipping:Number(d.settings?.shipping||0),free_shipping:Number(d.settings?.freeShipping||0),gateway:d.settings?.gateway||{},courier:d.settings?.courier||{},notifications:d.settings?.notifications||{},role:d.settings?.role||'Super Admin'});
+  try{ await request('site_config','POST',{id:1,hero:d.site?.hero||'YOUR TYPE',announcement:d.site?.announcement||'',sections:d.site?.sections||{},section_products:d.site?.sectionProducts||{},color_palette:d.site?.colorPalette||[],store:d.site?.store||{},content:d.site?.content||{},categories:d.site?.categories||[]}); }
+  catch(e){ if(/\b404\b/.test(cleanError(e))){ disabledTables.add('site_config'); console.warn('[Supabase] Optional table "site_config" is not available through PostgREST; skipping its sync.'); } else throw e; }
+  try{ await request('store_settings','POST',{id:1,gst:Number(d.settings?.gst||0),shipping:Number(d.settings?.shipping||0),free_shipping:Number(d.settings?.freeShipping||0),gateway:d.settings?.gateway||{},courier:d.settings?.courier||{},notifications:d.settings?.notifications||{},role:d.settings?.role||'Super Admin'}); }
+  catch(e){ if(/\b404\b/.test(cleanError(e))){ disabledTables.add('store_settings'); console.warn('[Supabase] Optional table "store_settings" is not available through PostgREST; skipping its sync.'); } else throw e; }
   await replaceTable('deleted_product_ids',(d.deletedProductIds||[]).map(id=>({product_id:String(id)})),'product_id');
   lastSync = new Date().toISOString(); lastError=null;
   return {enabled:true,source:'supabase',initial};
