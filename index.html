@@ -219,7 +219,7 @@ function toggleCustomerCare(){
 <div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalBox"><div class="modalTop"><h2 id="modalTitle">YOUR TYPE</h2><button onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
 <script>
-let products = [["Akari Flight Tee", "₹1,549", "akari-flight-tee.jpg", "SALE", "₹2,200"], ["Ghamand Chroma Instinct", "₹1,399", "chroma-instinct-tee.jpg", "SALE", "₹2,100"], ["Ghamand Buddha's Blessing", "₹1,499", "buddhas-blessing-tee.jpg", "SALE", "₹2,200"], ["Burning Oath T-Shirt", "₹1,399", "burning-oath-tshirt.jpg", "NEW"], ["Who Are You T-Shirt", "₹1,499", "who-are-you-tshirt.jpg", "NEW"], ["What You Fear T-Shirt", "₹1,399", "what-you-fear-tshirt.jpg", "NEW"], ["Specter of Stillness T-Shirt", "₹1,499", "specter-stillness-tshirt.jpg", "NEW"], ["Crowned Destiny Tee", "₹1,399", "crowned-destiny-tee.jpg", "NEW"], ["Chaos Oversize Tee", "₹1,399", "chaos.jpg", "NEW"], ["Burning Oath Tee", "₹1,499", "bushido.jpg", "NEW"], ["Chaos Destiny Tee", "₹1,399", "graffiti.jpg", "NEW"], ["Instinct Oversize Tee", "₹1,399", "armor.jpg", "NEW"], ["Bushido Graphic Tee", "₹1,499", "bushido.jpg", "NEW"], ["Inferno Street Tee", "₹1,449", "chaos.jpg", "NEW"], ["Midnight Graffiti Tee", "₹1,349", "graffiti.jpg", "NEW"], ["Ritual Oversize Tee", "₹1,499", "ornament.jpg", "NEW"], ["Dark Armor Tee", "₹1,399", "armor.jpg", "NEW"]];
+let products = [];
 function storageGet(key,fallback='[]'){
  try{const v=localStorage.getItem(key); if(v!==null)return v;}catch(e){}
  try{const m=document.cookie.match(new RegExp('(?:^|; )'+key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'=([^;]*)')); if(m)return decodeURIComponent(m[1]);}catch(e){}
@@ -254,7 +254,6 @@ function goToShop(e){
  requestAnimationFrame(()=>shop.scrollIntoView({behavior:'smooth',block:'start'}));
 }
 
-storageSet('yourTypeProductsCache',products)
 function normalizeSearch(value){
  return String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
 }
@@ -510,19 +509,24 @@ function trackOrder(){showModal('Track Order',`<input id="trackNo" class="modalI
 function lookupOrder(){const id=(document.getElementById('trackNo')?.value||'').trim();if(!id)return;fetch('/api/orders/'+encodeURIComponent(id)).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Order not found');document.getElementById('trackResult').innerHTML='<b>'+d.orderId+'</b><br>Status: '+d.status+'<br>Total: '+money(d.total)+'<br>Placed: '+new Date(d.date).toLocaleString('en-IN')}).catch(e=>document.getElementById('trackResult').textContent=e.message)}
 function showAbout(){showModal('About YOUR TYPE','<p class="muted">YOUR TYPE is a dark streetwear label built around bold graphics, oversized silhouettes and premium everyday pieces.</p>')} function showContact(){showModal('Contact Us','<p class="muted">Email: support@yourtype.store</p><p class="muted">We reply within 1–2 business days.</p>')} function showPolicy(title,text){showModal(title,'<p class="muted">'+text+'</p>')}
 async function loadSiteConfig(){try{const r=await fetch('/api/site-config',{cache:'no-store'});const d=await r.json(),site=d.site||{},sec=site.sections||{};ytSectionProducts=site.sectionProducts||{};const map={home:'home',collections:'collections',motion:'motion',featured:'shop',bestSellers:'bestSellers',newCollection:'newCollection',trending:'trending',womenTops:'womenTops',highlights:'highlights',editorial:'editorial',newsletter:'newsletter'};Object.entries(map).forEach(([key,id])=>{const el=document.getElementById(id);if(el)el.classList.toggle('adminHiddenSection',sec[key]===false)});const hero=document.getElementById('siteHeroTitle');if(hero&&site.hero)hero.textContent=String(site.hero);const ann=document.querySelector('.shipping');if(ann&&site.announcement)ann.setAttribute('aria-label',site.announcement);renderCurated(); }catch(_){}} loadSiteConfig(); setInterval(loadSiteConfig,15000); 
-fetch('/api/products').then(r=>r.json()).then(d=>{if(Array.isArray(d.products)&&d.products.length){products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);}renderProducts();renderCurated();updateCart();updateWishlist();}).catch(()=>{renderProducts();renderCurated();updateCart();updateWishlist();});
+function syncLegacySlidesFromProducts(){
+  const source=products.filter(Boolean);
+  bottomsSlides=source.slice(0,4).map(p=>({image:p[2],name:p[0],price:p[1]}));
+  motionSlides=source.slice(0,5).map(p=>({image:p[2],name:p[0],price:p[1]}));
+  bottomsIndex=bottomsSlides.length?Math.min(bottomsIndex,bottomsSlides.length-1):0;
+  motionIndex=motionSlides.length?Math.min(motionIndex,motionSlides.length-1):0;
+  const bt=document.getElementById('bottomsTrack'); if(bt)bt.innerHTML='';
+  const mt=document.getElementById('motionTrack'); if(mt)mt.innerHTML='';
+  bottomsRender(); motionRender();
+}
+fetch('/api/products',{cache:'no-store'}).then(r=>r.json()).then(d=>{products=Array.isArray(d.products)?d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]):[];syncLegacySlidesFromProducts();renderProducts();renderCurated();updateCart();updateWishlist();}).catch(()=>{products=[];renderProducts();renderCurated();updateCart();updateWishlist();});
 // Keep an already-open storefront fresh when Admin changes product data.
 let _ytLastProductSignature='';
 async function refreshStorefrontProducts(){try{const r=await fetch('/api/products',{cache:'no-store'});const d=await r.json();if(!Array.isArray(d.products))return;const sig=JSON.stringify(d.products.map(p=>[p.id,p.name,p.price,p.image,p.active,p.sizes,p.colors,p.featured,p.badge,p.oldPrice]));if(sig===_ytLastProductSignature)return;_ytLastProductSignature=sig;products=d.products.map(p=>[p.name,p.price,p.image,p.badge,p.oldPrice||'',p.stock,p.sizes||{S:p.stock,M:p.stock,L:p.stock,XL:p.stock,XXL:p.stock},Number(p.likes||0),p.id,p.colors||['Black','White','Charcoal'],Boolean(p.featured)]);renderProducts();renderCurated();}
 catch(_){}}
 setInterval(refreshStorefrontProducts,15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshStorefrontProducts();});
-const bottomsSlides=[
-  {image:'graffiti.jpg',name:'Chaos Destiny Tee',price:'₹1,399'},
-  {image:'ornament.jpg',name:'Dragon Wide Leg Pants',price:'₹1,699'},
-  {image:'bushido.jpg',name:'Shadow Combat Pants',price:'₹1,599'},
-  {image:'chaos.jpg',name:'Graphic Wide Leg Pants',price:'₹1,699'}
-];
+let bottomsSlides=[];
 let bottomsIndex=0;
 let bottomsDragging=false;
 let bottomsDragX=0;
@@ -536,8 +540,9 @@ function bottomsDistance(i){
 }
 function bottomsRender(){
   const track=document.getElementById('bottomsTrack'); if(!track)return;
+  if(!bottomsSlides.length){track.innerHTML='';return;}
   if(!track.children.length){
-    track.innerHTML=bottomsSlides.map((p,i)=>`<article class="collectionMotionCard" data-index="${i}" role="button" tabindex="0" aria-label="View ${p.name}"><div class="collectionMotionImage"><img src="photos/${p.image}" alt="${p.name}"></div><div class="collectionMotionInfo"><span>${p.name}</span><b>${p.price}</b></div></article>`).join('');
+    track.innerHTML=bottomsSlides.map((p,i)=>`<article class="collectionMotionCard" data-index="${i}" role="button" tabindex="0" aria-label="View ${p.name}"><div class="collectionMotionImage"><img src="${ytImage(p.image)}" alt="${p.name}"></div><div class="collectionMotionInfo"><span>${p.name}</span><b>${p.price}</b></div></article>`).join('');
   }
   [...track.children].forEach((card,i)=>{
     const d=bottomsDistance(i);
@@ -550,6 +555,7 @@ function bottomsRender(){
   });
 }
 function bottomsGo(dir){
+  if(!bottomsSlides.length)return;
   bottomsIndex=(bottomsIndex+dir+bottomsSlides.length)%bottomsSlides.length;
   bottomsDragX=0;
   bottomsRender();
@@ -616,13 +622,7 @@ function bottomsGo(dir){
   bottomsRender();
 })();
 
-const motionSlides=[
-  {image:'chaos.jpg',name:'Chaos Oversize Tee',price:'₹1,399'},
-  {image:'bushido.jpg',name:'Burning Oath Tee',price:'₹1,499'},
-  {image:'graffiti.jpg',name:'Chaos Destiny Tee',price:'₹1,399'},
-  {image:'armor.jpg',name:'Instinct Oversize Tee',price:'₹1,399'},
-  {image:'bushido.jpg',name:'Bushido Graphic Tee',price:'₹1,499'}
-];
+let motionSlides=[];
 let motionIndex=0;
 let motionDragging=false;
 let motionDragX=0;
@@ -643,8 +643,9 @@ function motionOpenProduct(i){
 }
 function motionRender(){
   const track=document.getElementById('motionTrack'); if(!track)return;
+  if(!motionSlides.length){track.innerHTML='';return;}
   if(!track.children.length){
-    track.innerHTML=motionSlides.map((p,i)=>`<article class="motionCard" data-index="${i}" role="button" tabindex="0" aria-label="Shop ${p.name}"><div class="motionCardImage"><img src="photos/${p.image}" alt="${p.name}"></div><div class="motionCardInfo"><span>${p.name}</span><b>${p.price}</b></div><button type="button" class="motionShopBtn" onclick="event.stopPropagation();motionOpenProduct(${i})">SHOP →</button></article>`).join('');
+    track.innerHTML=motionSlides.map((p,i)=>`<article class="motionCard" data-index="${i}" role="button" tabindex="0" aria-label="Shop ${p.name}"><div class="motionCardImage"><img src="${ytImage(p.image)}" alt="${p.name}"></div><div class="motionCardInfo"><span>${p.name}</span><b>${p.price}</b></div><button type="button" class="motionShopBtn" onclick="event.stopPropagation();motionOpenProduct(${i})">SHOP →</button></article>`).join('');
   }
   [...track.children].forEach((card,i)=>{
     const d=motionDistance(i);
@@ -657,6 +658,7 @@ function motionRender(){
   });
 }
 function motionGo(dir){
+  if(!motionSlides.length)return;
   motionIndex=(motionIndex+dir+motionSlides.length)%motionSlides.length;
   motionDragX=0;
   motionRender();
