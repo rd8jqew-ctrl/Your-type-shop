@@ -5,6 +5,9 @@ const enabled = Boolean(SUPABASE_URL && SUPABASE_KEY);
 let writeQueue = Promise.resolve();
 let lastSync = null;
 let lastError = null;
+// Some Supabase projects can have a table visible in Table Editor but not exposed
+// through PostgREST. Keep that optional table from blocking the whole store.
+const disabledTables = new Set();
 
 function cleanError(e){ return e?.message || String(e || 'Unknown Supabase error'); }
 function deep(v){ return JSON.parse(JSON.stringify(v)); }
@@ -21,6 +24,19 @@ async function request(table, method='GET', body=null, query=''){
 async function getAll(table, order='created_at'){
   return request(table,'GET',null,'select=*'+(order?'&order='+encodeURIComponent(order)+'.desc':''));
 }
+async function getAllOptional(table, order='created_at'){
+  if(disabledTables.has(table)) return [];
+  try{
+    return await getAll(table, order);
+  }catch(e){
+    if(/\\b404\\b/.test(cleanError(e))){
+      disabledTables.add(table);
+      console.warn(`[Supabase] Optional table "${table}" is not available through PostgREST; continuing without it.`);
+      return [];
+    }
+    throw e;
+  }
+}
 
 async function hydrateDb(db){
   if(!enabled) return { enabled:false, source:'data.json' };
@@ -29,8 +45,8 @@ async function hydrateDb(db){
     const [products,customers,orders,items,reviews,coupons,returns,newsletter,notifications,audit,siteRows,settingsRows,deleted] = await Promise.all([
       getAll('products','created_at'), getAll('customers','created_at'), getAll('orders','order_date'),
       getAll('order_items','created_at'), getAll('reviews','created_at'), getAll('coupons','created_at'),
-      getAll('returns','created_at'), getAll('newsletter','created_at'), getAll('notifications','created_at'),
-      getAll('audit','created_at'), getAll('site_config','updated_at'), getAll('store_settings','updated_at'),
+      getAll('returns','created_at'), getAll('newsletter','created_at'), getAllOptional('notifications','created_at'),
+      getAllOptional('audit','created_at'), getAll('site_config','updated_at'), getAll('store_settings','updated_at'),
       getAll('deleted_product_ids','deleted_at')
     ]);
 
@@ -80,10 +96,20 @@ async function persistDb(db, initial=false){
   const auditRows=(d.audit||[]).map(a=>({id:String(a.id),action:a.action||'',meta:a.meta||{},created_at:a.time||undefined}));
 
   async function replaceTable(table, rows, key){
-    const existing=await request(table,'GET',null,'select='+encodeURIComponent(key));
-    const keep=new Set(rows.map(r=>String(r[key])));
-    for(const r of existing||[]){ if(!keep.has(String(r[key]))){ await request(table,'DELETE',null,encodeURIComponent(key)+'=eq.'+encodeURIComponent(String(r[key]))); } }
-    if(rows.length) await request(table,'POST',rows);
+    if(disabledTables.has(table)) return;
+    try{
+      const existing=await request(table,'GET',null,'select='+encodeURIComponent(key));
+      const keep=new Set(rows.map(r=>String(r[key])));
+      for(const r of existing||[]){ if(!keep.has(String(r[key]))){ await request(table,'DELETE',null,encodeURIComponent(key)+'=eq.'+encodeURIComponent(String(r[key]))); } }
+      if(rows.length) await request(table,'POST',rows);
+    }catch(e){
+      if(/\\b404\\b/.test(cleanError(e))){
+        disabledTables.add(table);
+        console.warn(`[Supabase] Optional table "${table}" is not available through PostgREST; skipping its sync.`);
+        return;
+      }
+      throw e;
+    }
   }
 
   await replaceTable('products',productRows,'id');
