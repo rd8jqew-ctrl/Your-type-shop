@@ -513,7 +513,7 @@ function adminLogin(){
   </form>`);
   requestAnimationFrame(()=>document.getElementById('loginUser')?.focus());
 }
-async function doAdminLogin(){const username=String(document.getElementById("loginUser")?.value||"").trim(),password=String(document.getElementById("loginPass")?.value||"");if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}sessionStorage.setItem("adminToken",x.token);closeModal();await loadServerState();go("dashboard")}catch(e){toast("Unable to connect to server")}}
+async function doAdminLogin(){const username=String(document.getElementById("loginUser")?.value||"").trim(),password=String(document.getElementById("loginPass")?.value||"");if(!username||!password){toast("Enter username and password");return}try{const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username,password})}),x=await r.json();if(!r.ok){toast(x.error||"Login failed");return}setAdminToken(x.token);closeModal();await loadServerState();go("dashboard")}catch(e){toast("Unable to connect to server")}}
 
 function adminHeaders(){const t=getAdminToken();return t?{'Content-Type':'application/json','Authorization':'Bearer '+t}:{'Content-Type':'application/json'}}
 // Global server API helper: older admin sections call api2() directly.
@@ -918,7 +918,7 @@ async function restoreServerBackup(){
     if(!username||!password){toast("Enter username and password");return}
     try{
       const x=await api("/api/admin/login",{method:"POST",body:JSON.stringify({username,password})});
-      sessionStorage.setItem("adminToken",x.token);
+      setAdminToken(x.token);
       closeModal();
       await syncFromServer(false);
       go("dashboard");
@@ -1064,7 +1064,7 @@ async function restoreServerBackup(){
       try{await syncFromServer(false)}catch(_){}
     }
   }
-  window.addEventListener('load',syncOnOpen);
+  
 })();
 </script>
 
@@ -1129,7 +1129,7 @@ async function restoreServerBackup(){
   window.orderCard=function(o){const p=productById(o.productId),qty=Math.max(1,num(o.qty)),price=num(o.price),imgProduct=p||{name:o.items?.[0]?.name||'Product',image:o.image||o.items?.[0]?.image||'',images:o.image||o.items?.[0]?.image?[o.image||o.items?.[0]?.image]:[]};return `<div class="order"><div style="display:flex;justify-content:space-between"><b>${esc(o.id||'—')}</b><span class="pill">${esc(o.status||'New')}</span></div><div class="orderbody"><div class="orderimg">${picHtml(imgProduct)}</div><div><b>${esc(p?.name||'Product')}</b><br>SKU: ${esc(p?.sku||'—')}<br>Size: <b>${esc(o.size||'—')}</b> · Color: <b>${esc(o.color||'—')}</b> · Qty: <b>${qty}</b><br>Unit: ${money(price)} · Total: <b>${money(price*qty)}</b><br>Payment: ${esc(o.payment||'COD')}<br><span class="muted">${esc(o.customer||'—')} · ${esc(o.phone||'—')}<br>${esc(o.date||'—')}</span></div></div><h3>Delivery Address</h3><div class="address">${esc(o.customer||'—')}\n${esc(o.address||'—')}\n📞 ${esc(o.phone||'—')}</div><p class="small">${o.verified?'✓ Address verified':'⚠ Address pending verification'}</p>${o.awb?`<p class="muted">AWB: <b>${esc(o.awb)}</b>${o.tracking_url?` · <a href="${esc(o.tracking_url)}" target="_blank" rel="noopener" style="color:#fff">Track Shipment</a>`:''}</p>`:''}<div class="timeline">${['Confirmed','Packed','Shipped','Out for Delivery','Delivered'].map((x,i)=>`<div class="step ${['Confirmed','Packed','Shipped','Out for Delivery','Delivered'].indexOf(o.status)>=i?'done':''}">${x}</div>`).join('')}</div><button class="btn good" onclick="setOrderStatus('${esc(o.id)}','Packed')">Packed</button><button class="btn" onclick="setOrderStatus('${esc(o.id)}','Shipped')">Shipped</button><button class="btn" onclick="setOrderStatus('${esc(o.id)}','Out for Delivery')">Out for Delivery</button><button class="btn primary" onclick="setOrderStatus('${esc(o.id)}','Delivered')">Delivered</button><button class="btn" onclick="verify('${esc(o.id)}')">Verify Address</button><button class="btn" onclick="shipment('${esc(o.id)}')">AWB / Tracking</button><button class="btn" onclick="invoiceById('${esc(o.id)}')">Invoice</button><button class="btn" onclick="addressSlip('${esc(o.id)}')">📄 Address / Packing Slip (PDF)</button><button class="btn danger" onclick="cancelOrder('${esc(o.id)}')">Cancel</button><br><br><button class="btn" onclick="details('${esc(o.id)}')">Full Details</button></div>`};
 
   window.syncAdminNow=sync;
-  window.addEventListener('load',()=>{if(getAdminToken()){sync().then(()=>{const saved=localStorage.getItem('ytAdminSection');if(saved&&document.getElementById(saved))go(saved)}).catch(e=>toast(e.message))}});
+  
 })();
 </script>
 
@@ -1232,7 +1232,7 @@ async function restoreServerBackup(){
 
   window.legacyDownloadOrdersStale=function(){const rows=(state.orders||[]).map(o=>{const p=pid(o.productId);return [o.id||'',o.customer||'',p?.name||'',o.size||'',Math.max(1,num(o.qty)),num(o.price)*Math.max(1,num(o.qty)),o.status||''].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')});downloadText('YOUR_TYPE_ORDERS_LEGACY.csv','Order,Customer,Product,Size,Qty,Total,Status\n'+rows.join('\n'),'text/csv')};
 
-  window.addEventListener('load',()=>setTimeout(()=>refreshAdminData().catch(e=>console.warn(e)),200));
+  
 })();
 </script>
 
@@ -1350,6 +1350,25 @@ async function restoreServerBackup(){
     if(!palette.length){toast('Enter at least one color');return}
     try{await api('/api/admin/site-config',{method:'PATCH',body:JSON.stringify({colorPalette:palette})});if(window.syncAdminNow)await window.syncAdminNow();toast('Global color palette saved to server')}catch(e){toast(e.message)}
   };
+})();
+</script>
+<script>
+/* YOUR TYPE — FINAL PERFORMANCE + AUTH STABILITY PATCH */
+(function(){
+  let refreshStarted=false;
+  window.addEventListener('load',()=>{
+    if(refreshStarted||!getAdminToken())return;
+    refreshStarted=true;
+    setTimeout(async()=>{
+      try{
+        if(window.syncAdminNow) await window.syncAdminNow();
+        const saved=localStorage.getItem('ytAdminSection');
+        if(saved&&document.getElementById(saved)) go(saved);
+      }catch(e){console.warn('Admin refresh sync failed',e)}
+    },80);
+  });
+  window.imageUrl=window.imageUrl||function(v){const s=String(v||'').trim();if(!s)return '';if(/^data:|^https?:|^\//i.test(s))return s;if(/^uploads\//i.test(s))return '/'+s;return '/photos/'+s};
+  window.picHtml=function(p){const raw=String(p?.image||p?.images?.[0]||'').trim();const src=window.imageUrl(raw);return src?`<img src=\"${esc(raw.startsWith('/uploads/')||raw.startsWith('/photos/')||raw.startsWith('http')||raw.startsWith('data:')?raw:src)}\" alt=\"${esc(p?.name||'Product')}\" loading=\"lazy\" style=\"width:100%;height:100%;object-fit:cover;display:block\" onerror=\"this.remove();this.parentElement.classList.add('img-fallback');this.parentElement.dataset.fallback='YT'\">`:'<span>YT</span>'};
 })();
 </script>
 </body></html>
