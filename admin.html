@@ -1071,6 +1071,7 @@ async function restoreServerBackup(){
 <script>
 /* YOUR TYPE — FINAL SERVER/UI COMPATIBILITY PATCH */
 (function(){
+  window.esc=window.esc||function(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))};
   const api2=window.api2;
   const num=v=>Number(String(v??0).replace(/[^0-9.-]/g,''))||0;
   const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

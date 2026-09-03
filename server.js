@@ -3,6 +3,7 @@ const fs=require('fs');
 const path=require('path');
 const crypto=require('crypto');
 const {URL}=require('url');
+const persistence=require('./supabase-store');
 
 const ROOT=__dirname;
 const DATA=path.join(ROOT,'data.json');
@@ -28,7 +29,7 @@ let adminAuth=loadAdminAuth();
 if(!adminAuth&&ADMIN_PASS){if(!strongPassword(ADMIN_PASS))console.warn('ADMIN_PASS is weak; use 12+ chars with upper/lowercase, number and symbol.');else adminAuth=saveAdminAuth(ADMIN_PASS)}
 function verifyAdminPassword(password){if(!adminAuth)return false;const a=Buffer.from(hashPassword(password,adminAuth.salt),'hex'),b=Buffer.from(adminAuth.hash,'hex');return a.length===b.length&&crypto.timingSafeEqual(a,b)}
 function load(){try{return JSON.parse(fs.readFileSync(DATA,'utf8'))}catch{return {orders:[],newsletter:[],users:[],products:[],sessions:{}}}}
-function save(db){fs.writeFileSync(DATA,JSON.stringify(db,null,2))}
+function save(db){fs.writeFileSync(DATA,JSON.stringify(db,null,2)); return persistence.queueSave(db)}
 const db=load();
 db.orders ||= []; db.newsletter ||= []; db.users ||= []; db.products ||= []; db.sessions ||= {}; db.reviews ||= []; db.coupons ||= []; db.returns ||= []; db.notifications ||= []; db.audit ||= [];
 db.deletedProductIds ||= [];
@@ -44,7 +45,6 @@ db.site.store ||= {name:'YOUR TYPE',phone:'',whatsapp:'',email:'',address:'',cur
 db.site.content ||= {banner:'',bannerButton:'',bannerLink:''};
 db.site.categories ||= ['T-Shirt','Shirt'];
 db.products.forEach((p,i)=>{p.image=normalizeImageRef(p.image||(Array.isArray(p.images)?p.images[0]:'')||'');if(Array.isArray(p.images))p.images=p.images.map(normalizeImageRef).filter(Boolean);if(!p.id)p.id='p_'+crypto.createHash('sha1').update(String(p.name||'')+'|'+String(p.image||'')+'|'+i).digest('hex').slice(0,12);if(!p.sizes)p.sizes=Object.fromEntries(SIZES.map(s=>[s,Math.max(0,Number(p.stock||0))]));if(!p.sku)p.sku='YT-'+String(i+1).padStart(3,'0');if(!Array.isArray(p.colors)||!p.colors.length)p.colors=['Black','White','Charcoal'];if(!Array.isArray(p.images)||!p.images.length)p.images=[p.image||''];if(p.active===undefined)p.active=true});
-save(db);
 
 function hash(s){return crypto.createHash('sha256').update(String(s)).digest('hex')}
 function originFor(req){const o=req.headers.origin||'';return o&&o===('http://'+req.headers.host)?o:''}
@@ -72,7 +72,7 @@ async function api(req,res,p){
  const origin=originFor(req);
  try{
   const key=p.startsWith('/api/admin')?'admin':p.startsWith('/api/auth')?'auth':'api';
-  if(limited(req,key, p==='/api/admin/login'?8:90,60000))return send(res,429,{error:'Too many requests. Please try again shortly.'},'application/json',origin);
+  if(limited(req,key, p==='/api/admin/login'?8:300,60000))return send(res,429,{error:'Too many requests. Please try again shortly.'},'application/json',origin);
   if(req.method==='OPTIONS')return send(res,204,'','text/plain',origin);
 
   if(req.method==='POST'&&p==='/api/admin/login'){const x=await body(req);if(String(x.username||'')!==ADMIN_USER||!verifyAdminPassword(x.password))return send(res,401,{error:'Invalid admin credentials'},'application/json',origin);return send(res,200,{token:newSession('admin')},'application/json',origin)}
@@ -105,6 +105,7 @@ async function api(req,res,p){
   if(req.method==='GET'&&p.startsWith('/api/orders/')){const id=decodeURIComponent(p.slice('/api/orders/'.length)),o=db.orders.find(v=>v.orderId===id);if(!o)return send(res,404,{error:'Order not found'},'application/json',origin);return send(res,200,{orderId:o.orderId,status:o.status,date:o.date,total:o.total,subtotal:o.subtotal,discount:o.discount||0,couponCode:o.couponCode||'',gst:o.gst||0,shipping:o.shipping||0,items:o.items},'application/json',origin)}
 
   if(req.method==='GET'&&p==='/api/admin/data'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);return send(res,200,{orders:db.orders,newsletter:db.newsletter,products:db.products.filter(p=>!productDeleted(p.id)).map(safeProduct),users:db.users.map(u=>({id:u.id,name:u.name,email:u.email,phone:u.phone||'',createdAt:u.createdAt})),reviews:db.reviews,coupons:db.coupons,returns:db.returns,notifications:db.notifications,audit:db.audit,settings:db.settings,site:db.site},'application/json',origin)}
+  if(req.method==='GET'&&p==='/api/admin/database-status'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);try{await persistence.flush();return send(res,200,{ok:true,...persistence.status()},'application/json',origin)}catch(e){return send(res,503,{ok:false,...persistence.status(),error:e.message},'application/json',origin)}}
   if(req.method==='GET'&&p==='/api/admin/settings'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);return send(res,200,{settings:db.settings},'application/json',origin)}
   if(req.method==='PATCH'&&p==='/api/admin/settings'){if(!auth(req,'admin')||!adminPermission(req,'settings'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req);const next={...db.settings,...x};next.gst=Math.max(0,Math.min(100,Number(next.gst??5)));next.shipping=Math.max(0,Number(next.shipping??99));next.freeShipping=Math.max(0,Number(next.freeShipping??1999));if(next.freeShipping<next.shipping)next.freeShipping=Math.max(next.shipping,next.freeShipping);if(next.gateway&&typeof next.gateway==='object')next.gateway={...db.settings.gateway,...next.gateway};if(next.courier&&typeof next.courier==='object')next.courier={...db.settings.courier,...next.courier};if(next.notifications&&typeof next.notifications==='object')next.notifications={...db.settings.notifications,...next.notifications};const allowedRoles=['Super Admin','Order Manager','Inventory Manager','Support'];if(!allowedRoles.includes(String(next.role)))next.role='Super Admin';db.settings=next;audit('settings.update',{fields:Object.keys(x)});save(db);return send(res,200,{ok:true,settings:db.settings},'application/json',origin)}
 
@@ -184,4 +185,14 @@ const server=http.createServer(async(req,res)=>{
  if(!file.startsWith(ROOT)||!fs.existsSync(file)||fs.statSync(file).isDirectory())file=path.join(ROOT,'index.html');
  try{const ext=path.extname(file).toLowerCase();res.writeHead(200,{'Content-Type':mime[ext]||'application/octet-stream','Cache-Control':'no-store'});res.end(fs.readFileSync(file))}catch{send(res,404,'Not found','text/plain')}
 });
-server.listen(PORT,()=>console.log(`YOUR TYPE running at http://localhost:${PORT}`));
+(async()=>{
+ try{
+  const result=await persistence.hydrateDb(db);
+  console.log('[YOUR TYPE] Persistence:',result);
+  await save(db);
+  await persistence.flush();
+ }catch(e){
+  console.error('[YOUR TYPE] Supabase startup sync failed:',e.message);
+ }
+ server.listen(PORT,()=>console.log(`YOUR TYPE running at http://localhost:${PORT}`));
+})();

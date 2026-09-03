@@ -4,10 +4,6 @@
   "private": true,
   "description": "YOUR TYPE e-commerce website",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+  "scripts": {"start": "node server.js"},
+  "engines": {"node": ">=18"}
 }

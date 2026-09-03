@@ -54,12 +54,46 @@
       "Red",
       "Blue",
       "Green"
+    ],
+    "store": {
+      "name": "YOUR TYPE",
+      "phone": "",
+      "whatsapp": "",
+      "email": "",
+      "address": "",
+      "currency": "INR"
+    },
+    "content": {
+      "banner": "",
+      "bannerButton": "",
+      "bannerLink": ""
+    },
+    "categories": [
+      "T-Shirt",
+      "Shirt"
     ]
   },
   "settings": {
     "gst": 5,
     "shipping": 99,
-    "freeShipping": 1999
+    "freeShipping": 1999,
+    "gateway": {
+      "provider": "Razorpay",
+      "keyId": "",
+      "enabled": false
+    },
+    "courier": {
+      "provider": "Shiprocket",
+      "enabled": false
+    },
+    "notifications": {
+      "order": true,
+      "shipping": true,
+      "delivery": true,
+      "whatsapp": false,
+      "webhookUrl": ""
+    },
+    "role": "Super Admin"
   },
   "deletedProductIds": [
     "p_001",
