@@ -152,26 +152,7 @@ async function hydrateDb(db, options={}){
 async function persistDb(db, initial=false){
   if(!enabled) return {enabled:false};
   const d=deep(db);
-  // Keep the Supabase products payload compatible with the existing products table.
-  // The current schema contains: id, name, category, price, cost, sku, description,
-  // image, images, sizes, colors, active, featured, created_at, updated_at.
-  // Do NOT send UI-only/local fields such as badge, old_price, sections or likes;
-  // PostgREST rejects the entire insert/upsert when even one unknown column is sent.
-  const productRows=(d.products||[]).filter(p=>!d.deletedProductIds?.includes(String(p.id))).map(p=>({
-    id:String(p.id),
-    name:String(p.name||''),
-    category:p.category||'',
-    price:Number(String(p.price||0).replace(/[^0-9.-]/g,''))||0,
-    cost:Number(p.cost||0),
-    sku:p.sku||null,
-    description:p.description||'',
-    image:p.image||'',
-    images:Array.isArray(p.images)?p.images:[],
-    sizes:p.sizes||{},
-    colors:Array.isArray(p.colors)?p.colors:[],
-    active:p.active!==false,
-    featured:Boolean(p.featured)
-  }));
+  const productRows=(d.products||[]).filter(p=>!d.deletedProductIds?.includes(String(p.id))).map(p=>({id:String(p.id),name:String(p.name||''),category:p.category||'',price:Number(String(p.price||0).replace(/[^0-9.-]/g,''))||0,cost:Number(p.cost||0),sku:p.sku||null,description:p.description||'',image:p.image||'',images:p.images||[],sizes:p.sizes||{},colors:p.colors||[],active:p.active!==false,featured:Boolean(p.featured),badge:p.badge||'',old_price:p.oldPrice||'',sections:p.sections||[],likes:Number(p.likes||0)}));
   const customerRows=(d.users||[]).map(u=>({id:String(u.id),name:String(u.name||''),email:String(u.email||'').toLowerCase(),phone:u.phone||'',password_hash:u.password||null,created_at:u.createdAt||undefined}));
   const orderRows=(d.orders||[]).map(o=>({order_id:String(o.orderId),user_id:o.userId||null,name:o.name||'',email:o.email||'',phone:o.phone||'',address:o.address||'',city:o.city||'',pin:o.pin||'',subtotal:Number(o.subtotal||0),discount:Number(o.discount||0),coupon_code:o.couponCode||'',taxable_subtotal:Number(o.taxableSubtotal||0),gst_rate:Number(o.gstRate||0),gst:Number(o.gst||0),shipping:Number(o.shipping||0),total:Number(o.total||0),payment:o.payment||'cod',status:o.status||'New',verified:Boolean(o.verified),awb:o.awb||'',courier:o.courier||'',tracking_url:o.tracking_url||'',order_date:o.date||undefined}));
   const itemRows=[]; for(const o of d.orders||[]) for(const it of o.items||[]) itemRows.push({order_id:String(o.orderId),product_id:it.productId||null,name:it.name||'',image:it.image||'',sku:it.sku||'',price:Number(String(it.price||0).replace(/[^0-9.-]/g,''))||0,size:it.size||'M',color:it.color||'Black',qty:Number(it.qty||1)});
