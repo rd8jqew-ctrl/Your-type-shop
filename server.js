@@ -53,7 +53,7 @@ db.products=db.products.filter(p=>!localDeletedProductIds.has(String(p.id)));
 
 function hash(s){return crypto.createHash('sha256').update(String(s)).digest('hex')}
 function originFor(req){const o=req.headers.origin||'';return o&&o===('http://'+req.headers.host)?o:''}
-function send(res,status,data,type='application/json',origin=''){const h={'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'SAMEORIGIN','Referrer-Policy':'strict-origin-when-cross-origin','Permissions-Policy':'camera=(), microphone=(), geolocation=()','Content-Security-Policy':"default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' data: blob:; media-src 'self' blob:",'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET,POST,PATCH,DELETE,OPTIONS'};if(origin)h['Access-Control-Allow-Origin']=origin;res.writeHead(status,h);res.end(type==='application/json'?JSON.stringify(data):data)}
+function send(res,status,data,type='application/json',origin=''){const h={'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'SAMEORIGIN','Referrer-Policy':'strict-origin-when-cross-origin','Permissions-Policy':'camera=(), microphone=(), geolocation=()','Content-Security-Policy':"default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; img-src 'self' https: data: blob:; media-src 'self' https: data: blob:",'Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET,POST,PATCH,DELETE,OPTIONS'};if(origin)h['Access-Control-Allow-Origin']=origin;res.writeHead(status,h);res.end(type==='application/json'?JSON.stringify(data):data)}
 const rate=new Map();
 function limited(req,key,limit=60,windowMs=60000){const now=Date.now();const forwarded=String(req.headers['x-forwarded-for']||'').split(',')[0].trim();const ip=forwarded||req.socket.remoteAddress||'local';const k=key+'|'+ip;const arr=(rate.get(k)||[]).filter(t=>now-t<windowMs);arr.push(now);rate.set(k,arr);return arr.length>limit}
 function body(req){return new Promise((resolve,reject)=>{let b='';req.on('data',c=>{b+=c;if(b.length>30e6){req.destroy();reject(new Error('Payload too large'))}});req.on('end',()=>{try{resolve(b?JSON.parse(b):{})}catch(e){reject(e)}});req.on('error',reject)})}
@@ -63,7 +63,7 @@ function newSession(role,userId){const token=crypto.randomBytes(32).toString('he
 function orderId(){return 'YT-'+Date.now().toString(36).toUpperCase()+'-'+crypto.randomBytes(2).toString('hex').toUpperCase()}
 function priceNumber(v){return Number(String(v??'').replace(/[^0-9.-]/g,''))||0}
 function cleanSizes(z){const src=z||{};return Object.fromEntries(SIZES.map(s=>[s,Math.max(0,Math.floor(Number(src[s]||0)))]))}
-function normalizeImageRef(v){const s=String(v||'').trim();if(!s)return '';if(/^data:|^https?:|^\//i.test(s))return s;if(/^uploads\//i.test(s))return '/'+s;return '/photos/'+s}
+function normalizeImageRef(v){const s=String(v||'').trim();if(!s)return '';if(/^data:|^https?:|^\//i.test(s))return s;if(/^uploads\//i.test(s))return '/'+s;if(/^photos\//i.test(s))return '/'+s;const localUpload=path.join(UPLOADS,path.basename(s));if(fs.existsSync(localUpload))return '/uploads/'+encodeURIComponent(path.basename(s));return '/uploads/'+encodeURIComponent(s)}
 function safeProduct(p){const sizes=cleanSizes(p.sizes),images=(Array.isArray(p.images)?p.images:[]).map(normalizeImageRef).filter(Boolean),image=normalizeImageRef(p.image||images[0]||'');return {id:String(p.id),name:String(p.name||''),price:String(p.price||''),image,images:images.length?images:(image?[image]:[]),badge:String(p.badge||''),oldPrice:String(p.oldPrice||''),description:String(p.description||''),category:String(p.category||'T-Shirts'),sku:String(p.sku||''),cost:Number(p.cost||0),sizes,colors:Array.isArray(p.colors)&&p.colors.length?p.colors:['Black','White','Charcoal'],active:p.active!==false,featured:Boolean(p.featured),sections:Array.isArray(p.sections)?p.sections:[],stock:Object.values(sizes).reduce((a,b)=>a+b,0)}}
 function audit(action,meta={}){db.audit.unshift({id:crypto.randomUUID(),action,meta,time:new Date().toISOString()});db.audit=db.audit.slice(0,500)}
 function findProduct(item){const id=String(item.productId||'');if(id){const p=db.products.find(v=>String(v.id)===id);if(p)return p}const sku=String(item.sku||'');if(sku){const p=db.products.find(v=>String(v.sku)===sku);if(p)return p}const name=String(item.name||'');const image=String(item.image||'');return db.products.find(v=>v.name===name&&( !image || v.image===image))}
@@ -165,7 +165,8 @@ async function api(req,res,p){
   }
   if(req.method==='GET'&&p==='/api/admin/media'){
     if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
-    const media=fs.readdirSync(UPLOADS,{withFileTypes:true}).filter(e=>e.isFile()).map(e=>{const file=path.join(UPLOADS,e.name),st=fs.statSync(file),ext=path.extname(e.name).toLowerCase();const type=mime[ext]||'application/octet-stream';return {name:e.name,size:st.size,type,updatedAt:st.mtime.toISOString()}}).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+    if(supabaseStore.enabled){const media=await supabaseStore.listMedia();return send(res,200,{media},'application/json',origin)}
+    const media=fs.readdirSync(UPLOADS,{withFileTypes:true}).filter(e=>e.isFile()).map(e=>{const file=path.join(UPLOADS,e.name),st=fs.statSync(file),ext=path.extname(e.name).toLowerCase();const type=mime[ext]||'application/octet-stream';return {name:e.name,size:st.size,type,updatedAt:st.mtime.toISOString(),url:'/uploads/'+encodeURIComponent(e.name)}}).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
     return send(res,200,{media},'application/json',origin);
   }
   if(req.method==='DELETE'&&p.startsWith('/api/admin/media/')){
@@ -202,18 +203,18 @@ async function api(req,res,p){
 const server=http.createServer(async(req,res)=>{
  const u=new URL(req.url,'http://localhost'),p=u.pathname;
  if(p.startsWith('/api/')||p.startsWith('/uploads/'))return api(req,res,p);
- let file=path.normalize(path.join(ROOT,p==='/'?'index.html':p));
- if(!file.startsWith(ROOT)||!fs.existsSync(file)||fs.statSync(file).isDirectory())file=path.join(ROOT,'index.html');
+ const file=path.normalize(path.join(ROOT,p==='/'?'index.html':p));
+ if(!file.startsWith(ROOT)||!fs.existsSync(file)||fs.statSync(file).isDirectory())return send(res,404,'Not found','text/plain');
  try{const ext=path.extname(file).toLowerCase();res.writeHead(200,{'Content-Type':mime[ext]||'application/octet-stream','Cache-Control':'no-store'});res.end(fs.readFileSync(file))}catch{send(res,404,'Not found','text/plain')}
 });
 async function bootstrap(){
   try{
     if(supabaseStore.enabled){
       await supabaseStore.hydrateDb(db,{preserveDeletedIds:[...localDeletedProductIds]});
-      // Re-apply the local tombstones after hydration and clean any resurrected rows from the remote store.
+      // Re-apply local tombstones after hydration. Do not perform a destructive full-table rewrite during startup.
+      // Normal admin/customer writes are flushed explicitly after successful API operations.
       db.deletedProductIds=[...new Set([...(db.deletedProductIds||[]).map(String),...localDeletedProductIds])];
       db.products=db.products.filter(p=>!db.deletedProductIds.includes(String(p.id)));
-      await supabaseStore.persistDb(db,false);
     }
     storageReady=true;
     fs.writeFileSync(DATA,JSON.stringify(db,null,2));

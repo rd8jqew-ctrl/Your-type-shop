@@ -117,8 +117,9 @@ async function hydrateDb(db, options={}){
     if(!hasBusinessData){
       db.deletedProductIds=[...new Set([...(db.deletedProductIds||[]).map(String),...(options.preserveDeletedIds||[]).map(String)])];
       db.products=(db.products||[]).filter(p=>!new Set(db.deletedProductIds).has(String(p.id)));
-      await persistDb(db, true);
-      return { enabled:true, source:'data.json->supabase', migrated:true };
+      // Startup must remain non-destructive. If Supabase is empty, keep the local seed in memory;
+      // the first successful write can persist it without blocking the Render process.
+      return { enabled:true, source:'data.json->supabase', migrated:false, localSeedPending:true };
     }
 
     const preservedDeleted = new Set((options.preserveDeletedIds||[]).map(String));

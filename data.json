@@ -3,115 +3,13 @@
   "newsletter": [],
   "users": [],
   "products": [],
-  "sessions": {
-    "a53bef2598b7ddfb97ed46ac1922ff8443b52b4aa5c4e6f063e719bc731d66a8": {
-      "role": "admin",
-      "userId": null,
-      "expires": 1788041054815
-    },
-    "b18f17e38606ff2b1f02017ab2211dec2e7a9d622184f5ad772a7fa1a195008e": {
-      "role": "admin",
-      "userId": null,
-      "expires": 1788044406643
-    },
-    "2147af11b9f833db2da07a51cbf0c042d9ac01a2887996415078c51e4c0a72cb": {
-      "role": "admin",
-      "userId": null,
-      "expires": 1788215816177
-    },
-    "ae5b157b2bf27215322090f14381ab9d59ddd3b536d817604c45709b6688ee4c": {
-      "role": "admin",
-      "userId": null,
-      "expires": 1788220945455
-    }
-  },
+  "sessions": {},
   "reviews": [],
-  "notifications": [],
   "coupons": [],
   "returns": [],
+  "notifications": [],
   "audit": [],
-  "site": {
-    "hero": "YOUR TYPE",
-    "announcement": "New drops every week",
-    "sections": {
-      "home": true,
-      "collections": true,
-      "motion": true,
-      "featured": true,
-      "bestSellers": true,
-      "newCollection": true,
-      "trending": true,
-      "womenTops": true,
-      "highlights": true,
-      "editorial": true,
-      "newsletter": true
-    },
-    "sectionProducts": {},
-    "colorPalette": [
-      "Black",
-      "White",
-      "Charcoal",
-      "Red",
-      "Blue",
-      "Green"
-    ],
-    "store": {
-      "name": "YOUR TYPE",
-      "phone": "",
-      "whatsapp": "",
-      "email": "",
-      "address": "",
-      "currency": "INR"
-    },
-    "content": {
-      "banner": "",
-      "bannerButton": "",
-      "bannerLink": ""
-    },
-    "categories": [
-      "T-Shirt",
-      "Shirt"
-    ]
-  },
-  "settings": {
-    "gst": 5,
-    "shipping": 99,
-    "freeShipping": 1999,
-    "gateway": {
-      "provider": "Razorpay",
-      "keyId": "",
-      "enabled": false
-    },
-    "courier": {
-      "provider": "Shiprocket",
-      "enabled": false
-    },
-    "notifications": {
-      "order": true,
-      "shipping": true,
-      "delivery": true,
-      "whatsapp": false,
-      "webhookUrl": ""
-    },
-    "role": "Super Admin"
-  },
-  "deletedProductIds": [
-    "p_001",
-    "p_002",
-    "p_003",
-    "p_004",
-    "p_005",
-    "p_006",
-    "p_007",
-    "p_008",
-    "p_009",
-    "p_010",
-    "p_011",
-    "p_012",
-    "p_013",
-    "p_014",
-    "p_015",
-    "p_016",
-    "p_017"
-  ]
+  "settings": {"gst": 5, "shipping": 99, "freeShipping": 1999, "gateway": {}, "courier": {}, "notifications": {}, "role": "Super Admin"},
+  "site": {"hero": "YOUR TYPE", "announcement": "New drops every week", "sections": {"home": true, "collections": true, "motion": true, "featured": true, "bestSellers": true, "newCollection": true, "trending": true, "womenTops": true, "highlights": true, "editorial": true, "newsletter": true}, "sectionProducts": {}, "colorPalette": ["Black", "White", "Charcoal", "Red", "Blue", "Green"], "store": {"name": "YOUR TYPE", "phone": "", "whatsapp": "", "email": "", "address": "", "currency": "INR"}, "content": {"banner": "", "bannerButton": "", "bannerLink": ""}},
+  "deletedProductIds": []
 }
