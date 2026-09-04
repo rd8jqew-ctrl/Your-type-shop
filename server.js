@@ -30,13 +30,12 @@ function load(){try{return JSON.parse(fs.readFileSync(DATA,'utf8'))}catch{return
 let storageReady=false;
 function save(db){
   fs.writeFileSync(DATA,JSON.stringify(db,null,2));
-  if(storageReady && supabaseStore.enabled){
-    supabaseStore.queueSave(db).catch(err=>console.error('[Supabase] save failed:',err.message||err));
-  }
+  if(storageReady && supabaseStore.enabled) return supabaseStore.queueSave(db);
+  return Promise.resolve({enabled:false});
 }
 async function saveAndFlush(db){
-  save(db);
-  if(storageReady && supabaseStore.enabled) await supabaseStore.flush();
+  const job=save(db);
+  if(storageReady && supabaseStore.enabled) await job;
 }
 const db=load();
 db.orders ||= []; db.newsletter ||= []; db.users ||= []; db.products ||= []; db.sessions ||= {}; db.reviews ||= []; db.coupons ||= []; db.returns ||= []; db.notifications ||= []; db.audit ||= [];
@@ -197,7 +196,7 @@ async function api(req,res,p){
     const x=await body(req);if(!verifyAdminPassword(String(x.currentPassword||'')))return send(res,401,{error:'Current password is incorrect'},'application/json',origin);db.settings.role='Super Admin';audit('admin.role.reset');await saveAndFlush(db);return send(res,200,{ok:true,role:'Super Admin'},'application/json',origin);
   }
   return send(res,404,{error:'Not found'},'application/json',origin);
- }catch(e){console.error(e);return send(res,500,{error:'Server error'},'application/json',origin)}
+ }catch(e){console.error(e);return send(res,500,{error:e?.message||'Server error'},'application/json',origin)}
 }
 
 const server=http.createServer(async(req,res)=>{

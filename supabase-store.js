@@ -189,7 +189,7 @@ async function persistDb(db, initial=false){
       const existing=await request(table,'GET',null,'select='+encodeURIComponent(key));
       const keep=new Set(rows.map(r=>String(r[key])));
       for(const r of existing||[]){ if(!keep.has(String(r[key]))){ await request(table,'DELETE',null,encodeURIComponent(key)+'=eq.'+encodeURIComponent(String(r[key]))); } }
-      if(rows.length) await request(table,'POST',rows);
+      if(rows.length) await request(table,'POST',rows,'on_conflict='+encodeURIComponent(key));
     }catch(e){
       if(/\b404\b/.test(cleanError(e))){
         disabledTables.add(table);
@@ -211,9 +211,9 @@ async function persistDb(db, initial=false){
   await replaceTable('newsletter',newsletterRows,'email');
   await replaceTable('notifications',notificationRows,'id');
   await replaceTable('audit',auditRows,'id');
-  try{ await request('site_config','POST',{id:1,hero:d.site?.hero||'YOUR TYPE',announcement:d.site?.announcement||'',sections:d.site?.sections||{},section_products:d.site?.sectionProducts||{},color_palette:d.site?.colorPalette||[],store:d.site?.store||{},content:d.site?.content||{},categories:d.site?.categories||[]}); }
+  try{ await request('site_config','POST',{id:1,hero:d.site?.hero||'YOUR TYPE',announcement:d.site?.announcement||'',sections:d.site?.sections||{},section_products:d.site?.sectionProducts||{},color_palette:d.site?.colorPalette||[],store:d.site?.store||{},content:d.site?.content||{},categories:d.site?.categories||[]},'on_conflict=id'); }
   catch(e){ if(/\b404\b/.test(cleanError(e))){ disabledTables.add('site_config'); console.warn('[Supabase] Optional table "site_config" is not available through PostgREST; skipping its sync.'); } else throw e; }
-  try{ await request('store_settings','POST',{id:1,gst:Number(d.settings?.gst||0),shipping:Number(d.settings?.shipping||0),free_shipping:Number(d.settings?.freeShipping||0),gateway:d.settings?.gateway||{},courier:d.settings?.courier||{},notifications:d.settings?.notifications||{},role:d.settings?.role||'Super Admin'}); }
+  try{ await request('store_settings','POST',{id:1,gst:Number(d.settings?.gst||0),shipping:Number(d.settings?.shipping||0),free_shipping:Number(d.settings?.freeShipping||0),gateway:d.settings?.gateway||{},courier:d.settings?.courier||{},notifications:d.settings?.notifications||{},role:d.settings?.role||'Super Admin'},'on_conflict=id'); }
   catch(e){ if(/\b404\b/.test(cleanError(e))){ disabledTables.add('store_settings'); console.warn('[Supabase] Optional table "store_settings" is not available through PostgREST; skipping its sync.'); } else throw e; }
   await replaceTable('deleted_product_ids',(d.deletedProductIds||[]).map(id=>({product_id:String(id)})),'product_id');
   lastSync = new Date().toISOString(); lastError=null;
@@ -223,8 +223,11 @@ async function persistDb(db, initial=false){
 function queueSave(db){
   if(!enabled) return Promise.resolve({enabled:false});
   const snapshot=deep(db);
-  writeQueue=writeQueue.then(()=>persistDb(snapshot,false)).catch(e=>{lastError=cleanError(e);console.error('[Supabase]',lastError);throw e;});
-  return writeQueue;
+  const job=writeQueue.then(()=>persistDb(snapshot,false));
+  // Keep the queue usable after a failed write; the current caller still receives
+  // the rejected job so the API can return the real error instead of a false success.
+  writeQueue=job.catch(e=>{lastError=cleanError(e);console.error('[Supabase]',lastError);});
+  return job;
 }
 
 async function flush(){ return writeQueue; }
