@@ -1367,7 +1367,7 @@ async function restoreServerBackup(){
       }catch(e){console.warn('Admin refresh sync failed',e)}
     },80);
   });
-  window.imageUrl=window.imageUrl||function(v){const s=String(v||'').trim();if(!s)return '';if(/^data:|^https?:|^\//i.test(s))return s;if(/^uploads\//i.test(s))return '/'+s;return '/photos/'+s};
+  window.imageUrl=window.imageUrl||function(v){const s=String(v||'').trim();if(!s)return '';if(/^data:|^https?:|^\//i.test(s))return s;if(/^uploads\//i.test(s)||/^photos\//i.test(s))return '/'+s;return '/uploads/'+encodeURIComponent(s)};
   window.picHtml=function(p){const raw=String(p?.image||p?.images?.[0]||'').trim();const src=window.imageUrl(raw);return src?`<img src=\"${esc(raw.startsWith('/uploads/')||raw.startsWith('/photos/')||raw.startsWith('http')||raw.startsWith('data:')?raw:src)}\" alt=\"${esc(p?.name||'Product')}\" loading=\"lazy\" style=\"width:100%;height:100%;object-fit:cover;display:block\" onerror=\"this.remove();this.parentElement.classList.add('img-fallback');this.parentElement.dataset.fallback='YT'\">`:'<span>YT</span>'};
 })();
 </script>
