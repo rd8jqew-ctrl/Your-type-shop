@@ -1,5 +1,6 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
+const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'your-type-media';
 const enabled = Boolean(SUPABASE_URL && SUPABASE_KEY);
 
 let writeQueue = Promise.resolve();
@@ -11,6 +12,68 @@ const disabledTables = new Set();
 
 function cleanError(e){ return e?.message || String(e || 'Unknown Supabase error'); }
 function deep(v){ return JSON.parse(JSON.stringify(v)); }
+function storageHeaders(contentType){
+  const h={apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY};
+  if(contentType) h['Content-Type']=contentType;
+  return h;
+}
+function publicMediaUrl(objectName){
+  return SUPABASE_URL.replace(/\/$/,'')+'/storage/v1/object/public/'+encodeURIComponent(SUPABASE_STORAGE_BUCKET)+'/'+objectName.split('/').map(encodeURIComponent).join('/');
+}
+async function ensureStorageBucket(){
+  if(!enabled) return false;
+  const base=SUPABASE_URL.replace(/\/$/,'')+'/storage/v1';
+  const check=await fetch(base+'/bucket/'+encodeURIComponent(SUPABASE_STORAGE_BUCKET),{headers:storageHeaders()});
+  if(check.ok) return true;
+  if(check.status!==404) throw new Error(`Storage bucket check failed (${check.status})`);
+  const create=await fetch(base+'/bucket',{method:'POST',headers:{...storageHeaders(),'Content-Type':'application/json'},body:JSON.stringify({id:SUPABASE_STORAGE_BUCKET,name:SUPABASE_STORAGE_BUCKET,public:true})});
+  if(!create.ok && create.status!==409){const t=await create.text();throw new Error(`Storage bucket creation failed (${create.status}): ${t||'Unknown error'}`);}
+  return true;
+}
+async function uploadMedia(buffer,objectName,contentType){
+  if(!enabled) return null;
+  await ensureStorageBucket();
+  const clean=String(objectName||'media').replace(/^\/+/, '').split('/').map(x=>x.replace(/[^a-zA-Z0-9._-]/g,'_')).join('/');
+  const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/storage/v1/object/'+encodeURIComponent(SUPABASE_STORAGE_BUCKET)+'/'+clean,{method:'POST',headers:{...storageHeaders(contentType),'x-upsert':'true'},body:buffer});
+  if(!r.ok){const t=await r.text();throw new Error(`Storage upload failed (${r.status}): ${t||'Unknown error'}`);}
+  return {objectName:clean,url:publicMediaUrl(clean)};
+}
+async function listMedia(){
+  if(!enabled) return [];
+  await ensureStorageBucket();
+  const base=SUPABASE_URL.replace(/\/$/,'')+'/storage/v1/object/list/'+encodeURIComponent(SUPABASE_STORAGE_BUCKET);
+  const r=await fetch(base,{method:'POST',headers:{...storageHeaders(),'Content-Type':'application/json'},body:JSON.stringify({prefix:'',limit:1000,offset:0,sortBy:{column:'created_at',order:'desc'}})});
+  if(!r.ok){const t=await r.text();throw new Error(`Storage list failed (${r.status}): ${t||'Unknown error'}`);}
+  const rows=await r.json();
+  return (Array.isArray(rows)?rows:[]).filter(x=>x&&x.name).map(x=>({name:x.name,size:Number(x.metadata?.size||0),type:x.metadata?.mimetype||'application/octet-stream',updatedAt:x.updated_at||x.created_at||null,url:publicMediaUrl(x.name)}));
+}
+async function deleteMedia(objectName){
+  if(!enabled) return false;
+  const clean=String(objectName||'').replace(/^\/+/, '');
+  if(!clean) return false;
+  const r=await fetch(SUPABASE_URL.replace(/\/$/,'')+'/storage/v1/object/'+encodeURIComponent(SUPABASE_STORAGE_BUCKET)+'/'+clean,{method:'DELETE',headers:storageHeaders()});
+  if(!r.ok && r.status!==404){const t=await r.text();throw new Error(`Storage delete failed (${r.status}): ${t||'Unknown error'}`);}
+  return true;
+}
+async function migrateLocalUploads(dir,db){
+  if(!enabled) return {migrated:0};
+  let entries=[];
+  try{entries=require('fs').readdirSync(dir,{withFileTypes:true}).filter(e=>e.isFile());}catch{return {migrated:0};}
+  if(!entries.length) return {migrated:0};
+  await ensureStorageBucket();
+  const fs=require('fs'),path=require('path'),map=new Map();
+  for(const e of entries){
+    const file=path.join(dir,e.name),buf=fs.readFileSync(file),ext=path.extname(e.name).toLowerCase();
+    const types={'.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.webp':'image/webp','.mp4':'video/mp4','.webm':'video/webm'};
+    const up=await uploadMedia(buf,'legacy/'+e.name,types[ext]||'application/octet-stream');
+    map.set('/uploads/'+e.name,up.url);
+  }
+  const replace=v=>{if(typeof v!=='string')return v;const key=v.split('?')[0];return map.get(key)||v};
+  for(const p of db.products||[]){p.image=replace(p.image);if(Array.isArray(p.images))p.images=p.images.map(replace);}
+  for(const o of db.orders||[])for(const it of o.items||[])it.image=replace(it.image);
+  return {migrated:map.size};
+}
+
 
 async function request(table, method='GET', body=null, query=''){
   const url=SUPABASE_URL.replace(/\/$/,'')+'/rest/v1/'+table+(query?'?'+query:'');
@@ -62,7 +125,7 @@ async function hydrateDb(db, options={}){
     const remoteDeleted = new Set(deleted.map(x=>String(x.product_id)));
     const allDeleted = new Set([...preservedDeleted,...remoteDeleted]);
     db.products = products.filter(p=>!allDeleted.has(String(p.id))).map(p=>({
-      id:p.id,name:p.name,category:p.category,price:String(p.price ?? ''),cost:Number(p.cost||0),sku:p.sku||'',description:p.description||'',image:p.image||'',images:Array.isArray(p.images)?p.images:[],sizes:p.sizes||{},colors:Array.isArray(p.colors)?p.colors:[],badge:p.badge||'',oldPrice:String(p.old_price ?? p.oldPrice ?? ''),likes:Number(p.likes||0),active:p.active!==false,featured:Boolean(p.featured),sections:Array.isArray(p.sections)?p.sections:[],createdAt:p.created_at,updatedAt:p.updated_at
+      id:p.id,name:p.name,category:p.category,price:String(p.price ?? ''),cost:Number(p.cost||0),sku:p.sku||'',description:p.description||'',image:p.image||'',images:Array.isArray(p.images)?p.images:[],sizes:p.sizes||{},colors:Array.isArray(p.colors)?p.colors:[],active:p.active!==false,featured:Boolean(p.featured),badge:p.badge||'',oldPrice:String(p.old_price ?? p.oldPrice ?? ''),sections:Array.isArray(p.sections)?p.sections:[],likes:Number(p.likes||0),createdAt:p.created_at,updatedAt:p.updated_at
     }));
     db.users = customers.map(c=>({id:c.id,name:c.name,email:c.email,phone:c.phone||'',password:c.password_hash||'',createdAt:c.created_at}));
     const itemMap = new Map();
@@ -89,7 +152,7 @@ async function hydrateDb(db, options={}){
 async function persistDb(db, initial=false){
   if(!enabled) return {enabled:false};
   const d=deep(db);
-  const productRows=(d.products||[]).filter(p=>!d.deletedProductIds?.includes(String(p.id))).map(p=>({id:String(p.id),name:String(p.name||''),category:p.category||'',price:Number(String(p.price||0).replace(/[^0-9.-]/g,''))||0,cost:Number(p.cost||0),sku:p.sku||null,description:p.description||'',image:p.image||'',images:p.images||[],sizes:p.sizes||{},colors:p.colors||[],badge:String(p.badge||''),old_price:String(p.oldPrice ?? p.old_price ?? ''),likes:Number(p.likes||0),active:p.active!==false,featured:Boolean(p.featured),sections:Array.isArray(p.sections)?p.sections:[]}));
+  const productRows=(d.products||[]).filter(p=>!d.deletedProductIds?.includes(String(p.id))).map(p=>({id:String(p.id),name:String(p.name||''),category:p.category||'',price:Number(String(p.price||0).replace(/[^0-9.-]/g,''))||0,cost:Number(p.cost||0),sku:p.sku||null,description:p.description||'',image:p.image||'',images:p.images||[],sizes:p.sizes||{},colors:p.colors||[],active:p.active!==false,featured:Boolean(p.featured),badge:p.badge||'',old_price:p.oldPrice||'',sections:p.sections||[],likes:Number(p.likes||0)}));
   const customerRows=(d.users||[]).map(u=>({id:String(u.id),name:String(u.name||''),email:String(u.email||'').toLowerCase(),phone:u.phone||'',password_hash:u.password||null,created_at:u.createdAt||undefined}));
   const orderRows=(d.orders||[]).map(o=>({order_id:String(o.orderId),user_id:o.userId||null,name:o.name||'',email:o.email||'',phone:o.phone||'',address:o.address||'',city:o.city||'',pin:o.pin||'',subtotal:Number(o.subtotal||0),discount:Number(o.discount||0),coupon_code:o.couponCode||'',taxable_subtotal:Number(o.taxableSubtotal||0),gst_rate:Number(o.gstRate||0),gst:Number(o.gst||0),shipping:Number(o.shipping||0),total:Number(o.total||0),payment:o.payment||'cod',status:o.status||'New',verified:Boolean(o.verified),awb:o.awb||'',courier:o.courier||'',tracking_url:o.tracking_url||'',order_date:o.date||undefined}));
   const itemRows=[]; for(const o of d.orders||[]) for(const it of o.items||[]) itemRows.push({order_id:String(o.orderId),product_id:it.productId||null,name:it.name||'',image:it.image||'',sku:it.sku||'',price:Number(String(it.price||0).replace(/[^0-9.-]/g,''))||0,size:it.size||'M',color:it.color||'Black',qty:Number(it.qty||1)});
@@ -147,4 +210,4 @@ function queueSave(db){
 async function flush(){ return writeQueue; }
 function status(){ return {enabled,configured:enabled,lastSync,lastError,pending:writeQueue!==Promise.resolve()}; }
 
-module.exports={enabled,hydrateDb,persistDb,queueSave,flush,status};
+module.exports={enabled,hydrateDb,persistDb,queueSave,flush,status,uploadMedia,deleteMedia,listMedia,publicMediaUrl,migrateLocalUploads,ensureStorageBucket};
