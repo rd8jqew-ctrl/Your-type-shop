@@ -31,12 +31,20 @@ async function getAllOptional(table, order='created_at'){
 
 async function ensureStorageBucket(){
   if(!enabled || storageReady)return;
-  const get=await fetch(baseUrl()+'/storage/v1/bucket/'+encodeURIComponent(STORAGE_BUCKET),{headers:headers()});
+  const bucketUrl=baseUrl()+'/storage/v1/bucket/'+encodeURIComponent(STORAGE_BUCKET);
+  const get=await fetch(bucketUrl,{headers:headers()});
   if(get.ok){storageReady=true;return;}
-  if(get.status!==404) throw new Error(`Storage bucket check failed (${get.status})`);
+
+  // Some Supabase Storage versions/proxies return 400 for the bucket GET even
+  // when the bucket is usable. Do not stop an upload on that check. Try the
+  // idempotent create call; 409 means the bucket already exists.
   const create=await fetch(baseUrl()+'/storage/v1/bucket',{method:'POST',headers:headers(),body:JSON.stringify({id:STORAGE_BUCKET,name:STORAGE_BUCKET,public:true,file_size_limit:52428800})});
-  if(!create.ok){const t=await create.text();throw new Error(`Storage bucket create failed (${create.status}): ${t}`)}
-  storageReady=true;
+  const createText=await create.text();
+  if(create.ok || create.status===409){storageReady=true;return;}
+
+  let detail=createText;
+  try{const j=createText?JSON.parse(createText):null;detail=j?.message||j?.error||j?.statusCode||createText}catch{}
+  throw new Error(`Storage bucket setup failed (check ${get.status}, create ${create.status}): ${detail||'Unknown Storage error'}`);
 }
 async function uploadMedia(filename,buffer,contentType){
   if(!enabled)return '';
