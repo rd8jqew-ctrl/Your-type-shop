@@ -91,22 +91,31 @@
 
 <script>
 const cart=JSON.parse(localStorage.getItem('yourTypeCart')||'[]');
-function imageUrl(raw){const v=String(raw||'').trim();if(!v)return '/photos/ornament.jpg';if(/^data:|^https?:|^\//i.test(v))return v;if(/^photos\//i.test(v)||/^uploads\//i.test(v))return '/'+v;return '/photos/'+encodeURIComponent(v)}
 const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const imageUrl=v=>{const s=String(v||'').trim();if(!s)return '/photos/ornament.jpg';if(/^data:|^https?:|^\//i.test(s))return s;if(/^uploads\//i.test(s)||/^photos\//i.test(s))return '/'+s;return '/uploads/'+encodeURIComponent(s)};
+let checkoutSettings={shipping:99,freeShipping:999};
 const priceOf=p=>Number(String(p?.[1]??p?.price??0).replace(/[^0-9]/g,''))||0;
 const summary=document.getElementById('summary');
 if(!cart.length){summary.innerHTML='<p style="color:#777;font-size:11px;line-height:1.7">Your bag is empty. <a href="index.html">Return to shop</a>.</p>';document.querySelector('.checkout').disabled=true;}
-else{summary.innerHTML=cart.map(p=>`<div class="sumItem"><img src="${imageUrl(p[2])}" alt="" onerror="this.src='/photos/ornament.jpg';this.onerror=null"><span>${p[0]}<small>${p[1]}${p.size?' · SIZE '+p.size:''}${p.color?' · '+p.color.toUpperCase():''} · QTY ${Number(p.qty||1)}</small></span></div>`).join('');}
-const subtotal=cart.reduce((s,p)=>s+priceOf(p)*Number(p.qty||1),0);
-let shipping=0;
-let shippingThreshold=1999;
-async function loadCheckoutSettings(){try{const r=await fetch('/api/site-config',{cache:'no-store'});if(!r.ok)return;const d=await r.json();const st=d.settings||{};shippingThreshold=Number(st.freeShipping??shippingThreshold);const rate=Number(st.shipping??99);shipping=subtotal===0?0:(subtotal>=shippingThreshold?0:rate);document.getElementById('sumShipping').textContent=shipping===0?(subtotal>=shippingThreshold?'FREE':'—'):money(shipping);total=subtotal+shipping;document.getElementById('sumTotal').textContent=money(total)}catch(_){} }
-
+else{summary.innerHTML=cart.map(p=>`<div class="sumItem"><img src="${imageUrl(p[2])}" alt="${String(p[0]||'Product').replace(/[<>]/g,'')}" onerror="this.onerror=null;this.src='/photos/ornament.jpg'"><span>${p[0]}<small>${p[1]}${p.size?' · SIZE '+p.size:''}${p.color?' · '+p.color.toUpperCase():''} · QTY ${Number(p.qty||1)}</small></span></div>`).join('');}
+let subtotal=cart.reduce((s,p)=>s+priceOf(p)*Number(p.qty||1),0);
+let shipping=subtotal===0?0:(subtotal>=checkoutSettings.freeShipping?0:checkoutSettings.shipping);
 let discount=0,appliedCoupon=''; let total=subtotal+shipping;
-loadCheckoutSettings();
-document.getElementById('sumSubtotal').textContent=money(subtotal);
-document.getElementById('sumShipping').textContent=shipping===0?(subtotal>=999?'FREE':'—'):money(shipping);
-document.getElementById('sumTotal').textContent=money(total);
+async function initCheckout(){
+  try{
+    const [sr,pr]=await Promise.all([fetch('/api/site-config',{cache:'no-store'}),fetch('/api/products',{cache:'no-store'})]);
+    if(sr.ok){const d=await sr.json();const st=d.settings||{};checkoutSettings.shipping=Math.max(0,Number(st.shipping??checkoutSettings.shipping));checkoutSettings.freeShipping=Math.max(0,Number(st.freeShipping??checkoutSettings.freeShipping));}
+    if(pr.ok){const d=await pr.json();const byId=new Map((d.products||[]).map(p=>[String(p.id),p]));cart.forEach(p=>{const id=p[8];const fresh=id&&byId.get(String(id));if(fresh){p[1]=fresh.price??p[1];p[2]=fresh.image||p[2];p[8]=fresh.id;p[9]=fresh.colors||p[9];}});}
+  }catch(_){}
+  subtotal=cart.reduce((sum,p)=>sum+priceOf(p)*Number(p.qty||1),0);
+  shipping=subtotal===0?0:(subtotal>=checkoutSettings.freeShipping?0:checkoutSettings.shipping);
+  total=subtotal+shipping;
+  if(cart.length)summary.innerHTML=cart.map(p=>`<div class="sumItem"><img src="${imageUrl(p[2])}" alt="${String(p[0]||'Product').replace(/[<>]/g,'')}" onerror="this.onerror=null;this.src='/photos/ornament.jpg'"><span>${p[0]}<small>${p[1]}${p.size?' · SIZE '+p.size:''}${p.color?' · '+p.color.toUpperCase():''} · QTY ${Number(p.qty||1)}</small></span></div>`).join('');
+  document.getElementById('sumSubtotal').textContent=money(subtotal);
+  document.getElementById('sumShipping').textContent=shipping===0?(subtotal>=checkoutSettings.freeShipping?'FREE':'—'):money(shipping);
+  document.getElementById('sumTotal').textContent=money(total);
+}
+initCheckout();
 async function applyCoupon(){const code=document.getElementById('couponCode').value.trim();if(!code)return;try{const r=await fetch('/api/coupons/validate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,subtotal})});const d=await r.json();if(!r.ok)throw Error(d.error);discount=Number(d.discount||0);appliedCoupon=d.code;total=subtotal-discount+shipping;document.getElementById('sumTotal').textContent=money(total);document.getElementById('couponMsg').textContent='Coupon applied: '+money(discount)+' off';}catch(e){document.getElementById('couponMsg').textContent=e.message;discount=0;appliedCoupon='';total=subtotal+shipping;document.getElementById('sumTotal').textContent=money(total)}}
 function showUPIPopup(){
  const note=document.getElementById('upiNote');
