@@ -29,7 +29,7 @@ async function getAllOptional(table, order='created_at'){
   try{
     return await getAll(table, order);
   }catch(e){
-    if(/\\b404\\b/.test(cleanError(e))){
+    if(/\b404\b/.test(cleanError(e))){
       disabledTables.add(table);
       console.warn(`[Supabase] Optional table "${table}" is not available through PostgREST; continuing without it.`);
       return [];
@@ -108,7 +108,7 @@ async function persistDb(db, initial=false){
       for(const r of existing||[]){ if(!keep.has(String(r[key]))){ await request(table,'DELETE',null,encodeURIComponent(key)+'=eq.'+encodeURIComponent(String(r[key]))); } }
       if(rows.length) await request(table,'POST',rows);
     }catch(e){
-      if(/\\b404\\b/.test(cleanError(e))){
+      if(/\b404\b/.test(cleanError(e))){
         disabledTables.add(table);
         console.warn(`[Supabase] Optional table "${table}" is not available through PostgREST; skipping its sync.`);
         return;
