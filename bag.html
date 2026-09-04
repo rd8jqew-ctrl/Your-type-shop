@@ -5,7 +5,7 @@ function storageGet(key,fallback='[]'){try{const v=localStorage.getItem(key);if(
 function storageSet(key,value){const text=typeof value==='string'?value:JSON.stringify(value);try{localStorage.setItem(key,text)}catch(e){}try{document.cookie=key+'='+encodeURIComponent(text)+'; path=/; max-age=31536000; SameSite=Lax'}catch(e){}}
 let products=[];try{products=JSON.parse(storageGet('yourTypeProductsCache','[]'))}catch(e){products=[]}let cart=[];try{cart=JSON.parse(storageGet('yourTypeCart','[]'))}catch(e){cart=[]}let bagSettings={shipping:99,freeShipping:999};
 function money(n){return '₹'+Number(n||0).toLocaleString('en-IN')}
-function imageUrl(raw){const v=String(raw||'').trim();if(!v)return '/photos/ornament.jpg';if(/^data:|^https?:|^\//i.test(v))return v;if(/^photos\//i.test(v))return '/'+v;if(/^uploads\//i.test(v))return '/'+v;return '/uploads/'+encodeURIComponent(v)}
+function imageUrl(raw){const v=String(raw||'').trim();if(!v)return '/photos/ornament.jpg';if(/^data:|^https?:|^\//i.test(v))return v;if(/^photos\//i.test(v))return '/'+v;if(/^uploads\//i.test(v))return '/'+v;return '/photos/'+encodeURIComponent(v)}
 function productIdOf(p){return String(p?.[8]||p?.id||'')}
 function priceOf(p){return Number(String(p?.[1]??p?.price??0).replace(/[^0-9.]/g,''))||0}
 function save(){storageSet('yourTypeCart',cart);render()}function removeItem(i){cart.splice(i,1);save()}function qty(i,d){if(!cart[i])return;cart[i].qty=Math.max(1,Math.min(10,Number(cart[i].qty||1)+d));save()}function setSize(i,s){if(!cart[i])return;cart[i].size=s;save()}function setColor(i,c){if(!cart[i])return;cart[i].color=c;save()}
