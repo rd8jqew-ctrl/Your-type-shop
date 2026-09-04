@@ -38,7 +38,7 @@ async function getAllOptional(table, order='created_at'){
   }
 }
 
-async function hydrateDb(db){
+async function hydrateDb(db, options={}){
   if(!enabled) return { enabled:false, source:'data.json' };
 
   try{
@@ -46,17 +46,22 @@ async function hydrateDb(db){
       getAll('products','created_at'), getAll('customers','created_at'), getAll('orders','order_date'),
       getAll('order_items','created_at'), getAll('reviews','created_at'), getAll('coupons','created_at'),
       getAll('returns','created_at'), getAll('newsletter','created_at'), getAllOptional('notifications','created_at'),
-      getAllOptional('audit','created_at'), getAll('site_config','updated_at'), getAll('store_settings','updated_at'),
-      getAll('deleted_product_ids','deleted_at')
+      getAllOptional('audit','created_at'), getAllOptional('site_config','updated_at'), getAllOptional('store_settings','updated_at'),
+      getAllOptional('deleted_product_ids','deleted_at')
     ]);
 
     const hasBusinessData = products.length || customers.length || orders.length || items.length || reviews.length || coupons.length || returns.length || newsletter.length || notifications.length;
     if(!hasBusinessData){
+      db.deletedProductIds=[...new Set([...(db.deletedProductIds||[]).map(String),...(options.preserveDeletedIds||[]).map(String)])];
+      db.products=(db.products||[]).filter(p=>!new Set(db.deletedProductIds).has(String(p.id)));
       await persistDb(db, true);
       return { enabled:true, source:'data.json->supabase', migrated:true };
     }
 
-    db.products = products.map(p=>({
+    const preservedDeleted = new Set((options.preserveDeletedIds||[]).map(String));
+    const remoteDeleted = new Set(deleted.map(x=>String(x.product_id)));
+    const allDeleted = new Set([...preservedDeleted,...remoteDeleted]);
+    db.products = products.filter(p=>!allDeleted.has(String(p.id))).map(p=>({
       id:p.id,name:p.name,category:p.category,price:String(p.price ?? ''),cost:Number(p.cost||0),sku:p.sku||'',description:p.description||'',image:p.image||'',images:Array.isArray(p.images)?p.images:[],sizes:p.sizes||{},colors:Array.isArray(p.colors)?p.colors:[],active:p.active!==false,featured:Boolean(p.featured),createdAt:p.created_at,updatedAt:p.updated_at
     }));
     db.users = customers.map(c=>({id:c.id,name:c.name,email:c.email,phone:c.phone||'',password:c.password_hash||'',createdAt:c.created_at}));
@@ -71,7 +76,7 @@ async function hydrateDb(db){
     db.audit = audit.map(a=>({id:a.id,action:a.action,meta:a.meta||{},time:a.created_at}));
     if(siteRows[0]){ const s=siteRows[0]; db.site={hero:s.hero,announcement:s.announcement,sections:s.sections||{},sectionProducts:s.section_products||{},colorPalette:s.color_palette||[],store:s.store||{},content:s.content||{},categories:s.categories||[]}; }
     if(settingsRows[0]){ const s=settingsRows[0]; db.settings={gst:Number(s.gst||0),shipping:Number(s.shipping||0),freeShipping:Number(s.free_shipping||0),gateway:s.gateway||{},courier:s.courier||{},notifications:s.notifications||{},role:s.role||'Super Admin'}; }
-    db.deletedProductIds = [...new Set(deleted.map(x=>String(x.product_id)))];
+    db.deletedProductIds = [...new Set([...(options.preserveDeletedIds||[]).map(String),...deleted.map(x=>String(x.product_id))])];
     db.sessions = {};
     lastSync = new Date().toISOString(); lastError = null;
     return {enabled:true,source:'supabase',migrated:false};

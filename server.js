@@ -3,6 +3,7 @@ const fs=require('fs');
 const path=require('path');
 const crypto=require('crypto');
 const {URL}=require('url');
+const supabaseStore=require('./supabase-store');
 
 const ROOT=__dirname;
 const DATA=path.join(ROOT,'data.json');
@@ -26,7 +27,13 @@ let adminAuth=loadAdminAuth();
 if(!adminAuth&&ADMIN_PASS){if(!strongPassword(ADMIN_PASS))console.warn('ADMIN_PASS is weak; use 12+ chars with upper/lowercase, number and symbol.');else adminAuth=saveAdminAuth(ADMIN_PASS)}
 function verifyAdminPassword(password){if(!adminAuth)return false;const a=Buffer.from(hashPassword(password,adminAuth.salt),'hex'),b=Buffer.from(adminAuth.hash,'hex');return a.length===b.length&&crypto.timingSafeEqual(a,b)}
 function load(){try{return JSON.parse(fs.readFileSync(DATA,'utf8'))}catch{return {orders:[],newsletter:[],users:[],products:[],sessions:{}}}}
-function save(db){fs.writeFileSync(DATA,JSON.stringify(db,null,2))}
+let storageReady=false;
+function save(db){
+  fs.writeFileSync(DATA,JSON.stringify(db,null,2));
+  if(storageReady && supabaseStore.enabled){
+    supabaseStore.queueSave(db).catch(err=>console.error('[Supabase] save failed:',err.message||err));
+  }
+}
 const db=load();
 db.orders ||= []; db.newsletter ||= []; db.users ||= []; db.products ||= []; db.sessions ||= {}; db.reviews ||= []; db.coupons ||= []; db.returns ||= []; db.notifications ||= []; db.audit ||= [];
 db.settings ||= {gst:5,shipping:99,freeShipping:1999};
@@ -34,8 +41,11 @@ db.site ||= {hero:'YOUR TYPE',announcement:'New drops every week',sections:{home
 db.site.sections ||= {home:true,collections:true,motion:true,featured:true,bestSellers:true,newCollection:true,trending:true,womenTops:true,highlights:true,editorial:true,newsletter:true};
 db.site.sectionProducts ||= {}; db.site.colorPalette ||= ['Black','White','Charcoal','Red','Blue','Green'];
 db.site.store ||= {name:'YOUR TYPE',phone:'',whatsapp:'',email:'',address:'',currency:'INR'}; db.site.content ||= {banner:'',bannerButton:'',bannerLink:''};
+const localDeletedProductIds=new Set((db.deletedProductIds||[]).map(String));
 db.products.forEach((p,i)=>{if(!p.id)p.id='p_'+crypto.createHash('sha1').update(String(p.name||'')+'|'+String(p.image||'')+'|'+i).digest('hex').slice(0,12);if(!p.sizes)p.sizes=Object.fromEntries(SIZES.map(s=>[s,Math.max(0,Number(p.stock||0))]));if(!p.sku)p.sku='YT-'+String(i+1).padStart(3,'0');if(!Array.isArray(p.colors)||!p.colors.length)p.colors=['Black','White','Charcoal'];if(!Array.isArray(p.images)||!p.images.length)p.images=[p.image||''];if(p.active===undefined)p.active=true});
-save(db);
+// Never allow a product already marked deleted in the local source to be resurrected.
+db.products=db.products.filter(p=>!localDeletedProductIds.has(String(p.id)));
+
 
 function hash(s){return crypto.createHash('sha256').update(String(s)).digest('hex')}
 function originFor(req){const o=req.headers.origin||'';return o&&o===('http://'+req.headers.host)?o:''}
@@ -75,7 +85,7 @@ async function api(req,res,p){
   if(req.method==='GET'&&p==='/api/site-config')return send(res,200,{site:db.site},'application/json',origin);
   if(req.method==='PATCH'&&p==='/api/admin/site-config'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req);if(x.hero!==undefined)db.site.hero=String(x.hero);if(x.announcement!==undefined)db.site.announcement=String(x.announcement);if(x.sections&&typeof x.sections==='object')db.site.sections=x.sections;if(x.sectionProducts&&typeof x.sectionProducts==='object')db.site.sectionProducts=x.sectionProducts;if(Array.isArray(x.colorPalette))db.site.colorPalette=x.colorPalette.map(v=>String(v).trim()).filter(Boolean);audit('site.update');save(db);return send(res,200,{ok:true,site:db.site},'application/json',origin)}
 
-  if(req.method==='GET'&&p==='/api/products')return send(res,200,{products:db.products.map(safeProduct)},'application/json',origin);
+  if(req.method==='GET'&&p==='/api/products')return send(res,200,{products:db.products.filter(p=>p.active!==false).map(safeProduct)},'application/json',origin);
   if(req.method==='GET'&&p.startsWith('/api/reviews/')){const name=decodeURIComponent(p.slice('/api/reviews/'.length));return send(res,200,{reviews:db.reviews.filter(r=>r.product===name).slice(-50).reverse()},'application/json',origin)}
   if(req.method==='POST'&&p==='/api/reviews'){const x=await body(req),name=String(x.product||'').trim(),title=String(x.title||'').trim(),text=String(x.text||'').trim(),rating=Math.max(1,Math.min(5,Math.floor(Number(x.rating||5))));const s=auth(req,'customer');if(!name||!title||!text||text.length>800)return send(res,400,{error:'Product, title and review text are required'},'application/json',origin);if(!s)return send(res,401,{error:'Please sign in to review'},'application/json',origin);if(!db.orders.some(o=>o.userId===s.userId&&o.status!=='Cancelled'&&o.items?.some(it=>it.name===name)))return send(res,403,{error:'You can review a product after purchasing it.'},'application/json',origin);const u=db.users.find(v=>v.id===s.userId);const r={id:crypto.randomUUID(),product:name,rating,title,text,name:u?.name||'Customer',verified:true,status:'pending',reply:'',createdAt:new Date().toISOString()};db.reviews.push(r);save(db);return send(res,201,{ok:true,review:r},'application/json',origin)}
 
@@ -103,7 +113,7 @@ async function api(req,res,p){
   if(req.method==='PATCH'&&p.startsWith('/api/admin/users/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/users/'.length)),x=await body(req),u=db.users.find(v=>v.id===id);if(!u)return send(res,404,{error:'Customer not found'},'application/json',origin);['name','phone'].forEach(k=>{if(x[k]!==undefined)u[k]=String(x[k])});save(db);return send(res,200,{id:u.id,name:u.name,email:u.email,phone:u.phone||''},'application/json',origin)}
   if(req.method==='DELETE'&&p.startsWith('/api/admin/users/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/users/'.length)),n=db.users.length;db.users=db.users.filter(v=>v.id!==id);if(n===db.users.length)return send(res,404,{error:'Customer not found'},'application/json',origin);db.orders.forEach(o=>{if(o.userId===id)o.userId=null});save(db);return send(res,200,{ok:true},'application/json',origin)}
 
-  if(req.method==='POST'&&p==='/api/admin/products/bulk'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req),ids=Array.isArray(x.ids)?x.ids.map(String):[],action=String(x.action||'');if(!ids.length||!['show','hide','delete'].includes(action))return send(res,400,{error:'Invalid bulk action'},'application/json',origin);if(action==='delete')db.products=db.products.filter(p=>!ids.includes(String(p.id)));else db.products.forEach(p=>{if(ids.includes(String(p.id)))p.active=action==='show'});audit('products.bulk',{action,ids});save(db);return send(res,200,{ok:true},'application/json',origin)}
+  if(req.method==='POST'&&p==='/api/admin/products/bulk'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req),ids=Array.isArray(x.ids)?x.ids.map(String):[],action=String(x.action||'');if(!ids.length||!['show','hide','delete'].includes(action))return send(res,400,{error:'Invalid bulk action'},'application/json',origin);if(action==='delete'){db.products=db.products.filter(p=>!ids.includes(String(p.id)));db.deletedProductIds=Array.isArray(db.deletedProductIds)?db.deletedProductIds:[];for(const id of ids)if(!db.deletedProductIds.includes(id))db.deletedProductIds.push(id);}else db.products.forEach(p=>{if(ids.includes(String(p.id)))p.active=action==='show'});audit('products.bulk',{action,ids});save(db);return send(res,200,{ok:true},'application/json',origin)}
   if(req.method==='POST'&&p==='/api/admin/upload'){
    if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
    const x=await body(req),name=path.basename(String(x.name||'')).replace(/[^a-zA-Z0-9._-]/g,'_'),data=String(x.data||'');
@@ -122,7 +132,7 @@ async function api(req,res,p){
 
   if(req.method==='POST'&&p==='/api/admin/products'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req);const image=String(x.image||((x.images||[])[0]||''));if(!String(x.name||'').trim()||priceNumber(x.price)<=0||!image)return send(res,400,{error:'Name, price and image are required'},'application/json',origin);const pr=safeProduct({...x,id:'p_'+crypto.randomBytes(6).toString('hex'),image,sizes:cleanSizes(x.sizes)});db.products.push(pr);audit('product.create',{id:pr.id});save(db);return send(res,201,pr,'application/json',origin)}
   if(req.method==='PATCH'&&p.startsWith('/api/admin/products/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/products/'.length)),x=await body(req),i=db.products.findIndex(v=>String(v.id)===id);if(i<0)return send(res,404,{error:'Product not found'},'application/json',origin);const current=db.products[i],merged={...current,...x,id:current.id,image:String(x.image||((Array.isArray(x.images)&&x.images[0])||current.image)),sizes:x.sizes?cleanSizes(x.sizes):cleanSizes(current.sizes)};if(!merged.name||priceNumber(merged.price)<=0||!merged.image)return send(res,400,{error:'Name, price and image are required'},'application/json',origin);db.products[i]=safeProduct(merged);audit('product.update',{id});save(db);return send(res,200,db.products[i],'application/json',origin)}
-  if(req.method==='DELETE'&&p.startsWith('/api/admin/products/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/products/'.length)),i=db.products.findIndex(v=>String(v.id)===id);if(i<0)return send(res,404,{error:'Product not found'},'application/json',origin);db.products.splice(i,1);audit('product.delete',{id});save(db);return send(res,200,{ok:true},'application/json',origin)}
+  if(req.method==='DELETE'&&p.startsWith('/api/admin/products/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/products/'.length)),i=db.products.findIndex(v=>String(v.id)===id);if(i<0)return send(res,404,{error:'Product not found'},'application/json',origin);db.products.splice(i,1);db.deletedProductIds=Array.isArray(db.deletedProductIds)?db.deletedProductIds:[];if(!db.deletedProductIds.includes(id))db.deletedProductIds.push(id);audit('product.delete',{id});save(db);return send(res,200,{ok:true},'application/json',origin)}
 
   if(req.method==='POST'&&p==='/api/admin/coupons'){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const x=await body(req),code=String(x.code||'').trim().toUpperCase(),value=Number(x.value||0),minOrder=Math.max(0,Number(x.minOrder||0));if(!/^[A-Z0-9_-]{3,40}$/.test(code)||value<=0||value>100)return send(res,400,{error:'Valid coupon code and discount (1–100%) are required'},'application/json',origin);if(db.coupons.some(c=>String(c.code).toUpperCase()===code))return send(res,409,{error:'Coupon already exists'},'application/json',origin);const c={id:'c_'+crypto.randomBytes(6).toString('hex'),code,type:'percent',value,minOrder,expiresAt:x.expiresAt||null,active:x.active!==false,createdAt:new Date().toISOString()};db.coupons.push(c);audit('coupon.create',{id:c.id});save(db);return send(res,201,c,'application/json',origin)}
   if(req.method==='PATCH'&&p.startsWith('/api/admin/coupons/')){if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);const id=decodeURIComponent(p.slice('/api/admin/coupons/'.length)),x=await body(req),c=db.coupons.find(v=>v.id===id);if(!c)return send(res,404,{error:'Coupon not found'},'application/json',origin);if(x.code!==undefined)c.code=String(x.code).trim().toUpperCase();if(x.value!==undefined)c.value=Math.min(100,Math.max(0,Number(x.value||0)));if(x.minOrder!==undefined)c.minOrder=Math.max(0,Number(x.minOrder||0));if(x.expiresAt!==undefined)c.expiresAt=x.expiresAt||null;if(x.active!==undefined)c.active=Boolean(x.active);save(db);return send(res,200,c,'application/json',origin)}
@@ -151,12 +161,12 @@ async function api(req,res,p){
   }
   if(req.method==='GET'&&p==='/api/admin/backup'){
     if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
-    const backup={version:1,createdAt:new Date().toISOString(),orders:db.orders,newsletter:db.newsletter,users:db.users.map(u=>({...u,password:undefined})),products:db.products,coupons:db.coupons,returns:db.returns,notifications:db.notifications,settings:db.settings,site:db.site};audit('backup.download');save(db);return send(res,200,backup,'application/json',origin);
+    const backup={version:1,createdAt:new Date().toISOString(),orders:db.orders,newsletter:db.newsletter,users:db.users.map(u=>({...u,password:undefined})),products:db.products,coupons:db.coupons,returns:db.returns,notifications:db.notifications,settings:db.settings,site:db.site,deletedProductIds:db.deletedProductIds||[]};audit('backup.download');save(db);return send(res,200,backup,'application/json',origin);
   }
   if(req.method==='POST'&&p==='/api/admin/restore'){
     if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
     const x=await body(req);if(x.confirm!=='RESTORE_YOUR_TYPE'||!x.backup||typeof x.backup!=='object')return send(res,400,{error:'Valid restore confirmation and backup are required'},'application/json',origin);
-    const b=x.backup;db.orders=Array.isArray(b.orders)?b.orders:db.orders;db.newsletter=Array.isArray(b.newsletter)?b.newsletter:db.newsletter;db.users=Array.isArray(b.users)?b.users:db.users;db.products=Array.isArray(b.products)?b.products:db.products;db.coupons=Array.isArray(b.coupons)?b.coupons:db.coupons;db.returns=Array.isArray(b.returns)?b.returns:db.returns;db.notifications=Array.isArray(b.notifications)?b.notifications:db.notifications;db.settings={...(db.settings||{}),...(b.settings||{})};db.site={...(db.site||{}),...(b.site||{})};db.sessions ||= {};audit('backup.restore');save(db);return send(res,200,{ok:true},'application/json',origin);
+    const b=x.backup;db.orders=Array.isArray(b.orders)?b.orders:db.orders;db.newsletter=Array.isArray(b.newsletter)?b.newsletter:db.newsletter;db.users=Array.isArray(b.users)?b.users:db.users;const restoreDeleted=new Set([...(db.deletedProductIds||[]).map(String),...((b.deletedProductIds||[]).map(String))]);db.deletedProductIds=[...restoreDeleted];db.products=Array.isArray(b.products)?b.products.filter(p=>!restoreDeleted.has(String(p.id))):db.products.filter(p=>!restoreDeleted.has(String(p.id)));db.coupons=Array.isArray(b.coupons)?b.coupons:db.coupons;db.returns=Array.isArray(b.returns)?b.returns:db.returns;db.notifications=Array.isArray(b.notifications)?b.notifications:db.notifications;db.settings={...(db.settings||{}),...(b.settings||{})};db.site={...(db.site||{}),...(b.site||{})};db.sessions ||= {};audit('backup.restore');save(db);return send(res,200,{ok:true},'application/json',origin);
   }
   if(req.method==='POST'&&p==='/api/admin/notifications/test'){
     if(!auth(req,'admin'))return send(res,401,{error:'Unauthorized'},'application/json',origin);
@@ -177,4 +187,21 @@ const server=http.createServer(async(req,res)=>{
  if(!file.startsWith(ROOT)||!fs.existsSync(file)||fs.statSync(file).isDirectory())file=path.join(ROOT,'index.html');
  try{const ext=path.extname(file).toLowerCase();res.writeHead(200,{'Content-Type':mime[ext]||'application/octet-stream','Cache-Control':'no-store'});res.end(fs.readFileSync(file))}catch{send(res,404,'Not found','text/plain')}
 });
-server.listen(PORT,()=>console.log(`YOUR TYPE running at http://localhost:${PORT}`));
+async function bootstrap(){
+  try{
+    if(supabaseStore.enabled){
+      await supabaseStore.hydrateDb(db,{preserveDeletedIds:[...localDeletedProductIds]});
+      // Re-apply the local tombstones after hydration and clean any resurrected rows from the remote store.
+      db.deletedProductIds=[...new Set([...(db.deletedProductIds||[]).map(String),...localDeletedProductIds])];
+      db.products=db.products.filter(p=>!db.deletedProductIds.includes(String(p.id)));
+      await supabaseStore.persistDb(db,false);
+    }
+    storageReady=true;
+    fs.writeFileSync(DATA,JSON.stringify(db,null,2));
+    server.listen(PORT,()=>console.log(`YOUR TYPE running at http://localhost:${PORT}`));
+  }catch(e){
+    console.error('[Storage] Startup failed:',e.message||e);
+    process.exit(1);
+  }
+}
+bootstrap();
